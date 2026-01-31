@@ -1,0 +1,41 @@
+
+> neobi-india@2.0.0 dev D:\FINALmajorPROJECT\neobi-india
+> next dev
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:54112
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.8s
+ ○ Compiling / ...
+ ⨯ ./src/app/globals.css
+Module parse failed: Unexpected character '@' (1:0)
+> @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+| 
+| @tailwind base;
+
+Import trace for requested module:
+./src/app/globals.css
+./src/app/layout.tsx
+ ⨯ ./src/app/globals.css
+Module parse failed: Unexpected character '@' (1:0)
+> @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+| 
+| @tailwind base;
+
+Import trace for requested module:
+./src/app/globals.css
+./src/app/layout.tsx
+ ⨯ ./src/app/globals.css
+Module parse failed: Unexpected character '@' (1:0)
+> @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+| 
+| @tailwind base;
+
+Import trace for requested module:
+./src/app/globals.css
+./src/app/layout.tsx
+ HEAD / 500 in 19716ms
+ GET / 500 in 23ms

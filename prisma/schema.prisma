@@ -1,0 +1,238 @@
+// NeoBI India v2.0 - Database Schema
+// PostgreSQL database for production data persistence
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Business Profile
+model BusinessProfile {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Basic Info
+  name          String
+  industry      String
+  location      String
+  cityTier      Int      @default(1)
+  foundedDate   DateTime
+
+  // Financial Metrics
+  mrr           Float
+  customers     Int
+  teamSize      Int
+  growthTarget  Float
+
+  // Preferences
+  riskTolerance String   @default("medium")
+  vibeMode      String   @default("balanced")
+
+  // User Association
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relations
+  simulations   SimulationResult[]
+  auditTrail    AuditEntry[]
+  jugaadIdeas   JugaadIdea[]
+
+  @@index([userId])
+  @@index([industry])
+  @@index([createdAt])
+}
+
+// Simulation Results
+model SimulationResult {
+  id               String   @id @default(uuid())
+  createdAt        DateTime @default(now())
+
+  // Associated Profile
+  profileId        String
+  profile          BusinessProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // Query & Results
+  query            String
+  confidence       Float
+  executionTime    Int
+  costUsed         Float    @default(0)
+
+  // MARL State
+  marlEpisodes     Int      @default(10)
+  totalReward      Float
+  convergenceMetric Float
+
+  // Decision Paths (JSON)
+  paths            Json
+  selectedPath     Json?
+
+  // Enhanced Metrics (JSON)
+  rewardDecomposition    Json?
+  confidenceDistribution Json?
+  burnoutTrajectory      Json?
+  ablationStudy          Json?
+  curriculumLevels       Json?
+
+  @@index([profileId])
+  @@index([createdAt])
+}
+
+// Audit Trail
+model AuditEntry {
+  id          String   @id @default(uuid())
+  timestamp   DateTime @default(now())
+
+  // Associated Profile
+  profileId   String
+  profile     BusinessProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // Action Details
+  action      String
+  details     Json
+
+  // User Context
+  userId      String?
+  ipAddress   String?
+  userAgent   String?
+
+  @@index([profileId])
+  @@index([timestamp])
+  @@index([action])
+}
+
+// Jugaad Ideas
+model JugaadIdea {
+  id               String   @id @default(uuid())
+  createdAt        DateTime @default(now())
+
+  // Associated Profile
+  profileId        String
+  profile          BusinessProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // Idea Details
+  description      String
+  category         String
+  feasibilityScore Int
+  potentialImpact  Int
+  generation       Int      @default(1)
+
+  // Feedback
+  userFeedback     String?
+  implemented      Boolean  @default(false)
+  outcome          String?
+
+  @@index([profileId])
+  @@index([category])
+  @@index([createdAt])
+}
+
+// User Authentication
+model User {
+  id            String    @id @default(uuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?   // For credentials auth
+  image         String?
+  name          String?
+
+  // Relations
+  profiles      BusinessProfile[]
+  sessions      Session[]
+  accounts      Account[]
+
+  @@index([email])
+}
+
+// NextAuth Session
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// NextAuth Account
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// NIFTY Market Data Cache
+model NiftyData {
+  id            String   @id @default(uuid())
+  timestamp     DateTime @default(now())
+
+  // Market Data
+  value         Float
+  change        Float
+  changePercent Float
+  volume        Float?
+  isMarketOpen  Boolean
+  source        String   @default("yfinance")
+
+  @@index([timestamp])
+}
+
+// Festival Data Cache
+model Festival {
+  id            String   @id @default(uuid())
+
+  // Festival Info
+  name          String   @unique
+  date          DateTime
+  year          Int
+  demandLift    Float    @default(35)
+
+  // Categories Affected
+  categories    Json
+
+  @@index([date])
+  @@index([year])
+}
+
+// Performance Metrics
+model PerformanceMetric {
+  id          String   @id @default(uuid())
+  timestamp   DateTime @default(now())
+
+  // Metric Data
+  endpoint    String
+  duration    Int
+  statusCode  Int
+  userId      String?
+
+  // Additional Context
+  userAgent   String?
+  metadata    Json?
+
+  @@index([endpoint])
+  @@index([timestamp])
+  @@index([userId])
+}

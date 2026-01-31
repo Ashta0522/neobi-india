@@ -1,0 +1,136 @@
+'use client';
+
+import React, { useState } from 'react';
+import { JugaadIdea } from '@/types';
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { motion } from 'framer-motion';
+
+interface SelfEvolvingJugaadProps {
+  ideas: JugaadIdea[];
+  onGenerateNew: () => void;
+}
+
+const SelfEvolvingJugaadGenerator: React.FC<SelfEvolvingJugaadProps> = ({ ideas, onGenerateNew }) => {
+  const [selectedIdea, setSelectedIdea] = useState<string | null>(null);
+
+  const evolutionData = ideas.map((idea) => ({
+    name: `Gen ${idea.generation}`,
+    feasibility: (idea as any).feasibility ?? (idea as any).feasibilityScore ?? 0,
+    impact: (idea as any).impact ?? (idea as any).potentialImpact ?? 0,
+  }));
+
+  const categoryDistribution = Object.entries(
+    ideas.reduce(
+      (acc, idea) => {
+        const cat = idea.category || 'unknown';
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    )
+  ).map(([category, count]) => ({
+    name: category,
+    value: count,
+  }));
+
+  const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'];
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl border border-green-500/30 p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold text-green-300">🧬 Self-Evolving Jugaad Generator</h3>
+        <button
+          onClick={onGenerateNew}
+          className="px-4 py-2 text-xs font-bold bg-green-600/50 hover:bg-green-600 rounded border border-green-400/30 text-green-100 transition-all"
+        >
+          🔄 Generate New
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* Evolution Chart */}
+        <div style={{ width: '100%', height: 250 }}>
+          <ResponsiveContainer>
+            <BarChart data={evolutionData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="name" stroke="#86EFAC" />
+              <YAxis stroke="#86EFAC" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#0F172A',
+                  border: '1px solid #22C55E',
+                  borderRadius: '8px',
+                  color: '#86EFAC',
+                }}
+              />
+              <Bar dataKey="feasibility" fill="#22C55E" name="Feasibility" />
+              <Bar dataKey="impact" fill="#84CC16" name="Impact" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Category Distribution */}
+        <div style={{ width: '100%', height: 250 }}>
+          <ResponsiveContainer>
+            <PieChart>
+              <Pie data={categoryDistribution} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={5} dataKey="value">
+                {categoryDistribution.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#0F172A',
+                  border: '1px solid #22C55E',
+                  borderRadius: '8px',
+                  color: '#86EFAC',
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Ideas List */}
+      <div className="space-y-2 max-h-48 overflow-y-auto">
+            {ideas.map((idea) => (
+          <motion.div
+            key={idea.id}
+            onClick={() => setSelectedIdea(selectedIdea === idea.id ? null : idea.id)}
+            className="cursor-pointer p-3 bg-black/40 hover:bg-black/60 rounded-lg border border-green-500/20 hover:border-green-400 transition-all"
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="flex justify-between items-start mb-2">
+                  <span className="font-semibold text-green-300 text-sm">{idea.description.substring(0, 40)}...</span>
+                  <span className="text-xs bg-green-600/40 px-2 py-1 rounded text-green-200">Gen {idea.generation}</span>
+            </div>
+            <div className="flex gap-2 text-xs text-green-400">
+                  <span>Feasibility: {(idea as any).feasibility ?? (idea as any).feasibilityScore}%</span>
+                  <span>•</span>
+                  <span>Impact: {(idea as any).impact ?? (idea as any).potentialImpact}%</span>
+                  <span>•</span>
+                  <span>Success: {(idea as any).successRate ?? 0}%</span>
+            </div>
+
+                {selectedIdea === idea.id && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 pt-3 border-t border-green-500/20 text-xs text-green-300">
+                    <p>Mutations: {(idea as any).mutations ?? 0}</p>
+                    <p>Category: {idea.category}</p>
+                <p className="mt-2 font-semibold text-green-200">Full Description:</p>
+                <p>{idea.description}</p>
+              </motion.div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-green-500/20 flex justify-between text-xs text-green-300">
+        <span>Total Ideas: {ideas.length}</span>
+        <span>Avg Generation: {(ideas.reduce((acc, i) => acc + (i.generation || 0), 0) / Math.max(1, ideas.length)).toFixed(1)}</span>
+        <span>Avg Success: {(ideas.reduce((acc, i) => acc + ((i as any).successRate ?? 0), 0) / Math.max(1, ideas.length)).toFixed(0)}%</span>
+      </div>
+    </motion.div>
+  );
+};
+
+export default SelfEvolvingJugaadGenerator;

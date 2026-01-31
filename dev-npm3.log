@@ -1,0 +1,13 @@
+
+> neobi-india@2.0.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:54112
+- Network:       http://192.168.31.151:54112
+- Environments: .env.local
+
+✓ Starting...
+TypeError: Cannot read properties of undefined (reading 'replace')
+    at ignore-listed frames
+[?25h

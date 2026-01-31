@@ -1,0 +1,41 @@
+
+> neobi-india@2.0.0 dev D:\FINALmajorPROJECT\neobi-india
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:54112
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.7s
+ ⨯ ./src/app/api/nifty/route.ts:1:1
+Module not found: Can't resolve 'next/dist/server/web/exports/next-response'
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mNextRequest[39m[33m,[39m [33mNextResponse[39m } [36mfrom[39m [32m'next/server'[39m[33m;[39m[0m
+[0m [90m   |[39m [31m[1m^[22m[39m[0m
+[0m [90m 2 |[39m[0m
+[0m [90m 3 |[39m [90m// Helper to generate realistic market-hours-aware NIFTY data[39m[0m
+[0m [90m 4 |[39m [36mconst[39m generateRealisticNIFTYData [33m=[39m () [33m=>[39m {[0m
+
+https://nextjs.org/docs/messages/module-not-found
+ ○ Compiling /_not-found ...
+ ⨯ ./src/app/api/nifty/route.ts:1:1
+Module not found: Can't resolve 'next/dist/server/web/exports/next-response'
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mNextRequest[39m[33m,[39m [33mNextResponse[39m } [36mfrom[39m [32m'next/server'[39m[33m;[39m[0m
+[0m [90m   |[39m [31m[1m^[22m[39m[0m
+[0m [90m 2 |[39m[0m
+[0m [90m 3 |[39m [90m// Helper to generate realistic market-hours-aware NIFTY data[39m[0m
+[0m [90m 4 |[39m [36mconst[39m generateRealisticNIFTYData [33m=[39m () [33m=>[39m {[0m
+
+https://nextjs.org/docs/messages/module-not-found
+ ✓ Compiled /_not-found in 208ms (239 modules)
+ ○ Compiling /_error ...
+ ⨯ ./src/app/api/nifty/route.ts:1:1
+Module not found: Can't resolve 'next/dist/server/web/exports/next-response'
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mNextRequest[39m[33m,[39m [33mNextResponse[39m } [36mfrom[39m [32m'next/server'[39m[33m;[39m[0m
+[0m [90m   |[39m [31m[1m^[22m[39m[0m
+[0m [90m 2 |[39m[0m
+[0m [90m 3 |[39m [90m// Helper to generate realistic market-hours-aware NIFTY data[39m[0m
+[0m [90m 4 |[39m [36mconst[39m generateRealisticNIFTYData [33m=[39m () [33m=>[39m {[0m
+
+https://nextjs.org/docs/messages/module-not-found
+ GET /api/nifty 500 in 8258ms

@@ -1,0 +1,24 @@
+
+> neobi-india@2.0.0 dev D:\FINALmajorPROJECT\neobi-india
+> next dev "--turbo"
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+  ▲ Next.js 14.2.35 (turbo)
+  - Local:        http://localhost:54112
+  - Environments: .env.local
+
+ ✓ Starting...
+thread 'tokio-runtime-worker' panicked at packages\next-swc\crates\next-api\src\project.rs:534:80:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Error: A task panicked: called `Option::unwrap()` on a `None` value
+
+Debug info:
+- Execution of get_entrypoints_with_issues failed
+- Execution of Project::entrypoints failed
+- Execution of Project::app_project failed
+- Execution of find_app_dir failed
+- A task panicked: called `Option::unwrap()` on a `None` value] {
+  code: 'GenericFailure'
+}
+[?25h
