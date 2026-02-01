@@ -1,0 +1,522 @@
+[
+  {
+    "id": "d2c-001",
+    "name": "Ethnic Wear - Mumbai Instagram Store",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 400000,
+      "customers": 120,
+      "teamSize": 4,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2024-03-10",
+      "growthTarget": 35,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Influencer Collaboration",
+      "score": 4.7,
+      "reasoning": "Mumbai fashion influencers have 50K-200K engaged followers. Micro-influencer campaigns (₹15K-30K/post) drive 3-5% conversion rates. Alternative paths like paid ads would have higher CAC (₹800-1200 vs ₹400-600 through influencers) in competitive Mumbai market."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "d2c-002",
+    "name": "Sustainable Fashion - Bangalore",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 800000,
+      "customers": 200,
+      "teamSize": 8,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-08-20",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Content Marketing + SEO",
+      "score": 4.6,
+      "reasoning": "Bangalore's eco-conscious consumers actively search for sustainable fashion. Organic SEO for 'sustainable clothing India' has 12K monthly searches, 28% CTR. Blog content drives trust + lower CAC (₹350-500) vs paid ads (₹900-1400). Festival-aware content (Diwali gifting, wedding season) captures high-intent traffic."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "d2c-003",
+    "name": "Men's Streetwear - Delhi NCR",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 1200000,
+      "customers": 350,
+      "teamSize": 12,
+      "location": "Gurgaon",
+      "cityTier": 1,
+      "foundedDate": "2023-01-15",
+      "growthTarget": 50,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Quick Commerce Partnership",
+      "score": 4.8,
+      "reasoning": "Delhi NCR's Blinkit/Zepto coverage (70%+ areas) enables 10-minute fashion delivery. Partnership model: 15-18% commission but zero logistics cost. Impulse purchases increase 4x with quick delivery. Alternative wholesale would dilute margins by 40-45%."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "d2c-004",
+    "name": "Handloom Sarees - Jaipur",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 300000,
+      "customers": 45,
+      "teamSize": 3,
+      "location": "Jaipur",
+      "cityTier": 2,
+      "foundedDate": "2024-06-01",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Wedding Planner Partnerships",
+      "score": 4.9,
+      "reasoning": "Jaipur wedding planners handle 200-500 weddings/year with ₹50K-2L saree budgets per event. Commission-based model (12-15%) creates recurring revenue without marketing spend. Festival timing (Oct-Feb wedding season) aligns with peak demand. Alternative Instagram ads would have 2-3 month sales cycles vs immediate orders through planners."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "d2c-005",
+    "name": "Athleisure Brand - Pune",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 600000,
+      "customers": 180,
+      "teamSize": 6,
+      "location": "Pune",
+      "cityTier": 1,
+      "foundedDate": "2023-11-10",
+      "growthTarget": 45,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Gym Partnership Program",
+      "score": 4.7,
+      "reasoning": "Pune has 450+ fitness centers with 80K+ active members. Gym partnership model: branded merch corners with 20% revenue share. Captive audience reduces CAC to ₹200-300 vs ₹800-1000 for digital ads. Members trust gym recommendations, driving 18-22% conversion rates."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "d2c-006",
+    "name": "Kids Fashion - Hyderabad",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 500000,
+      "customers": 140,
+      "teamSize": 5,
+      "location": "Hyderabad",
+      "cityTier": 1,
+      "foundedDate": "2024-02-20",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Mom Influencer Community",
+      "score": 4.8,
+      "reasoning": "Hyderabad mom bloggers (10K-50K followers) have 8-12% engagement rates, 3x higher than fashion influencers. Gifting strategy (₹5K-8K/influencer) drives authentic reviews + UGC content. Festival-timing (Diwali, birthdays) increases conversion to 5-7%. Alternative Facebook ads would need ₹80K-120K monthly spend for similar reach."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "d2c-007",
+    "name": "Plus-Size Fashion - Chennai",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 350000,
+      "customers": 90,
+      "teamSize": 4,
+      "location": "Chennai",
+      "cityTier": 1,
+      "foundedDate": "2024-04-15",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Body Positivity Campaign",
+      "score": 4.6,
+      "reasoning": "Chennai's underserved plus-size market (estimated 2.5L potential customers) responds to authentic representation. Instagram Reels showcasing real customers drive 4x engagement vs product shots. CAC drops from ₹700-900 to ₹300-450 with UGC content. Festival campaigns (Pongal, Diwali) see 60% higher conversion."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "d2c-008",
+    "name": "Western Formals - Ahmedabad",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 450000,
+      "customers": 110,
+      "teamSize": 5,
+      "location": "Ahmedabad",
+      "cityTier": 2,
+      "foundedDate": "2023-09-05",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Corporate Gifting Tie-ups",
+      "score": 4.7,
+      "reasoning": "Ahmedabad corporates (pharma, textile companies) budget ₹1.5-3K/employee for festival gifting. Bulk orders (100-500 units) create predictable revenue. Festival timing (Diwali, Uttarayan) drives 40% of annual sales. Alternative retail expansion would require ₹8-12L investment with 18-24 month payback."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "d2c-009",
+    "name": "Fusion Wear - Kolkata",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 280000,
+      "customers": 70,
+      "teamSize": 3,
+      "location": "Kolkata",
+      "cityTier": 1,
+      "foundedDate": "2024-05-20",
+      "growthTarget": 25,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Durga Puja Pop-ups",
+      "score": 4.9,
+      "reasoning": "Kolkata's Durga Puja (Oct) drives 35-40% of annual fashion sales. Pop-up stalls in premium pandals (₹15K-25K rent/5 days) reach 50K+ footfall. Cash-on-spot sales eliminate payment delays. Festival urgency drives impulse purchases. Alternative year-round marketing would spread ₹2-3L budget thinly without concentrated ROI."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "extreme"
+    }
+  },
+  {
+    "id": "d2c-010",
+    "name": "Premium Denim - Chandigarh",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 550000,
+      "customers": 150,
+      "teamSize": 6,
+      "location": "Chandigarh",
+      "cityTier": 2,
+      "foundedDate": "2023-07-12",
+      "growthTarget": 35,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "College Campus Ambassadors",
+      "score": 4.8,
+      "reasoning": "Chandigarh's 15+ colleges have 80K+ students with ₹3-5K monthly fashion budgets. Campus ambassador program (₹2K stipend + 15% commission) drives peer-to-peer sales. Festival timing (Freshers, fests) creates urgency. CAC drops to ₹150-250 vs ₹600-800 for Instagram ads targeting same demographic."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "d2c-011",
+    "name": "Bridal Lehenga - Surat",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 900000,
+      "customers": 25,
+      "teamSize": 7,
+      "location": "Surat",
+      "cityTier": 2,
+      "foundedDate": "2023-04-08",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "WhatsApp Catalog Sales",
+      "score": 4.9,
+      "reasoning": "Surat's textile heritage creates trust for local brands. WhatsApp Business catalogs enable personalized service (family sharing, video calls). Average order value ₹35K-80K requires relationship building vs impersonal e-commerce. Festival weddings (Oct-Feb) drive 70% of sales. Integration with existing family networks reduces CAC to near-zero."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "extreme"
+    }
+  },
+  {
+    "id": "d2c-012",
+    "name": "Minimalist Basics - Kochi",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 320000,
+      "customers": 95,
+      "teamSize": 4,
+      "location": "Kochi",
+      "cityTier": 2,
+      "foundedDate": "2024-01-25",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Sustainable Packaging Story",
+      "score": 4.6,
+      "reasoning": "Kerala's eco-conscious consumers (highest literacy, environmental awareness) pay 15-20% premium for sustainable products. Instagram content showcasing biodegradable packaging, local artisan partnerships drives brand loyalty. CAC ₹400-550 through organic content vs ₹800-1100 for paid ads. Onam festival campaigns see 45% higher engagement."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "d2c-013",
+    "name": "Vintage Resale - Bangalore",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 420000,
+      "customers": 160,
+      "teamSize": 5,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-12-10",
+      "growthTarget": 45,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Community Swap Events",
+      "score": 4.7,
+      "reasoning": "Bangalore's sustainability-focused Gen Z drives thrift culture. Monthly swap events (₹8K-12K venue cost) acquire 30-40 new customers per event. Inventory sourcing through swaps eliminates procurement costs. Social media buzz from events drives online traffic. Alternative paid acquisition would cost ₹700-900 per customer vs ₹200-300 through events."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "d2c-014",
+    "name": "Maternity Wear - Mumbai Suburbs",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 380000,
+      "customers": 85,
+      "teamSize": 4,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2024-03-05",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Gynecologist Referral Program",
+      "score": 4.9,
+      "reasoning": "Mumbai gynecologists see 50-100+ pregnant patients monthly. Referral program (10% discount for patients, ₹500 Amazon voucher for doctors) creates trust-based sales. Conversion rate 40-50% vs 2-3% for cold Instagram ads. Alternative maternity apps would charge 25-30% commission vs 15-18% referral cost."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "d2c-015",
+    "name": "Festive Collection - Lucknow",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 250000,
+      "customers": 60,
+      "teamSize": 3,
+      "location": "Lucknow",
+      "cityTier": 2,
+      "foundedDate": "2024-07-15",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Eid Pre-orders Campaign",
+      "score": 4.8,
+      "reasoning": "Lucknow's Eid spending (estimated ₹800Cr+ in fashion) drives 50-60% of annual sales for festive brands. Pre-order campaigns (20% discount, 30-day advance) secure cash flow + accurate inventory planning. WhatsApp marketing to existing customers drives 25-30% repeat purchases. Alternative retail partnerships would take 35-40% margins."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "extreme"
+    }
+  },
+  {
+    "id": "d2c-016",
+    "name": "Activewear - Indore",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 290000,
+      "customers": 75,
+      "teamSize": 3,
+      "location": "Indore",
+      "cityTier": 2,
+      "foundedDate": "2024-02-10",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Marathon Sponsorship",
+      "score": 4.7,
+      "reasoning": "Indore Marathon (3000+ runners, growing 35% YoY) offers brand visibility at ₹50K-80K sponsorship. Branded race kits drive trial + social media UGC. Running community (active WhatsApp groups) provides organic referrals. Alternative Facebook ads would need ₹40K-60K monthly spend without community building benefit."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "d2c-017",
+    "name": "Custom Tailoring - Coimbatore",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 410000,
+      "customers": 55,
+      "teamSize": 6,
+      "location": "Coimbatore",
+      "cityTier": 2,
+      "foundedDate": "2023-10-20",
+      "growthTarget": 25,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Repeat Customer Loyalty Program",
+      "score": 4.6,
+      "reasoning": "Custom tailoring has 60-70% repeat rate with proper service. Loyalty program (every 5th order free alterations, 10% discount) increases LTV from ₹15K to ₹28K. WhatsApp reminders for festival seasons (Pongal, Diwali) drive repeat orders. Alternative new customer acquisition would cost ₹900-1200 vs ₹200-300 for retention marketing."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "d2c-018",
+    "name": "Workwear Women - Gurgaon",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 650000,
+      "customers": 190,
+      "teamSize": 7,
+      "location": "Gurgaon",
+      "cityTier": 1,
+      "foundedDate": "2023-06-15",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Corporate Women Networks",
+      "score": 4.8,
+      "reasoning": "Gurgaon has 50+ active women professional networks (SHEROES, Lean In circles). Sponsoring monthly meetups (₹15K-25K) provides direct access to target audience. Office-appropriate clothing has immediate need. Word-of-mouth in professional circles drives 35-40% conversion. Alternative LinkedIn ads would have higher CPC (₹80-120 vs ₹30-50 for organic network reach)."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "d2c-019",
+    "name": "Unisex Basics - Pune",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 520000,
+      "customers": 145,
+      "teamSize": 5,
+      "location": "Pune",
+      "cityTier": 1,
+      "foundedDate": "2023-11-28",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Subscription Box Model",
+      "score": 4.7,
+      "reasoning": "Pune's young professionals (25-35 age group) value convenience. Quarterly subscription boxes (₹3K-5K) create predictable revenue + reduce decision fatigue. Churn rate typically 15-20% vs 40-50% for one-time purchases. Festival-themed boxes (Diwali colors, summer whites) drive urgency. Alternative marketplace listing would take 20-25% commissions."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "d2c-020",
+    "name": "Luxury Accessories - Delhi",
+    "category": "D2C Clothing",
+    "profile": {
+      "industry": "D2C Fashion",
+      "mrr": 1100000,
+      "customers": 120,
+      "teamSize": 9,
+      "location": "Delhi",
+      "cityTier": 1,
+      "foundedDate": "2023-03-18",
+      "growthTarget": 45,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Personal Shopping Service",
+      "score": 4.9,
+      "reasoning": "Delhi's luxury consumers (AOV ₹25K-80K) expect personalized service. WhatsApp-based personal shoppers (video consultations, home trials) increase conversion from 3-4% to 25-30%. High-touch service justifies premium pricing. Festival gifting (Diwali, Karva Chauth) drives 40% of annual sales. Alternative luxury marketplaces would take 30-35% commissions + dilute brand positioning."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  }
+]

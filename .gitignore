@@ -63,3 +63,4 @@ neobi.db
 *.swo
 *~
 .vscode-test
+.vercel

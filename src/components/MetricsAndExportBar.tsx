@@ -1,12 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useNeoBIStore } from '@/lib/store';
-import { Gauge, Download, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Gauge, Download, ThumbsUp, ThumbsDown, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { generateShareableReport } from '@/utils/shareableReport';
 
 export const MetricsAndExportBar: React.FC = () => {
-  const { metrics, currentResult, profile } = useNeoBIStore();
+  const router = useRouter();
+  const { metrics, currentResult, profile, selectedPath } = useNeoBIStore();
+  const [shareLoading, setShareLoading] = useState(false);
 
   const exportOptions = [
     { label: 'PDF Report', icon: '📄', format: 'pdf' },
@@ -14,6 +18,24 @@ export const MetricsAndExportBar: React.FC = () => {
     { label: 'JSON+SHAP', icon: '📊', format: 'json' },
     { label: 'Audit Trail', icon: '📋', format: 'audit' },
   ];
+
+  const handleShareReport = () => {
+    if (!profile || !selectedPath || !currentResult) {
+      alert('Please run intelligence first to generate a report');
+      return;
+    }
+
+    setShareLoading(true);
+    try {
+      const report = generateShareableReport(profile, selectedPath, currentResult);
+      router.push(`/report/${report.id}`);
+    } catch (err) {
+      console.error('Share failed:', err);
+      alert('Failed to generate shareable report');
+    } finally {
+      setShareLoading(false);
+    }
+  };
 
   const handleExport = (format: string) => {
     try {
@@ -100,6 +122,21 @@ export const MetricsAndExportBar: React.FC = () => {
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* Share Report Button */}
+      {currentResult && selectedPath && (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleShareReport}
+          disabled={shareLoading}
+          className="text-xs px-4 py-2 rounded bg-gradient-peach text-black hover:shadow-lg transition-all font-bold flex items-center gap-2 disabled:opacity-50"
+          title="Share Report"
+        >
+          <Share2 size={14} />
+          {shareLoading ? 'Generating...' : 'Share Report'}
+        </motion.button>
+      )}
 
       {/* Export Buttons */}
       <div className="flex items-center gap-2">

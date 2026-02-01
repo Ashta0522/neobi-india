@@ -10,7 +10,7 @@ interface BurnoutTrajectoryChartProps {
 
 export function BurnoutTrajectoryChart({ trajectory }: BurnoutTrajectoryChartProps) {
   const data = trajectory.timestamp.map((date, idx) => ({
-    date: date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }),
+    date: new Date(date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }),
     'Baseline Risk': trajectory.baselineRisk[idx],
     'With Path': trajectory.afterPathRisk[idx],
     'Reduction': trajectory.baselineRisk[idx] - trajectory.afterPathRisk[idx],

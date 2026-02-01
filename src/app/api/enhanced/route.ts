@@ -1,5 +1,3 @@
-"use server";
-
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -16,7 +14,7 @@ export async function POST(request: Request) {
       }
 
       case 'reward-decomposition': {
-        return Response.json({ success: true, data: { totalReward: 850, components: { revenue: 35, riskReduction: 20, burnoutMitigation: 15, operationalEfficiency: 22, complianceScore: 8 }, timestamp: new Date() } });
+        return Response.json({ success: true, data: { totalReward: 850, components: { revenue: 35, riskReduction: 20, burnoutMitigation: 15, operationalEfficiency: 22, complianceScore: 8 }, timestamp: new Date().toISOString() } });
       }
 
       case 'curriculum-learning': {
@@ -24,7 +22,7 @@ export async function POST(request: Request) {
       }
 
       case 'burnout-trajectory': {
-        return Response.json({ success: true, data: { timestamp: Array.from({ length: 7 }, (_, i) => new Date()), baselineRisk: [65,69,73,77,81,85,88], afterPathRisk: [42,45,48,50,52,54,55], vibeMode: 'balanced', trajectory: 'improving' } });
+        return Response.json({ success: true, data: { timestamp: Array.from({ length: 7 }, (_, i) => new Date(Date.now() + i * 5 * 24 * 60 * 60 * 1000).toISOString()), baselineRisk: [65,69,73,77,81,85,88], afterPathRisk: [42,45,48,50,52,54,55], vibeMode: 'balanced', trajectory: 'improving' } });
       }
 
       case 'confidence-distribution': {
@@ -66,7 +64,7 @@ export async function POST(request: Request) {
       }
 
       case 'burnout-schedule': {
-        return Response.json({ success: true, data: { scheduled: true, nextCheckIn: new Date(Date.now() + 7 * 24 * 3600 * 1000) } });
+        return Response.json({ success: true, data: { scheduled: true, nextCheckIn: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString() } });
       }
 
       case 'regional-adjustment': {

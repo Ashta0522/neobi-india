@@ -35,7 +35,7 @@ export const OperationsPanel: React.FC = () => {
             <div key={role} className="border-l-2 border-agents-operations pl-3">
               <p className="font-bold">{role}</p>
               <p className="text-gray-400 text-xs">
-                {timeline.start.toLocaleDateString()} → {timeline.end.toLocaleDateString()}
+                {new Date(timeline.start).toLocaleDateString()} → {new Date(timeline.end).toLocaleDateString()}
               </p>
               <p className="text-agents-growth font-bold">
                 ₹{(timeline.cost / 100000).toFixed(1)}L

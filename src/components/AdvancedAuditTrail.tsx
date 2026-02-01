@@ -87,7 +87,7 @@ const AdvancedAuditTrail: React.FC<AdvancedAuditTrailProps> = ({ entries, onExpo
                     <p className="text-sm font-semibold text-purple-200">{entry.action}</p>
                     <p className="text-xs text-purple-400/60 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {entry.timestamp.toLocaleTimeString()}
+                      {new Date(entry.timestamp).toLocaleTimeString()}
                     </p>
                   </div>
                 </div>
@@ -109,7 +109,7 @@ const AdvancedAuditTrail: React.FC<AdvancedAuditTrailProps> = ({ entries, onExpo
       <div className="mt-4 pt-4 border-t border-purple-500/20 grid grid-cols-3 gap-2 text-xs text-purple-300">
         <div>Total Actions: {entries.length}</div>
         <div>Filtered: {filteredEntries.length}</div>
-        <div>Time Span: {entries.length > 0 ? Math.round((Date.now() - entries[0].timestamp.getTime()) / 60000) : 0} min</div>
+        <div>Time Span: {entries.length > 0 ? Math.round((Date.now() - new Date(entries[0].timestamp).getTime()) / 60000) : 0} min</div>
       </div>
     </motion.div>
   );

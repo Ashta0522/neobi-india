@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNeoBIStore } from '@/lib/store';
 import { format } from 'date-fns';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
 
 export const LiveTickerBar: React.FC = () => {
-  const { indiaContext, updateIndiaContext } = useNeoBIStore();
+  const { indiaContext, updateIndiaContext, setProfile } = useNeoBIStore();
 
   // Fetch NIFTY data from API in real-time
   useEffect(() => {
@@ -25,7 +25,6 @@ export const LiveTickerBar: React.FC = () => {
           marketHours: {
             isOpen: data.isMarketOpen,
             nextOpen: indiaContext.marketHours.nextOpen,
-            nextClose: indiaContext.marketHours.nextClose,
           },
         });
       } catch (error) {
@@ -54,7 +53,6 @@ export const LiveTickerBar: React.FC = () => {
             next: data.next,
             daysUntil: data.daysUntil,
             expectedDemandLift: data.expectedDemandLift,
-            date: new Date(data.date),
           },
         });
       } catch (error) {
@@ -119,6 +117,16 @@ export const LiveTickerBar: React.FC = () => {
 
       {/* Right Spacer */}
       <div className="flex-1" />
+
+      {/* New Profile Button */}
+      <button
+        onClick={() => setProfile(null)}
+        className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold bg-white/5 hover:bg-white/10 rounded border border-white/10 hover:border-white/20 transition-all"
+        title="Start with new profile"
+      >
+        <RefreshCw size={12} />
+        New Profile
+      </button>
 
       {/* Timestamp */}
       <div className="text-xs text-gray-500 font-mono">

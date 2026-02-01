@@ -4,7 +4,7 @@ import { Agent, BusinessProfile, SimulationResult, AgentId, DecisionPath, IndiaC
 interface NeoBIStore {
   // Profile
   profile: BusinessProfile | null;
-  setProfile: (profile: BusinessProfile) => void;
+  setProfile: (profile: BusinessProfile | null) => void;
 
   // Agents
   agents: Record<AgentId, Agent>;

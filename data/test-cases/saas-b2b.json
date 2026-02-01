@@ -1,0 +1,522 @@
+[
+  {
+    "id": "saas-001",
+    "name": "HR Payroll SaaS - Bangalore",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 1200000,
+      "customers": 45,
+      "teamSize": 12,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-05-10",
+      "growthTarget": 50,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "CA Referral Network",
+      "score": 4.9,
+      "reasoning": "Chartered Accountants manage 50-200+ SME clients each. Referral program (₹15K per paying customer, 6-month lock-in) creates trust-based sales. CAs benefit from compliance automation, creating win-win. Alternative enterprise sales would have 6-9 month cycles vs 2-3 weeks through CA referrals. Annual contract value ₹25K-80K per SME."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-002",
+    "name": "Restaurant POS - Mumbai",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 800000,
+      "customers": 80,
+      "teamSize": 8,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2023-09-15",
+      "growthTarget": 40,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Cloud Kitchen Aggregator Partnerships",
+      "score": 4.8,
+      "reasoning": "Mumbai has 2000+ cloud kitchens via Rebel Foods, FreshMenu ecosystems. Partnership with aggregators provides bundled POS + kitchen management. Commission model (₹8K-12K per kitchen) vs direct sales CAC of ₹25K-35K. Kitchen openings create recurring pipeline without cold outreach."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "saas-003",
+    "name": "Invoicing Software - Delhi NCR",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 600000,
+      "customers": 150,
+      "teamSize": 6,
+      "location": "Gurgaon",
+      "cityTier": 1,
+      "foundedDate": "2024-01-20",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Tally Migration Offer",
+      "score": 4.7,
+      "reasoning": "Delhi NCR has 500K+ Tally users frustrated with GST compliance complexity. Free Tally data migration + 3 months free trial converts 25-30% to paid plans. Pain point marketing (GST notices, filing deadlines) creates urgency. Annual contracts (₹4K-8K) have 18-month payback vs 24-30 months for cold acquisition."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-004",
+    "name": "School Management System - Pune",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 950000,
+      "customers": 65,
+      "teamSize": 10,
+      "location": "Pune",
+      "cityTier": 1,
+      "foundedDate": "2023-07-12",
+      "growthTarget": 45,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "District Education Office Approvals",
+      "score": 4.6,
+      "reasoning": "Pune district has 1200+ private schools requiring NEP 2020 compliance. District education office endorsement creates trust + reduces school-level sales cycles from 4-6 months to 6-8 weeks. Annual fees ₹12K-25K per school (200-800 students). Festival breaks (summer, Diwali) are key decision windows."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "saas-005",
+    "name": "Freelancer Marketplace - Bangalore",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 1500000,
+      "customers": 300,
+      "teamSize": 15,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-03-08",
+      "growthTarget": 60,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Startup Community Integration",
+      "score": 4.8,
+      "reasoning": "Bangalore's 8000+ startups use freelancers for design, content, dev work. Integration with NASSCOM, TiE communities provides credibility. Commission model (15-18%) aligns with project success. Alternative paid ads would have ₹1200-1800 CAC vs ₹400-600 through community referrals. Festival hiring freezes (Dec, Apr) require planning."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-006",
+    "name": "Inventory Management - Ahmedabad",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 450000,
+      "customers": 90,
+      "teamSize": 5,
+      "location": "Ahmedabad",
+      "cityTier": 2,
+      "foundedDate": "2024-02-15",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Textile Trader Associations",
+      "score": 4.9,
+      "reasoning": "Ahmedabad textile market (₹50K Cr+ annual turnover) has 15K+ traders with manual inventory tracking. Trade association endorsements provide instant credibility. Membership meetings offer captive audiences of 50-100 decision-makers. Annual fees ₹5K-15K with 80%+ renewal rates. Alternative direct sales would face trust barriers + 6-12 month cycles."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "saas-007",
+    "name": "Video Conferencing - Hyderabad",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 700000,
+      "customers": 120,
+      "teamSize": 9,
+      "location": "Hyderabad",
+      "cityTier": 1,
+      "foundedDate": "2023-11-01",
+      "growthTarget": 50,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "IT Services Company Partnerships",
+      "score": 4.7,
+      "reasoning": "Hyderabad's 3000+ IT services companies need data-secure conferencing (avoiding Zoom, Google Meet for client calls). Partnership model: white-label option for large firms, referral program for boutique agencies. Annual contracts ₹80K-3L (50-500 employees). Alternative freemium would have 1-2% conversion vs 18-22% through B2B partnerships."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-008",
+    "name": "CRM for Real Estate - Chennai",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 520000,
+      "customers": 55,
+      "teamSize": 7,
+      "location": "Chennai",
+      "cityTier": 1,
+      "foundedDate": "2024-04-10",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "CREDAI Chapter Partnerships",
+      "score": 4.8,
+      "reasoning": "CREDAI Chennai has 800+ builder members with 5-50 sales agents each. Chapter sponsorships (₹1.5L-2.5L annually) provide speaking slots at monthly meetings. Real estate seasonality (Jan-Mar, Aug-Oct) aligns with budget cycles. Annual fees ₹15K-80K per builder (based on project count). Alternative cold calling would face gatekeepers + 9-12 month cycles."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "saas-009",
+    "name": "Email Marketing Platform - Kolkata",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 380000,
+      "customers": 95,
+      "teamSize": 5,
+      "location": "Kolkata",
+      "cityTier": 1,
+      "foundedDate": "2023-12-05",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Agency Partner Program",
+      "score": 4.6,
+      "reasoning": "Kolkata has 200+ digital marketing agencies managing 10-50 SME clients each. White-label partnership (agencies keep 30% margins) creates recurring pipeline. Agencies upsell email marketing to existing clients, reducing sales cycle to 2-4 weeks. Festival campaigns (Durga Puja, Diwali) showcase platform value, driving annual contracts (₹3K-12K per client)."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "saas-010",
+    "name": "Field Service Management - Surat",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 410000,
+      "customers": 60,
+      "teamSize": 6,
+      "location": "Surat",
+      "cityTier": 2,
+      "foundedDate": "2024-03-20",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Diamond Industry Trade Shows",
+      "score": 4.7,
+      "reasoning": "Surat diamond industry has 6000+ polishing units with 10-100 workers each. Annual trade shows (3-4 major events) attract 5000+ decision-makers. Booth demos (₹80K-120K per event) showcase real-time tracking, quality control features. Annual fees ₹8K-30K per unit with 70%+ renewal rates. Alternative LinkedIn ads would struggle with offline-focused audience."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "saas-011",
+    "name": "Legal Practice Management - Delhi",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 650000,
+      "customers": 75,
+      "teamSize": 8,
+      "location": "Delhi",
+      "cityTier": 1,
+      "foundedDate": "2023-08-15",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Bar Association Sponsorships",
+      "score": 4.8,
+      "reasoning": "Delhi High Court Bar Association has 8000+ practicing advocates. Sponsoring legal seminars (₹50K-80K per event) provides speaking opportunities + demo booths. Case management pain points create urgency. Annual fees ₹10K-40K per law firm (1-20 associates). Alternative Google ads would face ad policy restrictions + low intent traffic."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-012",
+    "name": "Appointment Scheduling - Jaipur",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 290000,
+      "customers": 110,
+      "teamSize": 4,
+      "location": "Jaipur",
+      "cityTier": 2,
+      "foundedDate": "2024-05-08",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Healthcare Clinic Chains",
+      "score": 4.7,
+      "reasoning": "Jaipur's 50+ multi-location clinic chains (Manipal, Apollo, local groups) manage 500-2000 appointments daily. Chain-level contracts (₹20K-80K annually) provide volume + reduce sales cycles. WhatsApp integration drives adoption (90%+ patient base uses WhatsApp). Alternative single-clinic sales would have 10x lower ACV with similar sales effort."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-013",
+    "name": "Analytics Dashboard - Bangalore",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 1100000,
+      "customers": 85,
+      "teamSize": 14,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-06-20",
+      "growthTarget": 55,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "VC Portfolio Company Access",
+      "score": 4.9,
+      "reasoning": "Bangalore VCs (Accel, Sequoia, Blume) have 30-100 portfolio companies each needing analytics. VC introductions create warm leads + reduce sales cycles from 4-6 months to 6-8 weeks. Portfolio-wide deals (₹1.5L-5L annually) justify enterprise pricing. Alternative inbound marketing would struggle to reach decision-makers in funded startups."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-014",
+    "name": "E-commerce Store Builder - Mumbai",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 720000,
+      "customers": 200,
+      "teamSize": 9,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2023-10-12",
+      "growthTarget": 45,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Instagram Coach Partnerships",
+      "score": 4.8,
+      "reasoning": "Mumbai has 500+ Instagram coaches teaching SMEs social commerce. Partnership model: coaches get 20% recurring commissions, students get 2-month free trial. Coach credibility drives 40-50% conversion vs 3-5% for cold ads. Monthly plans (₹3K-8K) align with student budgets. Festival sales coaching (Diwali, New Year) creates urgency."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "saas-015",
+    "name": "Recruitment ATS - Pune",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 580000,
+      "customers": 50,
+      "teamSize": 7,
+      "location": "Pune",
+      "cityTier": 1,
+      "foundedDate": "2024-01-18",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Recruitment Agency Partnerships",
+      "score": 4.7,
+      "reasoning": "Pune's 300+ staffing agencies place 50-500 candidates annually. White-label ATS (₹15K-50K per agency) improves their efficiency + client reporting. Agencies upsell to client companies, creating expansion revenue. Alternative direct-to-corporate sales would face 6-9 month procurement cycles + Naukri/LinkedIn entrenched competition."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-016",
+    "name": "Project Management Tool - Hyderabad",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 850000,
+      "customers": 95,
+      "teamSize": 11,
+      "location": "Hyderabad",
+      "cityTier": 1,
+      "foundedDate": "2023-09-08",
+      "growthTarget": 50,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Remote Work Community Sponsorships",
+      "score": 4.6,
+      "reasoning": "Hyderabad's remote-first startups (post-pandemic shift) need async collaboration tools. Sponsoring remote work meetups, Slack communities (₹20K-40K monthly) provides organic reach. Free team plan (up to 10 users) drives viral adoption, converting to paid at 25-30 users. Annual contracts ₹80K-3L (30-200 employees)."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-017",
+    "name": "Accounting Software - Chandigarh",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 340000,
+      "customers": 85,
+      "teamSize": 4,
+      "location": "Chandigarh",
+      "cityTier": 2,
+      "foundedDate": "2024-02-25",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Tax Filing Season Campaigns",
+      "score": 4.7,
+      "reasoning": "Chandigarh SMEs face GST filing stress (10th, 20th of every month). Google ads targeting 'GST filing software' spike 300% during filing windows. Free GST return filing tool (requires signup) converts 20-25% to annual plans (₹4K-10K). Alternative year-round marketing would waste budget during low-intent periods."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-018",
+    "name": "Customer Support Platform - Bangalore",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 950000,
+      "customers": 70,
+      "teamSize": 12,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-07-15",
+      "growthTarget": 45,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "D2C Brand Communities",
+      "score": 4.8,
+      "reasoning": "Bangalore's 2000+ D2C brands face WhatsApp support chaos (500-5000 messages daily). D2C community sponsorships (₹40K-60K monthly) provide case study opportunities + peer referrals. WhatsApp Business API integration is key buying factor. Annual contracts ₹1.2L-6L (based on message volume). Alternative Freshdesk/Zendesk compete on features, not India-specific needs."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "saas-019",
+    "name": "Expense Management - Gurgaon",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 620000,
+      "customers": 65,
+      "teamSize": 8,
+      "location": "Gurgaon",
+      "cityTier": 1,
+      "foundedDate": "2024-03-12",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "CFO Network Referrals",
+      "score": 4.9,
+      "reasoning": "Gurgaon CFO networks (CFO Connect, FP&A forums) have 500+ members managing ₹10Cr-500Cr companies. Peer referrals reduce sales cycles from 5-7 months to 6-8 weeks. Pain point presentations at quarterly meetups (₹30K-50K sponsorship) showcase ROI. Annual contracts ₹1L-8L (50-500 employees) with 85%+ renewal rates."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "saas-020",
+    "name": "Learning Management System - Chennai",
+    "category": "SaaS B2B",
+    "profile": {
+      "industry": "SaaS",
+      "mrr": 780000,
+      "customers": 55,
+      "teamSize": 10,
+      "location": "Chennai",
+      "cityTier": 1,
+      "foundedDate": "2023-11-20",
+      "growthTarget": 45,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Corporate Training Vendor Partnerships",
+      "score": 4.8,
+      "reasoning": "Chennai corporates (TCS, Infosys, Wipro, manufacturing) spend ₹5K-15K per employee annually on training. Partnership with training vendors (Dale Carnegie, NIIT, Franklin Covey) provides platform access to their clients. Revenue share model (20-25%) aligns incentives. Annual contracts ₹2L-15L (100-2000 employees). Alternative direct sales would face L&D procurement barriers."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  }
+]

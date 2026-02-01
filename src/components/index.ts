@@ -31,6 +31,7 @@ export { RiskAndCoachPanel } from './RiskAndCoachPanel';
 export { LiveTickerBar } from './LiveTickerBar';
 export { MetricsAndExportBar } from './MetricsAndExportBar';
 export { AgentActivityTree } from './AgentActivityTree';
+export { MRRHealthPulse } from './MRRHealthPulse';
 export { ComplianceTaxPanel } from './ComplianceTaxPanel';
 export { default as CompliancePanel } from './CompliancePanel';
 export { HiringBridge } from './HiringBridge';

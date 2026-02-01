@@ -13,6 +13,7 @@ import { SHAPBeeswarm, AgentContributionPie, ConfidenceDistributionHistogram, Bu
 import { OperationsPanel } from '@/components/OperationsPanel';
 import { RiskAndCoachPanel } from '@/components/RiskAndCoachPanel';
 import { MetricsAndExportBar } from '@/components/MetricsAndExportBar';
+import { MRRHealthPulse } from '@/components/MRRHealthPulse';
 // NEW: Tier 2 & 3 Features
 import {
   FullPageRoadmap, BurnoutMitigationPathways, AdvancedAuditTrail, SelfEvolvingJugaadGenerator,
@@ -756,6 +757,17 @@ export default function Home() {
                   {/* Graphs Below Paths */}
                   <div className="mt-8">
                     <h3 className="text-lg font-bold text-agents-growth mb-3">Analytics</h3>
+
+                    {/* MRR Health Pulse Widget */}
+                    <div className="mb-4">
+                      <MRRHealthPulse
+                        currentMRR={profile.mrr}
+                        previousWeekMRR={profile.mrr * 0.95} // Simulated previous week data
+                        cashOnHand={profile.mrr * 6} // Simulated 6 months runway
+                        monthlyBurn={profile.mrr * 0.4} // Simulated burn rate
+                      />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                       <MARLConvergenceCurve />
                       <CashFlowProjectionChart />

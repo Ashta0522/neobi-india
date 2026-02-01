@@ -1,0 +1,522 @@
+[
+  {
+    "id": "mixed-001",
+    "name": "Test Prep EdTech - Kota",
+    "category": "Mixed",
+    "profile": {
+      "industry": "EdTech",
+      "mrr": 2500000,
+      "customers": 850,
+      "teamSize": 18,
+      "location": "Kota",
+      "cityTier": 2,
+      "foundedDate": "2023-04-10",
+      "growthTarget": 60,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Offline Coaching Center Partnerships",
+      "score": 4.9,
+      "reasoning": "Kota has 150+ offline coaching institutes struggling with digital transition. White-label platform (coaching keeps branding, pays ₹300-500 per student annually) provides hybrid revenue stream. Student base of 2L+ creates massive pipeline. JEE/NEET cycle (Jun-May) drives predictable enrollment waves. Alternative direct-to-student marketing would face brand trust barriers in coaching-dominated Kota market."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "mixed-002",
+    "name": "Micro-Lending FinTech - Bangalore",
+    "category": "Mixed",
+    "profile": {
+      "industry": "FinTech",
+      "mrr": 3200000,
+      "customers": 1200,
+      "teamSize": 25,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-01-15",
+      "growthTarget": 70,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Gig Worker Platform Integrations",
+      "score": 4.8,
+      "reasoning": "Bangalore's 500K+ gig workers (Swiggy, Zomato, Uber, Urban Company) need instant credit for emergencies. API integration with gig platforms enables income verification + payroll deduction. Loans (₹5K-50K) repaid within 30-90 days reduce default risk. Festival spending (Diwali, Eid) drives 40% of loan demand. Alternative NBFC partnerships would take 60-70% of interest margins vs 20-25% platform commission."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "mixed-003",
+    "name": "Telemedicine Platform - Mumbai",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Healthcare",
+      "mrr": 1800000,
+      "customers": 650,
+      "teamSize": 22,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2023-06-20",
+      "growthTarget": 50,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Corporate Wellness Packages",
+      "score": 4.7,
+      "reasoning": "Mumbai corporates (5000+ companies, 2M+ employees) mandate employee health benefits. Annual wellness packages (₹800-1500 per employee) with unlimited consultations create B2B2C model. Festival health camps (pre-Diwali checkups) drive engagement. Alternative D2C model would have ₹600-900 CAC vs ₹150-250 for corporate deals. Annual contracts provide predictable revenue vs transactional consultations."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "mixed-004",
+    "name": "Hyperlocal Logistics - Delhi NCR",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Logistics",
+      "mrr": 2800000,
+      "customers": 180,
+      "teamSize": 45,
+      "location": "Gurgaon",
+      "cityTier": 1,
+      "foundedDate": "2022-09-10",
+      "growthTarget": 55,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "D2C Brand Exclusive Partnerships",
+      "score": 4.8,
+      "reasoning": "Delhi NCR's 3000+ D2C brands need reliable last-mile delivery (Delhivery, BlueDart have 24-48hr SLAs). Exclusive partnerships (guaranteed same-day delivery) at ₹40-60 per shipment vs ₹25-35 marketplace rates justify premium through speed. Festival peaks (Diwali, Valentine's) require 3-4x surge capacity. Alternative marketplace aggregator model (Dunzo, Porter) would commoditize service + reduce margins."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "mixed-005",
+    "name": "Language Learning App - Pune",
+    "category": "Mixed",
+    "profile": {
+      "industry": "EdTech",
+      "mrr": 950000,
+      "customers": 420,
+      "teamSize": 12,
+      "location": "Pune",
+      "cityTier": 1,
+      "foundedDate": "2023-10-05",
+      "growthTarget": 45,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "IT Services Company Tie-ups",
+      "score": 4.9,
+      "reasoning": "Pune IT companies (TCS, Infosys, Cognizant, 100+ others) need English/German/Japanese training for client-facing roles. Corporate licenses (₹15K-40K per employee annually) with certification programs create B2B revenue. Companies bear 60-100% of costs as L&D investment. Festival enrollment drives (New Year, appraisal cycles) spike demand. Alternative B2C model would have 3-5% conversion vs 40-50% corporate adoption."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "mixed-006",
+    "name": "Insurance Aggregator - Hyderabad",
+    "category": "Mixed",
+    "profile": {
+      "industry": "FinTech",
+      "mrr": 1400000,
+      "customers": 320,
+      "teamSize": 16,
+      "location": "Hyderabad",
+      "cityTier": 1,
+      "foundedDate": "2023-07-18",
+      "growthTarget": 50,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "POSP Agent Network Expansion",
+      "score": 4.7,
+      "reasoning": "Hyderabad's 5000+ POSP agents sell ₹50K-5L policies monthly but lack tech platforms. Providing mobile app for quote comparison + instant policy issuance (commission split 60:40 in agent favor) creates distribution network. Festival insurance buying (Diwali, Ugadi for vehicle insurance) drives 35% of annual volume. Alternative direct-to-consumer digital ads would have ₹2K-4K CAC vs ₹500-800 through agents."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "mixed-007",
+    "name": "Home Services Marketplace - Chennai",
+    "category": "Mixed",
+    "profile": {
+      "industry": "On-Demand Services",
+      "mrr": 1100000,
+      "customers": 520,
+      "teamSize": 14,
+      "location": "Chennai",
+      "cityTier": 1,
+      "foundedDate": "2023-03-25",
+      "growthTarget": 45,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Festival Deep-Cleaning Packages",
+      "score": 4.8,
+      "reasoning": "Chennai households deep-clean before Pongal, Diwali, Navratri (60-70% annual deep-cleaning happens around 3-4 festivals). Pre-festival packages (₹3K-8K for full home) with early-bird discounts (2 weeks advance) enable workforce planning. Subscription model (₹1200-1800 quarterly for regular cleaning) creates recurring revenue. Alternative on-demand model has lumpy revenue + workforce idle time."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "extreme"
+    }
+  },
+  {
+    "id": "mixed-008",
+    "name": "AgriTech Marketplace - Nashik",
+    "category": "Mixed",
+    "profile": {
+      "industry": "AgriTech",
+      "mrr": 850000,
+      "customers": 280,
+      "teamSize": 10,
+      "location": "Nashik",
+      "cityTier": 3,
+      "foundedDate": "2024-01-10",
+      "growthTarget": 40,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "FPO Collective Procurement",
+      "score": 4.9,
+      "reasoning": "Nashik district has 50+ Farmer Producer Organizations (FPOs) with 500-5000 members each. Collective procurement of seeds, fertilizers, pesticides (₹5L-50L per FPO per season) provides volume + payment security. Kharif (Jun-Jul) and Rabi (Oct-Nov) seasons drive predictable cycles. Festival timing (pre-monsoon purchases for good yield) aligns with farmer cash flows. Alternative individual farmer sales would have high CAC (₹800-1200) + payment collection challenges."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "mixed-009",
+    "name": "Mental Wellness Platform - Bangalore",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Healthcare",
+      "mrr": 680000,
+      "customers": 240,
+      "teamSize": 8,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2024-02-15",
+      "growthTarget": 50,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Startup EAP Programs",
+      "score": 4.6,
+      "reasoning": "Bangalore startups (8000+ companies, 500K+ employees) face burnout issues but lack HR bandwidth for traditional EAP vendors. Lightweight subscription (₹200-400 per employee annually) with anonymous access removes stigma. Monthly wellness workshops (mindfulness, stress management) drive engagement. Festival stress (year-end targets, Diwali family expectations) creates awareness moments. Alternative B2C therapy would face ₹1500-2500 CAC vs ₹150-300 for corporate."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "mixed-010",
+    "name": "EV Charging Network - Delhi NCR",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Clean Energy",
+      "mrr": 1900000,
+      "customers": 450,
+      "teamSize": 20,
+      "location": "Gurgaon",
+      "cityTier": 1,
+      "foundedDate": "2023-05-12",
+      "growthTarget": 65,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Mall & Office Complex Partnerships",
+      "score": 4.8,
+      "reasoning": "Delhi NCR malls and office complexes (500+ locations) need EV charging to attract customers/tenants. Revenue-share model (mall gets 15-20% of charging fees) vs upfront installation fees (₹5-8L per location) speeds deployment. Captive parking users (2-3 hour stays) enable full charges. Festival shopping seasons drive footfall + charging demand. Alternative public roadside chargers face vandalism + payment collection issues."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "mixed-011",
+    "name": "Wedding Planning Platform - Mumbai",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Events",
+      "mrr": 2200000,
+      "customers": 85,
+      "teamSize": 16,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2023-09-20",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Vendor Commission Marketplace",
+      "score": 4.9,
+      "reasoning": "Mumbai weddings (₹15L-2Cr budgets) involve 15-25 vendors (venue, catering, decoration, photography, etc.). Marketplace model (12-18% commission from vendors) creates revenue without charging couples. Verified vendor network reduces couple anxiety. Wedding season (Oct-Feb) drives 75% of annual bookings. Alternative couple subscription model would face price sensitivity + limit market size."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "extreme"
+    }
+  },
+  {
+    "id": "mixed-012",
+    "name": "Pet Care Subscription - Bangalore",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Pet Services",
+      "mrr": 720000,
+      "customers": 380,
+      "teamSize": 9,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2024-04-08",
+      "growthTarget": 45,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Veterinary Clinic Partnerships",
+      "score": 4.7,
+      "reasoning": "Bangalore's 200+ vet clinics see 50-200 pets monthly. Partnership model: clinics recommend subscription grooming/food delivery (clinic gets ₹200-300 per signup). Pet owners trust vet recommendations. Quarterly flea/tick prevention subscriptions align with medical advice. Festival pet gifting (Diwali puppies/kittens) drives new signups but requires responsible messaging. Alternative D2C Instagram ads would have ₹800-1200 CAC vs ₹300-500 through vets."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "mixed-013",
+    "name": "Co-working Space - Jaipur",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Real Estate",
+      "mrr": 1500000,
+      "customers": 95,
+      "teamSize": 12,
+      "location": "Jaipur",
+      "cityTier": 2,
+      "foundedDate": "2022-11-10",
+      "growthTarget": 35,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Remote-First Startup Memberships",
+      "score": 4.6,
+      "reasoning": "Jaipur's 500+ startups (many remote-first) need occasional meeting spaces vs full-time offices. Flexible membership (₹5K-15K monthly for 5-10 day access) reduces vacancy risk vs annual lease commitments. Quarterly town halls, networking events drive community value. Festival co-working events (Diwali mixer, Holi celebrations) increase member engagement. Alternative corporate leases would face long sales cycles + high vacancy in Tier-2 market."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "mixed-014",
+    "name": "Skill Development Platform - Lucknow",
+    "category": "Mixed",
+    "profile": {
+      "industry": "EdTech",
+      "mrr": 580000,
+      "customers": 320,
+      "teamSize": 7,
+      "location": "Lucknow",
+      "cityTier": 2,
+      "foundedDate": "2024-03-15",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Government Skill India Tie-ups",
+      "score": 4.8,
+      "reasoning": "Lucknow's PMKVY (Pradhan Mantri Kaushal Vikas Yojana) has ₹50Cr+ annual budget for skill training. Becoming NSDC-certified training partner provides government-funded students (₹5K-20K per student paid by government). Targets: retail, hospitality, basic IT skills. Batch enrollments (quarterly cycles) create predictable revenue. Alternative self-funded students would face affordability barriers in Tier-2 market."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "mixed-015",
+    "name": "Pharma Distribution - Ahmedabad",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Healthcare",
+      "mrr": 3500000,
+      "customers": 220,
+      "teamSize": 28,
+      "location": "Ahmedabad",
+      "cityTier": 2,
+      "foundedDate": "2021-07-20",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Kirana Pharmacy Conversion",
+      "score": 4.9,
+      "reasoning": "Ahmedabad's 2000+ kirana stores can become pharmacy points with drug license support (₹20K-30K assistance). Provides last-mile distribution for chronic disease medicines (diabetes, BP). Kirana gets 15-20% margins, distributor ensures consistent supply. Festival health camps (free BP checks during Navratri) drive awareness. Alternative retail pharmacy expansion would cost ₹8-12L per store vs ₹50K-80K for kirana conversion."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "mixed-016",
+    "name": "Influencer Marketing Platform - Mumbai",
+    "category": "Mixed",
+    "profile": {
+      "industry": "MarTech",
+      "mrr": 1600000,
+      "customers": 140,
+      "teamSize": 15,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2023-08-10",
+      "growthTarget": 55,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Festival Campaign Packages",
+      "score": 4.8,
+      "reasoning": "Mumbai brands spend 40-50% of annual marketing budgets during festivals (Diwali, Raksha Bandhan, Valentine's). Pre-packaged influencer campaigns (₹2L-10L for 10-50 influencers) with guaranteed deliverables simplify brand decisions. Platform vets influencers for fake followers. Commission model (25-30%) vs monthly SaaS fees aligns with brand ROI. Alternative year-round campaigns would have inconsistent demand + cash flow challenges."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "extreme"
+    }
+  },
+  {
+    "id": "mixed-017",
+    "name": "Legal Tech SaaS - Delhi",
+    "category": "Mixed",
+    "profile": {
+      "industry": "LegalTech",
+      "mrr": 920000,
+      "customers": 85,
+      "teamSize": 11,
+      "location": "Delhi",
+      "cityTier": 1,
+      "foundedDate": "2024-01-20",
+      "growthTarget": 45,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Startup Legal Compliance Packages",
+      "score": 4.7,
+      "reasoning": "Delhi NCR startups (15K+ registered) need incorporation, compliance, IP filing support. Annual packages (₹25K-80K for incorporation + 1 year compliance) with automated reminders reduce legal risks. Integration with CA/CS firms creates referral pipeline. Funding round legal work (term sheets, SHA) provides upsell opportunities. Alternative transaction-based pricing would face price comparison with traditional lawyers."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "mixed-018",
+    "name": "Renewable Energy Installer - Pune",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Clean Energy",
+      "mrr": 2400000,
+      "customers": 65,
+      "teamSize": 22,
+      "location": "Pune",
+      "cityTier": 1,
+      "foundedDate": "2022-05-15",
+      "growthTarget": 50,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Industrial Park Cluster Approach",
+      "score": 4.9,
+      "reasoning": "Pune's 30+ industrial parks have 50-200 SME factories each. Cluster approach (offering solar to entire park at bulk rates) reduces customer acquisition + installation costs by 30-40%. Industrial associations facilitate group decisions. Government subsidies (MNRE, state programs) reduce customer payback to 3-4 years. Alternative individual factory sales would have 9-12 month cycles vs 3-4 months for cluster deals."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "mixed-019",
+    "name": "Senior Care Services - Bangalore",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Healthcare",
+      "mrr": 1300000,
+      "customers": 180,
+      "teamSize": 24,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-10-05",
+      "growthTarget": 40,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "NRI Children Subscriptions",
+      "score": 4.8,
+      "reasoning": "Bangalore has 200K+ senior citizens with NRI children (abroad or other cities). NRI children pay ₹8K-25K monthly for parent care (medical visits, companion services, emergency response). WhatsApp updates + video calls provide peace of mind. Festival visits (Diwali, Ugadi) require extra care coordination. Alternative senior-paid model would face price sensitivity + decision-making delays vs adult child urgency."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "mixed-020",
+    "name": "Quick Commerce Dark Store - Hyderabad",
+    "category": "Mixed",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 3800000,
+      "customers": 2200,
+      "teamSize": 35,
+      "location": "Hyderabad",
+      "cityTier": 1,
+      "foundedDate": "2023-12-01",
+      "growthTarget": 70,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Hyper-Local SKU Optimization",
+      "score": 4.7,
+      "reasoning": "Hyderabad neighborhoods have distinct preferences (Banjara Hills wants imported goods, Dilsukhnagar wants Andhra staples). 2km-radius dark stores with localized SKUs (1500-2000 SKUs vs Blinkit's 3000+) improve inventory turnover from 20 days to 12 days. Festival-specific SKUs (Sankranti, Bonalu items) create urgency. Alternative city-wide uniform inventory would have 25-30% dead stock vs 8-12% with localization."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  }
+]

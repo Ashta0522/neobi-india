@@ -1,0 +1,522 @@
+[
+  {
+    "id": "cafe-001",
+    "name": "Healthy Cafe in Bangalore Mall",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 500000,
+      "customers": 80,
+      "teamSize": 5,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2024-01-15",
+      "growthTarget": 25,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Local Partnership",
+      "score": 4.5,
+      "reasoning": "Bangalore mall location benefits from partnerships with gyms, yoga studios, and wellness centers. Cross-promotion drives sustainable foot traffic without heavy marketing spend."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "cafe-002",
+    "name": "Cloud Kitchen - Tier 2 City",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 300000,
+      "customers": 120,
+      "teamSize": 3,
+      "location": "Pune",
+      "cityTier": 2,
+      "foundedDate": "2023-08-20",
+      "growthTarget": 40,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Platform Expansion",
+      "score": 4.2,
+      "reasoning": "Cloud kitchens in Tier 2 cities should expand to Swiggy, Zomato, and ONDC simultaneously. Platform fees are lower, and multi-platform presence captures wider market."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "cafe-003",
+    "name": "Premium Dining - South Delhi",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 1200000,
+      "customers": 45,
+      "teamSize": 15,
+      "location": "Delhi",
+      "cityTier": 1,
+      "foundedDate": "2022-03-10",
+      "growthTarget": 15,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Experience Enhancement",
+      "score": 4.8,
+      "reasoning": "Premium dining in South Delhi should focus on curated experiences (chef's table, wine pairing) rather than volume expansion. High-margin upsells maintain exclusivity."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "cafe-004",
+    "name": "Street Food Chain - Mumbai",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 800000,
+      "customers": 200,
+      "teamSize": 8,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2023-11-05",
+      "growthTarget": 50,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Franchise Model",
+      "score": 4.3,
+      "reasoning": "Street food chains scale best via micro-franchising. Mumbai's high density supports rapid expansion with low capex per outlet."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "very_high"
+    }
+  },
+  {
+    "id": "cafe-005",
+    "name": "Vegan QSR - Tier 3 Town",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 150000,
+      "customers": 60,
+      "teamSize": 4,
+      "location": "Coimbatore",
+      "cityTier": 3,
+      "foundedDate": "2024-06-01",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Community Building",
+      "score": 3.8,
+      "reasoning": "Vegan concept in Tier 3 requires education + community. WhatsApp groups, local health influencers, and college partnerships drive awareness cost-effectively."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "cafe-006",
+    "name": "Biryani Delivery - Hyderabad",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 600000,
+      "customers": 180,
+      "teamSize": 6,
+      "location": "Hyderabad",
+      "cityTier": 1,
+      "foundedDate": "2023-02-14",
+      "growthTarget": 30,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Dark Kitchen Network",
+      "score": 4.6,
+      "reasoning": "Hyderabad's biryani market is saturated. Multi-location dark kitchens reduce delivery time, critical for repeat orders in this category."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "cafe-007",
+    "name": "Dessert Bar - Kolkata",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 400000,
+      "customers": 90,
+      "teamSize": 5,
+      "location": "Kolkata",
+      "cityTier": 1,
+      "foundedDate": "2024-09-20",
+      "growthTarget": 20,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Instagram Marketing",
+      "score": 4.4,
+      "reasoning": "Dessert bars are highly visual. Instagram Reels + food blogger collaborations in Kolkata drive foot traffic better than traditional ads."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "very_high"
+    }
+  },
+  {
+    "id": "cafe-008",
+    "name": "Juice Bar Chain - Chennai",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 350000,
+      "customers": 100,
+      "teamSize": 4,
+      "location": "Chennai",
+      "cityTier": 1,
+      "foundedDate": "2023-07-10",
+      "growthTarget": 40,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Corporate Tie-ups",
+      "score": 4.5,
+      "reasoning": "Chennai's IT corridor has high demand for healthy options. B2B contracts with tech parks provide predictable revenue + volume."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "cafe-009",
+    "name": "Bakery - Jaipur",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 450000,
+      "customers": 70,
+      "teamSize": 6,
+      "location": "Jaipur",
+      "cityTier": 2,
+      "foundedDate": "2022-12-01",
+      "growthTarget": 25,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Product Diversification",
+      "score": 4.1,
+      "reasoning": "Jaipur's tourist market allows premium pricing for ethnic fusion baked goods (kesar pista cookies, gulab jamun croissants). Differentiation matters more than volume."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "very_high"
+    }
+  },
+  {
+    "id": "cafe-010",
+    "name": "Fast Casual - Ahmedabad",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 550000,
+      "customers": 140,
+      "teamSize": 7,
+      "location": "Ahmedabad",
+      "cityTier": 2,
+      "foundedDate": "2023-04-18",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Catering Services",
+      "score": 4.3,
+      "reasoning": "Ahmedabad's strong community culture creates catering demand for festivals, corporate events, and family functions. 40% margin add-on with minimal overhead."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": false,
+      "festivalSensitivity": "very_high"
+    }
+  },
+  {
+    "id": "cafe-011",
+    "name": "Cafe Chain - Kochi",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 700000,
+      "customers": 160,
+      "teamSize": 10,
+      "location": "Kochi",
+      "cityTier": 2,
+      "foundedDate": "2022-08-25",
+      "growthTarget": 30,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Mall Kiosk Expansion",
+      "score": 4.6,
+      "reasoning": "Kochi's mall density is growing. Kiosks (₹5-8L capex) have faster ROI than full cafes (₹25-30L). Test-and-scale model works well."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "cafe-012",
+    "name": "Ethnic Restaurant - Indore",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 380000,
+      "customers": 85,
+      "teamSize": 5,
+      "location": "Indore",
+      "cityTier": 2,
+      "foundedDate": "2024-01-08",
+      "growthTarget": 22,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Food Festivals Participation",
+      "score": 4.0,
+      "reasoning": "Indore's vibrant food culture rewards festival participation. ₹15-20K booth fees generate ₹80K-1L revenue + brand awareness for ethnic cuisine."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "very_high"
+    }
+  },
+  {
+    "id": "cafe-013",
+    "name": "Coffee Roastery - Coorg",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 280000,
+      "customers": 50,
+      "teamSize": 4,
+      "location": "Coorg",
+      "cityTier": 3,
+      "foundedDate": "2023-10-12",
+      "growthTarget": 18,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "D2C E-commerce",
+      "score": 4.7,
+      "reasoning": "Coorg's coffee reputation enables premium D2C pricing (₹800-1200/kg vs ₹400 wholesale). Amazon + own Shopify store capture metro demand."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "cafe-014",
+    "name": "Italian QSR - Lucknow",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 420000,
+      "customers": 110,
+      "teamSize": 6,
+      "location": "Lucknow",
+      "cityTier": 2,
+      "foundedDate": "2023-05-30",
+      "growthTarget": 28,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "College Proximity Focus",
+      "score": 4.2,
+      "reasoning": "Lucknow's student population drives Italian food demand. Locations near colleges + student discounts (15-20%) create loyal customer base."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "cafe-015",
+    "name": "Tea Lounge - Chandigarh",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 320000,
+      "customers": 95,
+      "teamSize": 4,
+      "location": "Chandigarh",
+      "cityTier": 2,
+      "foundedDate": "2024-03-14",
+      "growthTarget": 25,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Events & Workshops",
+      "score": 4.4,
+      "reasoning": "Tea tasting workshops + poetry nights in Chandigarh's cafe culture drive premium pricing (₹500-800/person) and Instagram virality."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "cafe-016",
+    "name": "South Indian Chain - Surat",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 650000,
+      "customers": 170,
+      "teamSize": 9,
+      "location": "Surat",
+      "cityTier": 2,
+      "foundedDate": "2022-11-20",
+      "growthTarget": 35,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Quick Commerce Tie-up",
+      "score": 4.5,
+      "reasoning": "Surat's diamond merchants work late hours. Zepto/Blinkit partnerships for breakfast/snack delivery capture untapped 9-11 PM window."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": false,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "cafe-017",
+    "name": "Health Food - Gurgaon",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 850000,
+      "customers": 130,
+      "teamSize": 8,
+      "location": "Gurgaon",
+      "cityTier": 1,
+      "foundedDate": "2023-09-05",
+      "growthTarget": 32,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Corporate Wellness Programs",
+      "score": 4.8,
+      "reasoning": "Gurgaon corporates budget ₹200-300/employee/month for wellness. Monthly meal plans (breakfast + lunch) create recurring revenue + predictable cash flow."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "cafe-018",
+    "name": "Paan Shop Modern - Varanasi",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 180000,
+      "customers": 200,
+      "teamSize": 3,
+      "location": "Varanasi",
+      "cityTier": 2,
+      "foundedDate": "2024-07-22",
+      "growthTarget": 20,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Tourist Packaging",
+      "score": 4.1,
+      "reasoning": "Varanasi tourists pay premium for experience. Packaged 'Banarasi Paan Sampler' (₹150-250) has 60% margin vs traditional retail (30%)."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "very_high"
+    }
+  },
+  {
+    "id": "cafe-019",
+    "name": "Pan-Asian - Noida",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 720000,
+      "customers": 140,
+      "teamSize": 10,
+      "location": "Noida",
+      "cityTier": 1,
+      "foundedDate": "2022-06-18",
+      "growthTarget": 28,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Lunch Subscription Model",
+      "score": 4.3,
+      "reasoning": "Noida IT parks have 50K+ employees. Monthly lunch subscriptions (₹6000-8000) reduce customer acquisition cost by 70% and stabilize revenue."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": false,
+      "festivalSensitivity": "low"
+    }
+  },
+  {
+    "id": "cafe-020",
+    "name": "Regional Thali - Nashik",
+    "category": "Food & Beverage",
+    "profile": {
+      "industry": "Food & Beverage",
+      "mrr": 290000,
+      "customers": 75,
+      "teamSize": 5,
+      "location": "Nashik",
+      "cityTier": 2,
+      "foundedDate": "2024-02-28",
+      "growthTarget": 24,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Highway Stopover Branding",
+      "score": 4.2,
+      "reasoning": "Nashik's Mumbai-Ahmedabad highway location is strategic. Branding as 'authentic thali stopover' + Google Maps optimization captures traveler traffic (₹80-100K/month incremental)."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  }
+]

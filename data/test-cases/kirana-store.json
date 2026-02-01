@@ -1,0 +1,522 @@
+[
+  {
+    "id": "kirana-001",
+    "name": "Neighborhood Kirana - Mumbai Suburb",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 900000,
+      "customers": 450,
+      "teamSize": 6,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2020-02-15",
+      "growthTarget": 25,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "WhatsApp Order & Delivery",
+      "score": 4.9,
+      "reasoning": "Mumbai customers value convenience + personal relationships. WhatsApp Business catalog with 30-min delivery radius drives repeat orders. Existing customer base (450 families) provides low-cost acquisition. Festival bulk orders (Diwali, Ganesh Chaturthi) increase average order value 3-4x. Alternative app development would cost ₹5-8L with low adoption vs zero-cost WhatsApp."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "kirana-002",
+    "name": "3-Store Chain - Bangalore",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 2100000,
+      "customers": 850,
+      "teamSize": 15,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2019-06-10",
+      "growthTarget": 30,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Central Inventory Management",
+      "score": 4.8,
+      "reasoning": "3-store operations suffer from stock imbalances (one store overstock, another stockout). Central warehouse (₹2-3L setup) with daily inter-store transfers reduces wastage by 15-20%. Bulk purchasing power improves margins by 3-5%. Alternative individual store management continues to lose ₹40K-60K monthly in expired goods + missed sales."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "kirana-003",
+    "name": "Premium Grocery - Delhi South",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 1500000,
+      "customers": 320,
+      "teamSize": 8,
+      "location": "Delhi",
+      "cityTier": 1,
+      "foundedDate": "2021-03-20",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Organic/Imported Product Focus",
+      "score": 4.7,
+      "reasoning": "South Delhi's affluent customers (GK, Vasant Vihar) pay 40-60% premium for organic, imported goods. Specialized sourcing from ITC, Godrej Nature's Basket creates differentiation vs Blinkit/Zepto. Festival gifting hampers (Diwali, New Year) drive 30-35% of annual revenue. Alternative price competition with quick commerce would erode margins without volume advantages."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "kirana-004",
+    "name": "Quick Commerce Kirana - Pune",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 800000,
+      "customers": 520,
+      "teamSize": 10,
+      "location": "Pune",
+      "cityTier": 1,
+      "foundedDate": "2023-08-15",
+      "growthTarget": 50,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "Dunzo/Swiggy Instamart Partnership",
+      "score": 4.6,
+      "reasoning": "Pune's quick commerce penetration (40%+ households) creates delivery demand kirana can't handle alone. Listing on Dunzo/Swiggy (20-25% commission) provides instant visibility + delivery infrastructure. Peak hour orders (7-10pm) increase 5x with app access. Alternative own delivery fleet would cost ₹3-5L monthly in salaries + fuel."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "kirana-005",
+    "name": "Rural Cluster - Jaipur District",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 450000,
+      "customers": 280,
+      "teamSize": 4,
+      "location": "Jaipur",
+      "cityTier": 3,
+      "foundedDate": "2022-01-10",
+      "growthTarget": 20,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "SHG Bulk Supply Contracts",
+      "score": 4.8,
+      "reasoning": "Jaipur district has 2000+ Self-Help Groups (SHGs) buying ₹20K-80K monthly for members. Direct supply contracts (10-12% margins) create predictable revenue + reduce working capital needs. Festival seasons (Holi, Diwali) see 2-3x bulk orders. Alternative retail focus would face Reliance/DMart competition in nearby towns."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "kirana-006",
+    "name": "Tech-Enabled Store - Hyderabad",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 1100000,
+      "customers": 650,
+      "teamSize": 9,
+      "location": "Hyderabad",
+      "cityTier": 1,
+      "foundedDate": "2023-05-20",
+      "growthTarget": 40,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "UPI Cashback Loyalty Program",
+      "score": 4.7,
+      "reasoning": "Hyderabad's UPI adoption (90%+ transactions) enables digital loyalty. UPI cashback (2-3% on purchases above ₹500) drives repeat visits. Data analytics identify high-value customers for personalized offers. Festival campaigns (Sankranti, Diwali) with bonus cashback increase basket size 40-50%. Alternative paper-based loyalty cards have 15-20% redemption vs 60-70% for UPI cashback."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "kirana-007",
+    "name": "5-Store Chain - Chennai",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 3200000,
+      "customers": 1400,
+      "teamSize": 25,
+      "location": "Chennai",
+      "cityTier": 1,
+      "foundedDate": "2018-11-05",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Private Label Products",
+      "score": 4.9,
+      "reasoning": "5-store chain has volume to negotiate private label manufacturing (minimum 5000-10000 units). Private label margins (35-40%) vs branded goods (12-18%) drive profitability. Focus on staples (rice, dal, spices) where brand loyalty is lower. Festival packaging (Pongal special packs) creates urgency. Alternative expansion to 6th store would dilute management + capital vs margin improvement through private label."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "kirana-008",
+    "name": "Pharmacy + Grocery - Ahmedabad",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 1300000,
+      "customers": 480,
+      "teamSize": 7,
+      "location": "Ahmedabad",
+      "cityTier": 2,
+      "foundedDate": "2021-09-12",
+      "growthTarget": 30,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Senior Citizen Subscription Plans",
+      "score": 4.8,
+      "reasoning": "Ahmedabad's aging population (35%+ households with 60+ members) needs regular medicine + grocery delivery. Monthly subscription (₹500-800) for free home delivery drives recurring revenue. Reminder calls for prescription refills build trust. Festival health packages (Diwali immunity boosters) upsell supplements. Alternative walk-in focus misses home delivery convenience seniors value."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "kirana-009",
+    "name": "Apartment Complex Store - Gurgaon",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 700000,
+      "customers": 350,
+      "teamSize": 5,
+      "location": "Gurgaon",
+      "cityTier": 1,
+      "foundedDate": "2022-04-18",
+      "growthTarget": 25,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Resident Welfare Association Tie-up",
+      "score": 4.9,
+      "reasoning": "Gurgaon apartment complexes (1000-5000 residents) provide captive customer base. RWA endorsement (monthly newsletter ad ₹5K-8K) builds trust. Weekend bulk delivery slots reduce delivery costs. Festival bulk orders (Diwali, Holi) with group discounts (10-15%) drive volume. Alternative competing with Blinkit/Zepto on speed impossible; community focus creates moat."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "kirana-010",
+    "name": "Organic Specialty - Bangalore",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 950000,
+      "customers": 280,
+      "teamSize": 6,
+      "location": "Bangalore",
+      "cityTier": 1,
+      "foundedDate": "2023-02-10",
+      "growthTarget": 40,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Farmer Direct Sourcing",
+      "score": 4.7,
+      "reasoning": "Bangalore organic customers pay 30-50% premium but demand transparency. Direct farmer partnerships (FPOs in Karnataka) enable farm visit events + storytelling. Cuts middlemen, improving margins from 18-22% to 28-35%. Festival harvest boxes (Ugadi, Diwali) showcase seasonal produce. Alternative reliance on organic distributors limits differentiation vs BigBasket Organic, Nature's Basket."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "kirana-011",
+    "name": "Express Mini-Mart - Mumbai Station",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 1600000,
+      "customers": 2800,
+      "teamSize": 8,
+      "location": "Mumbai",
+      "cityTier": 1,
+      "foundedDate": "2020-08-20",
+      "growthTarget": 20,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Grab-and-Go Meal Combos",
+      "score": 4.8,
+      "reasoning": "Mumbai station footfall (50K+ daily) drives impulse purchases. Meal combos (sandwich + drink + snack ₹80-120) cater to commuters. Peak hours (7-10am, 6-9pm) account for 70% of sales. Festival travel spikes (Diwali, summer) see 2x volume. Alternative traditional kirana assortment too slow for commuter needs; combo strategy increases transaction speed + basket size."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "kirana-012",
+    "name": "Wholesale Kirana - Kolkata",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 2500000,
+      "customers": 120,
+      "teamSize": 12,
+      "location": "Kolkata",
+      "cityTier": 1,
+      "foundedDate": "2017-05-15",
+      "growthTarget": 25,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Credit Terms for Retailers",
+      "score": 4.9,
+      "reasoning": "Kolkata's 5000+ small kirana stores need 15-30 day credit to manage cash flow. Offering credit (with 2% interest) creates loyalty vs cash-only wholesalers. Festival pre-stocking (Durga Puja in Oct) drives 40-50% of annual volume. Digital ledger via WhatsApp reduces collection disputes. Alternative cash-only operations lose customers to Metro Cash & Carry, other credit-offering wholesalers."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "extreme"
+    }
+  },
+  {
+    "id": "kirana-013",
+    "name": "Hyperlocal Delivery - Pune",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 650000,
+      "customers": 420,
+      "teamSize": 7,
+      "location": "Pune",
+      "cityTier": 1,
+      "foundedDate": "2023-06-25",
+      "growthTarget": 45,
+      "riskTolerance": "aggressive"
+    },
+    "expertRating": {
+      "bestPath": "30-Min Delivery Guarantee",
+      "score": 4.6,
+      "reasoning": "Pune's competitive quick commerce market demands speed. 2km radius with 2-3 delivery boys enables 30-min delivery without Zepto/Blinkit commissions (20-25%). Geotagged WhatsApp ordering + Google Maps routing optimizes delivery. Peak dinner ingredient orders (6-9pm) drive 45% of revenue. Alternative commission-based platforms would reduce already thin margins (15-18% to 10-12%)."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": false,
+      "festivalSensitivity": "medium"
+    }
+  },
+  {
+    "id": "kirana-014",
+    "name": "College Area Store - Delhi",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 550000,
+      "customers": 680,
+      "teamSize": 5,
+      "location": "Delhi",
+      "cityTier": 1,
+      "foundedDate": "2022-07-10",
+      "growthTarget": 30,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Student Discount Cards",
+      "score": 4.7,
+      "reasoning": "Delhi University area has 50K+ students with ₹3-5K monthly grocery budgets. Student discount cards (5-8% off, ₹200 annual fee) create recurring revenue + loyalty. Late-night hours (till 11pm) cater to hostel students. Festival season (Diwali, New Year) hampers for outstation students drive bulk sales. Alternative regular pricing loses to DMart, Reliance Fresh nearby."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "kirana-015",
+    "name": "Franchise Chain (8 stores) - Surat",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 4500000,
+      "customers": 2200,
+      "teamSize": 40,
+      "location": "Surat",
+      "cityTier": 2,
+      "foundedDate": "2016-03-08",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Franchise-to-Company Owned Conversion",
+      "score": 4.8,
+      "reasoning": "8-franchise model has inconsistent quality + franchisee margin conflicts (franchisees keep 20-25% margins). Converting top 3-4 performing stores to company-owned (buyout ₹15-25L per store) improves margins by 12-18% + enables better inventory control. Festival coordination (Diwali, Uttarayan) becomes seamless. Alternative continuing franchise model limits scaling + brand consistency."
+    },
+    "metadata": {
+      "complexity": "high",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "kirana-016",
+    "name": "Ayurvedic + Grocery - Jaipur",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 720000,
+      "customers": 340,
+      "teamSize": 6,
+      "location": "Jaipur",
+      "cityTier": 2,
+      "foundedDate": "2021-11-15",
+      "growthTarget": 30,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Ayurvedic Doctor Partnerships",
+      "score": 4.9,
+      "reasoning": "Jaipur's Ayurvedic heritage creates customer trust in traditional medicine. Partnership with 10-15 local Ayurvedic doctors (referral for specific products) drives credibility. Seasonal immunity products (monsoon, winter) align with festival health concerns. Doctor consultation days (monthly) at store drive foot traffic. Alternative standalone grocery competes with supermarkets; Ayurvedic differentiation creates niche."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "kirana-017",
+    "name": "Coastal Fresh Seafood - Kochi",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 1100000,
+      "customers": 520,
+      "teamSize": 9,
+      "location": "Kochi",
+      "cityTier": 2,
+      "foundedDate": "2020-06-20",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Daily Catch Pre-Orders",
+      "score": 4.8,
+      "reasoning": "Kerala seafood lovers demand freshness (same-day catch). WhatsApp pre-order system (cutoff 6am for evening delivery) reduces wastage from 25-30% to 8-12%. Direct fisherman purchases cut middlemen, improving margins 10-15%. Festival seasons (Onam, Christmas) see premium fish demand spike 3-4x. Alternative retail model with unsold stock would erode profitability."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  },
+  {
+    "id": "kirana-018",
+    "name": "Tier-3 Town Chain - Nashik",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 380000,
+      "customers": 240,
+      "teamSize": 4,
+      "location": "Nashik",
+      "cityTier": 3,
+      "foundedDate": "2023-01-12",
+      "growthTarget": 25,
+      "riskTolerance": "conservative"
+    },
+    "expertRating": {
+      "bestPath": "Festival Bulk Sales Focus",
+      "score": 4.7,
+      "reasoning": "Nashik's economy peaks during festival season (Ganesh Chaturthi, Diwali drive 50%+ annual grocery sales). Pre-festival inventory stocking (₹2-3L investment in Jul-Aug) captures demand surge. Bulk discounts (10-15% off on ₹5K+ purchases) drive family group buying. Alternative year-round marketing would have low ROI in Tier-3 market with limited disposable income outside festivals."
+    },
+    "metadata": {
+      "complexity": "low",
+      "seasonality": true,
+      "festivalSensitivity": "extreme"
+    }
+  },
+  {
+    "id": "kirana-019",
+    "name": "Green Grocer + Staples - Chandigarh",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 620000,
+      "customers": 310,
+      "teamSize": 5,
+      "location": "Chandigarh",
+      "cityTier": 2,
+      "foundedDate": "2022-09-05",
+      "growthTarget": 30,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Farm-to-Store Direct Supply",
+      "score": 4.6,
+      "reasoning": "Chandigarh's proximity to Punjab farms (30-50km) enables direct vegetable/fruit sourcing. Daily trips to mandis cut distributor margins (20-25% savings). Freshness guarantee (same-day harvest) justifies 10-15% premium pricing vs supermarkets. Festival demand (Lohri, Baisakhi) for specific produce creates planning advantage. Alternative reliance on APMC distributors reduces margins + freshness edge."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "high"
+    }
+  },
+  {
+    "id": "kirana-020",
+    "name": "Supermarket Hybrid - Indore",
+    "category": "Kirana Store Chain",
+    "profile": {
+      "industry": "Retail",
+      "mrr": 1400000,
+      "customers": 780,
+      "teamSize": 14,
+      "location": "Indore",
+      "cityTier": 2,
+      "foundedDate": "2019-12-10",
+      "growthTarget": 35,
+      "riskTolerance": "balanced"
+    },
+    "expertRating": {
+      "bestPath": "Weekend Promotions + Demos",
+      "score": 4.7,
+      "reasoning": "Indore families shop on weekends (Saturday 60%+ footfall). Product demos (FMCG brands pay ₹5K-8K per demo) + weekend combo offers drive impulse purchases. Festival pre-promotion (2 weeks before Diwali, Navratri) captures early buying. Loyalty points (1 point = ₹1 on ₹100 spend) drive 50-60% repeat rate. Alternative everyday low pricing competes with DMart/Reliance without differentiation."
+    },
+    "metadata": {
+      "complexity": "medium",
+      "seasonality": true,
+      "festivalSensitivity": "very high"
+    }
+  }
+]

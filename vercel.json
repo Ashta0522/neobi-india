@@ -4,15 +4,6 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["bom1"],
-  "env": {
-    "DATABASE_URL": "@database-url",
-    "NEXTAUTH_SECRET": "@nextauth-secret",
-    "NEXTAUTH_URL": "@nextauth-url",
-    "FINNHUB_API_KEY": "@finnhub-api-key",
-    "OPENROUTER_API_KEY": "@openrouter-api-key",
-    "NEXT_PUBLIC_SENTRY_DSN": "@sentry-dsn",
-    "NEXT_PUBLIC_POSTHOG_KEY": "@posthog-key"
-  },
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30
