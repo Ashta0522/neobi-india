@@ -60,6 +60,8 @@ export interface DecisionPath {
   agentContributions: Record<AgentId, number>;
   subDecisions?: DecisionPath[];
   selected?: boolean;
+  steps?: string[]; // Implementation steps
+  risks?: string[]; // Risk factors
 }
 
 export interface SimulationResult {

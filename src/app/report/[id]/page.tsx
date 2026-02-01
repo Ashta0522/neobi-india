@@ -274,26 +274,28 @@ export default function ReportPage() {
             </div>
           </div>
 
-          <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
-            <div className="text-xs text-gray-400 mb-2">Implementation Steps</div>
-            <div className="space-y-2">
-              {selectedPath.steps.map((step, idx) => (
-                <div key={idx} className="flex items-start gap-2 text-sm">
-                  <span className="text-agents-growth font-bold">{idx + 1}.</span>
-                  <span className="text-gray-300">{step}</span>
-                </div>
-              ))}
+          {selectedPath.steps && selectedPath.steps.length > 0 && (
+            <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
+              <div className="text-xs text-gray-400 mb-2">Implementation Steps</div>
+              <div className="space-y-2">
+                {selectedPath.steps.map((step: string, idx: number) => (
+                  <div key={idx} className="flex items-start gap-2 text-sm">
+                    <span className="text-agents-growth font-bold">{idx + 1}.</span>
+                    <span className="text-gray-300">{step}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {selectedPath.risks.length > 0 && (
+          {selectedPath.risks && selectedPath.risks.length > 0 && (
             <div className="mt-4 p-4 bg-red-500/10 rounded-lg border border-red-500/30">
               <div className="flex items-center gap-2 text-red-400 mb-2">
                 <AlertTriangle size={16} />
                 <span className="text-xs font-bold">Risk Factors</span>
               </div>
               <ul className="space-y-1">
-                {selectedPath.risks.map((risk, idx) => (
+                {selectedPath.risks.map((risk: string, idx: number) => (
                   <li key={idx} className="text-xs text-red-300 flex items-start gap-2">
                     <span>•</span>
                     <span>{risk}</span>
