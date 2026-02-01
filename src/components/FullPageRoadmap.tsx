@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, X, Zap, Target, TrendingUp, Shield, Brain, Code2 } from 'lucide-react';
+import { ChevronRight, X, Zap, Target, TrendingUp, Shield, Brain, Code2, Package, Users, Lightbulb } from 'lucide-react';
 import { useNeoBIStore } from '@/lib/store';
+import { generateExecutionOptions, getIndustryPaths, ExecutionOption } from '@/lib/industryStrategies';
 
 interface RoadmapNode {
   id: string;
@@ -17,201 +18,213 @@ interface RoadmapNode {
 }
 
 const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { currentResult, setCascadingLevel, setBreadcrumbPath, decisionHistory, pushDecision, popDecision, resetDecisionHistory } = useNeoBIStore();
+  const { currentResult, setCascadingLevel, setBreadcrumbPath, decisionHistory, pushDecision, popDecision, resetDecisionHistory, profile } = useNeoBIStore();
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
 
-  const nodes: Record<string, RoadmapNode> = {
-    root: {
-      id: 'root',
-      title: 'Growth Strategy Root',
-      description: 'Strategic decision tree for your business',
-      icon: <Target className="w-8 h-8" />,
-      level: 1,
-      children: ['conservative', 'balanced', 'aggressive'],
-      metrics: [
-        { label: 'Risk Score', value: 45 },
-        { label: 'Potential Return', value: 75 },
-        { label: 'Timeline', value: 180 },
-      ],
-      actions: [
-        {
-          label: 'Expand All',
-          action: () => {
-            setSelectedNode(null);
+  // Get industry-specific path names
+  const industryPaths = useMemo(() => {
+    return getIndustryPaths(profile?.industry || 'generic');
+  }, [profile?.industry]);
+
+  // Generate dynamic nodes based on business profile
+  const nodes: Record<string, RoadmapNode> = useMemo(() => {
+    const businessName = profile?.name || 'Your Business';
+    const industry = profile?.industry || 'Business';
+    const location = profile?.location || 'India';
+
+    return {
+      root: {
+        id: 'root',
+        title: `${industry} Growth Strategy`,
+        description: `Strategic decision tree for ${businessName} in ${location}`,
+        icon: <Target className="w-8 h-8" />,
+        level: 1,
+        children: ['conservative', 'balanced', 'aggressive'],
+        metrics: [
+          { label: 'Risk Score', value: profile?.riskTolerance === 'high' ? 70 : profile?.riskTolerance === 'low' ? 30 : 50 },
+          { label: 'Growth Target', value: profile?.growthTarget || 30 },
+          { label: 'Team Size', value: Math.min(100, (profile?.teamSize || 5) * 10) },
+        ],
+        actions: [
+          {
+            label: 'Expand All',
+            action: () => {
+              setSelectedNode(null);
+            },
           },
-        },
-      ],
-    },
-    conservative: {
-      id: 'conservative',
-      title: 'Conservative Path',
-      description: 'Low-risk, steady growth approach',
-      icon: <Shield className="w-6 h-6" />,
-      level: 2,
-      children: ['partnership', 'organic', 'optimization'],
-      metrics: [
-        { label: 'Risk', value: 20 },
-        { label: 'Timeline', value: 120 },
-        { label: 'ROI', value: 60 },
-      ],
-      actions: [],
-    },
-    balanced: {
-      id: 'balanced',
-      title: 'Balanced Path',
-      description: 'Mixed approach for optimal growth',
-      icon: <TrendingUp className="w-6 h-6" />,
-      level: 2,
-      children: ['market-expansion', 'team-scaling', 'product-launch'],
-      metrics: [
-        { label: 'Risk', value: 50 },
-        { label: 'Timeline', value: 150 },
-        { label: 'ROI', value: 120 },
-      ],
-      actions: [],
-    },
-    aggressive: {
-      id: 'aggressive',
-      title: 'Aggressive Path',
-      description: 'High-growth, higher-risk strategy',
-      icon: <Zap className="w-6 h-6" />,
-      level: 2,
-      children: ['vc-funding', 'market-takeover', 'international'],
-      metrics: [
-        { label: 'Risk', value: 75 },
-        { label: 'Timeline', value: 200 },
-        { label: 'ROI', value: 200 },
-      ],
-      actions: [],
-    },
-    partnership: {
-      id: 'partnership',
-      title: 'Strategic Partnerships',
-      description: 'Leverage existing relationships for growth',
-      icon: <Code2 className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Cost', value: 30 },
-        { label: 'Speed', value: 85 },
-        { label: 'Sustainability', value: 80 },
-      ],
-      actions: [],
-    },
-    organic: {
-      id: 'organic',
-      title: 'Organic Growth',
-      description: 'Bootstrap and reinvest profits',
-      icon: <Brain className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Cost', value: 20 },
-        { label: 'Speed', value: 40 },
-        { label: 'Independence', value: 95 },
-      ],
-      actions: [],
-    },
-    optimization: {
-      id: 'optimization',
-      title: 'Process Optimization',
-      description: 'Improve efficiency and reduce costs',
-      icon: <TrendingUp className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Impact', value: 70 },
-        { label: 'Implementation', value: 60 },
-        { label: 'Payback', value: 50 },
-      ],
-      actions: [],
-    },
-    'market-expansion': {
-      id: 'market-expansion',
-      title: 'Market Expansion',
-      description: 'Enter new geographic or product markets',
-      icon: <Zap className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Market Size', value: 90 },
-        { label: 'Competition', value: 65 },
-        { label: 'Entry Cost', value: 75 },
-      ],
-      actions: [],
-    },
-    'team-scaling': {
-      id: 'team-scaling',
-      title: 'Team Scaling',
-      description: 'Build and optimize your team structure',
-      icon: <Brain className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Hiring Needs', value: 55 },
-        { label: 'Training', value: 45 },
-        { label: 'Retention', value: 70 },
-      ],
-      actions: [],
-    },
-    'product-launch': {
-      id: 'product-launch',
-      title: 'Product Launch',
-      description: 'Develop and release new offerings',
-      icon: <Code2 className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Development', value: 60 },
-        { label: 'Market Fit', value: 50 },
-        { label: 'Revenue Impact', value: 85 },
-      ],
-      actions: [],
-    },
-    'vc-funding': {
-      id: 'vc-funding',
-      title: 'VC Funding',
-      description: 'Raise capital from investors',
-      icon: <Zap className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Capital Raised', value: 95 },
-        { label: 'Dilution', value: 40 },
-        { label: 'Timeline', value: 75 },
-      ],
-      actions: [],
-    },
-    'market-takeover': {
-      id: 'market-takeover',
-      title: 'Market Takeover',
-      description: 'Aggressive market domination strategy',
-      icon: <Shield className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Market Share', value: 85 },
-        { label: 'Brand Impact', value: 90 },
-        { label: 'Risk Level', value: 85 },
-      ],
-      actions: [],
-    },
-    international: {
-      id: 'international',
-      title: 'International Expansion',
-      description: 'Enter global markets strategically',
-      icon: <Target className="w-6 h-6" />,
-      level: 3,
-      children: [],
-      metrics: [
-        { label: 'Market Potential', value: 95 },
-        { label: 'Complexity', value: 80 },
-        { label: 'Investment', value: 90 },
-      ],
-      actions: [],
-    },
-  };
+        ],
+      },
+      conservative: {
+        id: 'conservative',
+        title: industryPaths.conservative,
+        description: 'Low-risk, steady growth approach focused on stability',
+        icon: <Shield className="w-6 h-6" />,
+        level: 2,
+        children: ['partnership', 'organic', 'optimization'],
+        metrics: [
+          { label: 'Risk', value: 20 },
+          { label: 'Timeline', value: 120 },
+          { label: 'ROI', value: 60 },
+        ],
+        actions: [],
+      },
+      balanced: {
+        id: 'balanced',
+        title: industryPaths.balanced,
+        description: 'Mixed approach balancing growth with sustainability',
+        icon: <TrendingUp className="w-6 h-6" />,
+        level: 2,
+        children: ['market-expansion', 'team-scaling', 'product-launch'],
+        metrics: [
+          { label: 'Risk', value: 50 },
+          { label: 'Timeline', value: 150 },
+          { label: 'ROI', value: 120 },
+        ],
+        actions: [],
+      },
+      aggressive: {
+        id: 'aggressive',
+        title: industryPaths.aggressive,
+        description: 'High-growth strategy for rapid market capture',
+        icon: <Zap className="w-6 h-6" />,
+        level: 2,
+        children: ['vc-funding', 'market-takeover', 'international'],
+        metrics: [
+          { label: 'Risk', value: 75 },
+          { label: 'Timeline', value: 200 },
+          { label: 'ROI', value: 200 },
+        ],
+        actions: [],
+      },
+      partnership: {
+        id: 'partnership',
+        title: 'Strategic Partnerships',
+        description: `Partner with complementary ${industry} businesses`,
+        icon: <Users className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Cost', value: 30 },
+          { label: 'Speed', value: 85 },
+          { label: 'Sustainability', value: 80 },
+        ],
+        actions: [],
+      },
+      organic: {
+        id: 'organic',
+        title: 'Organic Growth',
+        description: 'Bootstrap using existing customer base and profits',
+        icon: <Brain className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Cost', value: 20 },
+          { label: 'Speed', value: 40 },
+          { label: 'Independence', value: 95 },
+        ],
+        actions: [],
+      },
+      optimization: {
+        id: 'optimization',
+        title: 'Process Optimization',
+        description: 'Improve efficiency and reduce operational costs',
+        icon: <TrendingUp className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Impact', value: 70 },
+          { label: 'Implementation', value: 60 },
+          { label: 'Payback', value: 50 },
+        ],
+        actions: [],
+      },
+      'market-expansion': {
+        id: 'market-expansion',
+        title: 'Market Expansion',
+        description: `Expand ${industry} presence to new markets`,
+        icon: <Zap className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Market Size', value: 90 },
+          { label: 'Competition', value: 65 },
+          { label: 'Entry Cost', value: 75 },
+        ],
+        actions: [],
+      },
+      'team-scaling': {
+        id: 'team-scaling',
+        title: 'Team Scaling',
+        description: `Grow team from ${profile?.teamSize || 5} to optimize operations`,
+        icon: <Users className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Hiring Needs', value: 55 },
+          { label: 'Training', value: 45 },
+          { label: 'Retention', value: 70 },
+        ],
+        actions: [],
+      },
+      'product-launch': {
+        id: 'product-launch',
+        title: 'Product/Service Launch',
+        description: `Launch new ${industry} offerings`,
+        icon: <Package className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Development', value: 60 },
+          { label: 'Market Fit', value: 50 },
+          { label: 'Revenue Impact', value: 85 },
+        ],
+        actions: [],
+      },
+      'vc-funding': {
+        id: 'vc-funding',
+        title: 'Funding Round',
+        description: 'Raise capital from investors for rapid scaling',
+        icon: <Zap className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Capital Raised', value: 95 },
+          { label: 'Dilution', value: 40 },
+          { label: 'Timeline', value: 75 },
+        ],
+        actions: [],
+      },
+      'market-takeover': {
+        id: 'market-takeover',
+        title: 'Market Leadership',
+        description: `Become the leading ${industry} player in ${location}`,
+        icon: <Shield className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Market Share', value: 85 },
+          { label: 'Brand Impact', value: 90 },
+          { label: 'Risk Level', value: 85 },
+        ],
+        actions: [],
+      },
+      international: {
+        id: 'international',
+        title: 'Geographic Expansion',
+        description: 'Expand beyond current location strategically',
+        icon: <Target className="w-6 h-6" />,
+        level: 3,
+        children: [],
+        metrics: [
+          { label: 'Market Potential', value: 95 },
+          { label: 'Complexity', value: 80 },
+          { label: 'Investment', value: 90 },
+        ],
+        actions: [],
+      },
+    };
+  }, [profile, industryPaths]);
 
   const getNodeColor = (level: 1 | 2 | 3) => {
     const colors = {
@@ -222,31 +235,44 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     return colors[level];
   };
 
-  // Generate synthetic subpaths avoiding repeats from decisionHistory
-  const generateSubPaths = (rootLabel: string) => {
-    const base = [
-      'Joint Membership Bundle',
-      'Free Smoothie Promo',
-      'Co-Branded Flyer Campaign',
-      'In-Gym Sampling Events',
-      'Social Media Cross-Promo',
-    ];
+  // Get category icon based on execution option category
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'marketing': return <TrendingUp className="w-6 h-6" />;
+      case 'operations': return <Shield className="w-6 h-6" />;
+      case 'growth': return <Zap className="w-6 h-6" />;
+      case 'partnerships': return <Users className="w-6 h-6" />;
+      case 'technology': return <Code2 className="w-6 h-6" />;
+      default: return <Lightbulb className="w-6 h-6" />;
+    }
+  };
+
+  // Generate DYNAMIC industry-specific execution options
+  const generateSubPaths = useCallback((rootLabel: string) => {
+    // Use the industry strategies generator instead of hardcoded options
+    const executionOptions = generateExecutionOptions(profile, rootLabel);
+
+    // Filter out already selected decisions
     const used = decisionHistory || [];
-    const candidates = base.filter((b) => !used.includes(b));
+    const candidates = executionOptions.filter((opt) => !used.includes(opt.title));
     const picks = candidates.slice(0, Math.min(5, candidates.length));
-    return picks.map((name, i) => ({
-      id: `${rootLabel.toLowerCase().replace(/\s+/g, '-')}-sub-${i}`,
-      title: name,
-      description: `Execution option for ${rootLabel}: ${name}`,
-      icon: <Zap className="w-6 h-6" />,
+
+    return picks.map((option) => ({
+      id: option.id,
+      title: option.title,
+      description: option.description,
+      icon: getCategoryIcon(option.category),
       level: 3 as 1 | 2 | 3,
       metrics: [
-        { label: 'Projected Revenue', value: Math.round(Math.random() * 100) },
-        { label: 'Risk Delta', value: Math.round(Math.random() * 50) },
-        { label: 'Burnout Delta', value: Math.round(Math.random() * 30) },
+        { label: 'Projected Revenue', value: option.projectedRevenue },
+        { label: 'Risk Delta', value: option.riskDelta },
+        { label: 'Burnout Delta', value: option.burnoutDelta },
       ],
+      cost: option.cost,
+      timelineDays: option.timelineDays,
+      category: option.category,
     }));
-  };
+  }, [profile, decisionHistory]);
 
   const renderNode = (nodeId: string, parentX: number = 0, parentY: number = 0, depth: number = 0) => {
     const node = nodes[nodeId];
@@ -343,24 +369,65 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
         )}
 
-        {/* Dynamic generated children (Explore options) */}
-        {dynamicChildren.length > 0 && (
-          <div className="flex gap-4 justify-center flex-wrap max-w-3xl mt-4">
-            {dynamicChildren.map((child) => (
-              <div key={child.id} className="w-64 p-3 rounded-lg bg-black/30 border border-amber-400/10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded bg-amber-600 flex items-center justify-center">{child.icon}</div>
-                  <div>
-                    <div className="font-semibold text-amber-200">{child.title}</div>
-                    <div className="text-xs text-amber-300/60">{child.description}</div>
+        {/* Dynamic generated children (Explore options) - ONLY for leaf nodes (no children) */}
+        {!hasChildren && node.level === 3 && dynamicChildren.length > 0 && (
+          <div className="flex gap-4 justify-center flex-wrap max-w-4xl mt-4">
+            <div className="w-full text-center mb-2">
+              <span className="text-sm text-amber-300/80 font-semibold">🎯 Execution Options for {node.title}</span>
+              <p className="text-xs text-amber-300/40 mt-1">Tailored strategies based on your {profile?.industry || 'business'} profile</p>
+            </div>
+            {dynamicChildren.map((child: any) => (
+              <div key={child.id} className="w-72 p-4 rounded-lg bg-black/40 border border-amber-400/20 hover:border-amber-400/50 transition-all">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center flex-shrink-0">{child.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-amber-200 text-sm">{child.title}</div>
+                    <div className="text-xs text-amber-300/60 mt-1 line-clamp-2">{child.description}</div>
                   </div>
                 </div>
-                <div className="mt-2 text-xs text-amber-200/60 flex gap-2 flex-wrap">
-                  {child.metrics.map((m) => (
-                    <div key={m.label} className="px-2 py-1 bg-black/60 rounded">{m.label}: {m.value}</div>
+
+                {/* Category Tag */}
+                {child.category && (
+                  <div className="mt-2">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${
+                      child.category === 'marketing' ? 'bg-pink-500/20 text-pink-300' :
+                      child.category === 'operations' ? 'bg-blue-500/20 text-blue-300' :
+                      child.category === 'growth' ? 'bg-green-500/20 text-green-300' :
+                      child.category === 'partnerships' ? 'bg-purple-500/20 text-purple-300' :
+                      child.category === 'technology' ? 'bg-cyan-500/20 text-cyan-300' :
+                      'bg-gray-500/20 text-gray-300'
+                    }`}>
+                      {child.category}
+                    </span>
+                  </div>
+                )}
+
+                {/* Metrics */}
+                <div className="mt-3 grid grid-cols-3 gap-1">
+                  {child.metrics.map((m: any) => (
+                    <div key={m.label} className="text-center p-1.5 bg-black/40 rounded">
+                      <div className="text-[10px] text-amber-300/50">{m.label.replace('Projected ', '').replace(' Delta', '')}</div>
+                      <div className={`text-xs font-bold ${
+                        m.label.includes('Revenue') ? 'text-green-400' :
+                        m.label.includes('Risk') ? 'text-orange-400' :
+                        m.label.includes('Burnout') ? (m.value < 0 ? 'text-green-400' : 'text-red-400') :
+                        'text-amber-300'
+                      }`}>
+                        {m.label.includes('Burnout') && m.value > 0 ? '+' : ''}{m.value}{m.label.includes('Revenue') ? '%' : ''}
+                      </div>
+                    </div>
                   ))}
                 </div>
-                <div className="mt-3 flex gap-2">
+
+                {/* Cost & Timeline */}
+                {(child.cost || child.timelineDays) && (
+                  <div className="mt-2 flex justify-between text-[10px] text-amber-300/50">
+                    {child.cost && <span>Est. Cost: ₹{(child.cost / 1000).toFixed(0)}K</span>}
+                    {child.timelineDays && <span>{child.timelineDays} days</span>}
+                  </div>
+                )}
+
+                <div className="mt-3">
                   <button
                     onClick={() => {
                       pushDecision(child.title);
@@ -368,9 +435,9 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       setCascadingLevel(child.level);
                       setBreadcrumbPath([...(decisionHistory || []), child.title]);
                     }}
-                    className="px-2 py-1 bg-amber-600/30 hover:bg-amber-600 rounded text-amber-200 text-xs"
+                    className="w-full px-3 py-2 bg-gradient-to-r from-amber-600/40 to-amber-700/40 hover:from-amber-600 hover:to-amber-700 rounded text-amber-100 text-xs font-semibold transition-all"
                   >
-                    Explore
+                    Explore Strategy →
                   </button>
                 </div>
               </div>

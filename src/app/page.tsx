@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useNeoBIStore } from '@/lib/store';
 import { BusinessProfile, SimulationResult, MARLState, JugaadIdea, RewardDecomposition, CurriculumLevel, AblationStudy, BurnoutTrajectory, ConfidenceDistribution } from '@/types';
 import { generateDecisionPaths, simulateMARLEpisode, generateCompetitorHeatmap } from '@/utils/simulationEngine';
@@ -108,6 +109,7 @@ export default function Home() {
     setIsLoading,
   } = useNeoBIStore();
 
+  const router = useRouter();
   const [profileStep, setProfileStep] = useState<number>(0);
   const [showFullRoadmap, setShowFullRoadmap] = useState(false);
   const [selectedFestival, setSelectedFestival] = useState<string | null>(null);
@@ -756,10 +758,18 @@ export default function Home() {
 
                   {/* Graphs Below Paths */}
                   <div className="mt-8">
-                    <h3 className="text-lg font-bold text-agents-growth mb-3">Analytics</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-agents-growth">Analytics Dashboard</h3>
+                      <button
+                        onClick={() => router.push('/benchmarks')}
+                        className="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg transition-all shadow-lg flex items-center gap-2"
+                      >
+                        📊 View Full Benchmarks
+                      </button>
+                    </div>
 
                     {/* MRR Health Pulse Widget */}
-                    <div className="mb-4">
+                    <div className="mb-6">
                       <MRRHealthPulse
                         currentMRR={profile.mrr}
                         previousWeekMRR={profile.mrr * 0.95} // Simulated previous week data
@@ -768,7 +778,8 @@ export default function Home() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Analytics Grid - 3 columns for better visibility */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       <MARLConvergenceCurve />
                       <CashFlowProjectionChart />
                       <SHAPBeeswarm />

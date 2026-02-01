@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Activity, Zap, TrendingUp, DollarSign, Target, Clock, CheckCircle, Database } from 'lucide-react';
+import { Activity, Zap, TrendingUp, DollarSign, Target, Clock, CheckCircle, Database, ArrowLeft } from 'lucide-react';
 
 export default function BenchmarksPage() {
+  const router = useRouter();
   const [liveMetrics, setLiveMetrics] = useState({
     avgLatency: 0,
     cascadeDepth: 0,
@@ -68,6 +70,13 @@ export default function BenchmarksPage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
+        <button
+          onClick={() => router.push('/')}
+          className="mb-4 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft size={20} />
+          <span>Back to Dashboard</span>
+        </button>
         <h1 className="text-4xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 bg-clip-text text-transparent mb-2">
           NeoBI Performance Benchmarks
         </h1>
