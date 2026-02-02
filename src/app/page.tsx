@@ -1,45 +1,35 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useNeoBIStore } from '@/lib/store';
-import { BusinessProfile, SimulationResult, MARLState, JugaadIdea, RewardDecomposition, CurriculumLevel, AblationStudy, BurnoutTrajectory, ConfidenceDistribution } from '@/types';
-import { generateDecisionPaths, simulateMARLEpisode, generateCompetitorHeatmap } from '@/utils/simulationEngine';
+import { BusinessProfile, SimulationResult, MARLState, JugaadIdea, RewardDecomposition, CurriculumLevel, AblationStudy, BurnoutTrajectory, ConfidenceDistribution, DecisionPath } from '@/types';
+import { generateDecisionPaths, simulateMARLEpisode } from '@/utils/simulationEngine';
 import { LiveTickerBar } from '@/components/LiveTickerBar';
 import { AgentActivityTree } from '@/components/AgentActivityTree';
 import { ControlBar } from '@/components/ControlBar';
-import { DecisionRoadmap } from '@/components/DecisionRoadmap';
-import { MARLConvergenceCurve, WorldModelAccuracyChart, CashFlowProjectionChart, InventoryTurnoverChart } from '@/components/Graphs';
+import { MARLConvergenceCurve, CashFlowProjectionChart } from '@/components/Graphs';
 import { SHAPBeeswarm, AgentContributionPie, ConfidenceDistributionHistogram, BurnoutRiskChart } from '@/components/AdvancedGraphs';
 import { OperationsPanel } from '@/components/OperationsPanel';
 import { RiskAndCoachPanel } from '@/components/RiskAndCoachPanel';
 import { MetricsAndExportBar } from '@/components/MetricsAndExportBar';
 import { MRRHealthPulse } from '@/components/MRRHealthPulse';
-// NEW: Tier 2 & 3 Features
 import {
-  FullPageRoadmap, BurnoutMitigationPathways, AdvancedAuditTrail, SelfEvolvingJugaadGenerator,
-  UPIFraudDefense, RegionalInequalityAdjustment, FestivalAwareDemandMultiplier,
-  CompliancePanel,
-  GlobalSHAPBeeswarm, RewardDecompositionChart, CurriculumBreakdown, AblationStudyChart,
-  BurnoutTrajectoryChart, FestivalMultiplierSlider, CascadingPathSelector, JugaadGenerator,
-  RegionalAdjustmentGauge, CompetitorHeatmapChart, UFraudRiskSimulator,
+  FullPageRoadmap, CompliancePanel, UFraudRiskSimulator,
+  RewardDecompositionChart, CurriculumBreakdown, AblationStudyChart,
+  BurnoutTrajectoryChart, InvoiceDiscountCalculator,
 } from '@/components';
-import { motion } from 'framer-motion';
-import { Zap, BookOpen, ChevronLeft, ChevronRight, Map, Download } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Zap, ChevronLeft, ChevronRight, Map, Search, ArrowRight, Check, AlertTriangle, TrendingUp, Shield, Calculator, BarChart3, Users, Target, Lightbulb, Brain, Info } from 'lucide-react';
 
-// Fallback data so Tier 2 & Tier 3 sections and right-panel tabs always render
+// Fallback data
 const FALLBACK_REWARD_DECOMPOSITION: RewardDecomposition = {
   totalReward: 850,
   components: { revenue: 35, riskReduction: 20, burnoutMitigation: 15, operationalEfficiency: 22, complianceScore: 8 },
   timestamp: new Date(),
 };
 const FALLBACK_CONFIDENCE_DISTRIBUTION: ConfidenceDistribution = {
-  bins: [60, 70, 80, 90, 95],
-  counts: [2, 3, 5, 3, 2],
-  mean: 84,
-  stdDev: 8,
-  minConfidence: 72,
-  maxConfidence: 94,
+  bins: [60, 70, 80, 90, 95], counts: [2, 3, 5, 3, 2], mean: 84, stdDev: 8, minConfidence: 72, maxConfidence: 94,
 };
 const FALLBACK_ABLATION_STUDY: AblationStudy[] = [
   { component: 'MARL', performanceWithout: 64, performanceWith: 92, dropPercentage: 30.4 },
@@ -54,514 +44,302 @@ const FALLBACK_BURNOUT_TRAJECTORY: BurnoutTrajectory = {
   vibeMode: 'balanced',
   trajectory: 'improving',
 };
-const FALLBACK_MITIGATION_TRAJECTORIES = Array.from({ length: 7 }, (_, i) => ({
-  day: i * 5,
-  baseline: 65 + i * 4,
-  withPathA: 42 + i * 2,
-  withPathB: 45 + i * 1.5,
-  withPathC: 48 + i * 1.2,
-  threshold: 40,
-}));
 const FALLBACK_CURRICULUM_LEVELS: CurriculumLevel[] = [
   { level: 1, description: 'Single-Decision', episodes: [0, 10, 20, 30], rewards: [400, 520, 620, 700], convergenceMetric: [0, 30, 60, 85], agentContributions: { orchestrator: 15, simulation_cluster: 20, decision_intelligence: 30, operations_optimizer: 15, personal_coach: 5, innovation_advisor: 5, growth_strategist: 5, learning_adaptation: 5 } },
   { level: 2, description: 'Sequential', episodes: [0, 15, 30], rewards: [500, 650, 780], convergenceMetric: [0, 50, 90], agentContributions: { orchestrator: 12, simulation_cluster: 22, decision_intelligence: 28, operations_optimizer: 18, personal_coach: 6, innovation_advisor: 6, growth_strategist: 4, learning_adaptation: 4 } },
   { level: 3, description: 'Multi-Agent', episodes: [0, 20], rewards: [600, 820], convergenceMetric: [0, 75], agentContributions: { orchestrator: 10, simulation_cluster: 25, decision_intelligence: 25, operations_optimizer: 20, personal_coach: 5, innovation_advisor: 5, growth_strategist: 5, learning_adaptation: 5 } },
 ];
 
-function burnoutTrajectoryToMitigation(t: BurnoutTrajectory): Array<{ day: number; baseline: number; withPathA: number; withPathB: number; withPathC: number; threshold: number }> {
-  const n = Math.min(t.baselineRisk.length, t.afterPathRisk.length);
-  return Array.from({ length: n }, (_, i) => ({
-    day: i * 5,
-    baseline: t.baselineRisk[i],
-    withPathA: t.afterPathRisk[i] * 0.65,
-    withPathB: t.afterPathRisk[i] * 0.58,
-    withPathC: t.afterPathRisk[i] * 0.72,
-    threshold: 40,
-  }));
+const DECISION_TYPES = [
+  { value: 'growth', label: 'Growth Strategy', icon: TrendingUp, description: 'How to scale my business?' },
+  { value: 'hiring', label: 'Hiring & Team', icon: Users, description: 'When and whom to hire?' },
+  { value: 'funding', label: 'Funding & Investment', icon: Calculator, description: 'Should I raise funds?' },
+  { value: 'marketing', label: 'Marketing & Sales', icon: Target, description: 'How to acquire customers?' },
+  { value: 'operations', label: 'Operations', icon: BarChart3, description: 'How to optimize operations?' },
+  { value: 'pivot', label: 'Pivot / New Market', icon: Lightbulb, description: 'Should I pivot?' },
+  { value: 'compliance', label: 'Compliance & Legal', icon: Shield, description: 'GST, TDS, DPDP?' },
+  { value: 'custom', label: 'Custom Query', icon: Brain, description: 'Ask anything' },
+];
+
+const AGENT_CONFIG = {
+  orchestrator: { name: 'Central Orchestrator', color: '#A855F7', level: 'L1' },
+  simulation_cluster: { name: 'Simulation Cluster', color: '#06B6D4', level: 'L2' },
+  decision_intelligence: { name: 'Decision Intelligence', color: '#22C55E', level: 'L2' },
+  operations_optimizer: { name: 'Operations Optimizer', color: '#F97316', level: 'L2' },
+  personal_coach: { name: 'Personal Coach', color: '#14B8A6', level: 'L3' },
+  innovation_advisor: { name: 'Innovation Advisor', color: '#EAB308', level: 'L3' },
+  growth_strategist: { name: 'Growth Strategist', color: '#EC4899', level: 'L3' },
+  learning_adaptation: { name: 'Learning Agent', color: '#84CC16', level: 'L4' },
+};
+
+// Graph Card with Conclusion
+function GraphCard({ title, conclusion, children }: { title: string; conclusion: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-slate-900/50 rounded-xl border border-white/10 overflow-hidden">
+      <div className="p-4 border-b border-white/10">
+        <h4 className="font-bold text-white">{title}</h4>
+      </div>
+      <div className="p-4 h-72">
+        {children}
+      </div>
+      <div className="px-4 py-3 bg-gradient-to-r from-green-900/20 to-blue-900/20 border-t border-white/5">
+        <div className="flex items-start gap-2">
+          <Info size={14} className="text-blue-400 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-gray-300">{conclusion}</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-const DEFAULT_REGIONS = [
-  { tier: 1 as const, cities: ['Bangalore', 'Mumbai'], demandMultiplier: 1.5, costMultiplier: 1.4, competitionLevel: 85, growthPotential: 90, marketSize: 500, averageRevenue: 250 },
-  { tier: 2 as const, cities: ['Pune', 'Chandigarh'], demandMultiplier: 1.2, costMultiplier: 1.1, competitionLevel: 60, growthPotential: 75, marketSize: 200, averageRevenue: 120 },
-  { tier: 3 as const, cities: ['Smaller cities'], demandMultiplier: 0.9, costMultiplier: 0.8, competitionLevel: 40, growthPotential: 65, marketSize: 100, averageRevenue: 60 },
-];
+// Decision Popup
+function DecisionPopup({ path, onClose, onExplorePath, isRecommended, isRisky }: {
+  path: DecisionPath; onClose: () => void; onExplorePath: () => void; isRecommended: boolean; isRisky: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+        onClick={(e) => e.stopPropagation()}
+        className={`max-w-3xl w-full max-h-[85vh] overflow-y-auto rounded-2xl p-6 border-2 ${
+          isRecommended ? 'bg-green-950/95 border-green-500' : isRisky ? 'bg-red-950/95 border-red-500' : 'bg-orange-950/95 border-orange-500'
+        }`}
+      >
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-xl font-black">{path.name}</h2>
+              {isRecommended && <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full flex items-center gap-1"><Check size={12} /> BEST</span>}
+              {isRisky && <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full flex items-center gap-1"><AlertTriangle size={12} /> RISKY</span>}
+            </div>
+            <p className="text-gray-400 text-sm">{path.description}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg text-xl">×</button>
+        </div>
+
+        <div className="grid grid-cols-4 gap-3 mb-4">
+          {[
+            { label: 'Expected Value', value: `₹${(path.expectedValue / 100000).toFixed(1)}L` },
+            { label: 'Probability', value: `${(path.probability * 100).toFixed(0)}%` },
+            { label: 'Risk', value: `${path.riskScore}/100`, color: path.riskScore > 60 ? 'text-red-400' : path.riskScore > 30 ? 'text-yellow-400' : 'text-green-400' },
+            { label: 'Timeline', value: `${path.timeline}d` },
+          ].map((m) => (
+            <div key={m.label} className="p-3 rounded-lg bg-black/30">
+              <div className="text-[10px] text-gray-400">{m.label}</div>
+              <div className={`text-lg font-bold ${m.color || ''}`}>{m.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="p-3 rounded-lg bg-green-900/30 border border-green-500/30">
+            <h4 className="font-bold text-green-400 text-sm mb-2">✓ Strengths</h4>
+            <ul className="text-xs space-y-1 text-green-200">
+              <li>• Revenue: ₹{(path.expectedValue / 100000).toFixed(1)}L potential</li>
+              <li>• Success rate: {(path.probability * 100).toFixed(0)}%</li>
+              <li>• Efficiency gain: {path.benefits?.efficiency || 15}%</li>
+            </ul>
+          </div>
+          <div className="p-3 rounded-lg bg-red-900/30 border border-red-500/30">
+            <h4 className="font-bold text-red-400 text-sm mb-2">⚠ Risks</h4>
+            <ul className="text-xs space-y-1 text-red-200">
+              <li>• Risk score: {path.riskScore}/100</li>
+              <li>• Timeline: {path.timeline} days</li>
+              <li>• Upfront cost required</li>
+            </ul>
+          </div>
+        </div>
+
+        <button
+          onClick={onExplorePath}
+          className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 ${
+            isRecommended ? 'bg-green-500 hover:bg-green-600' : isRisky ? 'bg-red-500 hover:bg-red-600' : 'bg-orange-500 hover:bg-orange-600'
+          } text-white`}
+        >
+          <Map size={18} /> Explore This Path <ArrowRight size={18} />
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 export default function Home() {
   const {
-    profile,
-    setProfile,
-    agents,
-    updateAgent,
-    setCurrentResult,
-    currentResult,
-    addResult,
-    selectedPath,
-    setSelectedPath,
-    sidebarOpen,
-    toggleSidebar,
-    rightPanelOpen,
-    toggleRightPanel,
-    rightPanelTab,
-    setRightPanelTab,
-    showRoadmap,
-    setShowRoadmap,
-    isLoading,
-    setIsLoading,
+    profile, setProfile, agents, updateAgent, setCurrentResult, currentResult, addResult,
+    selectedPath, setSelectedPath, sidebarOpen, toggleSidebar, rightPanelOpen, toggleRightPanel,
+    rightPanelTab, setRightPanelTab, isLoading, setIsLoading,
+    setCascadingPaths, setCascadingLevel, setBreadcrumbPath, setFestivalMultiplier, setRegionalAdjustment, addAuditEntry,
   } = useNeoBIStore();
 
   const router = useRouter();
-  const [profileStep, setProfileStep] = useState<number>(0);
   const [showFullRoadmap, setShowFullRoadmap] = useState(false);
-  const [selectedFestival, setSelectedFestival] = useState<string | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<1 | 2 | 3>(1);
+  const [decisionType, setDecisionType] = useState('');
+  const [decisionQuery, setDecisionQuery] = useState('');
+  const [showDecisionInput, setShowDecisionInput] = useState(false);
+  const [selectedDecisionPath, setSelectedDecisionPath] = useState<DecisionPath | null>(null);
+  const [exploredPaths, setExploredPaths] = useState<string[]>([]);
+  const [activeAgents, setActiveAgents] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'analytics' | 'calculators' | 'advanced'>('analytics');
+
   const [formData, setFormData] = useState({
-    name: '',
-    industry: '',
-    mrr: 500000,
-    customers: 50,
-    location: 'Bangalore',
-    teamSize: 5,
-    growthTarget: 20,
-    cityTier: 1 as 1 | 2 | 3,
-    festival: 'Diwali',
+    name: '', industry: '', mrr: 500000, customers: 50, location: 'Bangalore',
+    teamSize: 5, growthTarget: 20, cityTier: 1 as 1 | 2 | 3, festival: 'Diwali',
   });
 
-  // NEW: Tier 2/3 state management
-  const {
-    cascadingPaths, setCascadingPaths, setCascadingLevel, setBreadcrumbPath,
-    festivalMultiplier, setFestivalMultiplier, regionalAdjustment, setRegionalAdjustment,
-    jugaadHistory, addJugaadIdea, updateJugaadIdea, auditTrail, addAuditEntry,
-  } = useNeoBIStore();
-
-  // Handle profile onboarding
   const handleProfileSubmit = () => {
     if (!formData.name || !formData.industry) return;
-
     const newProfile: BusinessProfile = {
-      id: crypto.randomUUID(),
-      name: formData.name,
-      industry: formData.industry,
-      mrr: formData.mrr,
-      customers: formData.customers,
-      location: formData.location,
-      teamSize: formData.teamSize,
-      foundedDate: new Date(),
-      growthTarget: formData.growthTarget,
-      riskTolerance: 'medium',
-      vibeMode: 'balanced',
+      id: crypto.randomUUID(), name: formData.name, industry: formData.industry,
+      mrr: formData.mrr, customers: formData.customers, location: formData.location,
+      teamSize: formData.teamSize, foundedDate: new Date(), growthTarget: formData.growthTarget,
+      riskTolerance: 'medium', vibeMode: 'balanced',
     };
-
     setProfile(newProfile);
-    setProfileStep(0);
+    setShowDecisionInput(true);
   };
 
-  // NEW: Tier 2/3 handlers
-  const handleCascadingSelect = async (subPath: any) => {
-    setSelectedPath(subPath);
-    setCascadingLevel(2);
-    setBreadcrumbPath(['Level 1', selectedPath?.name, subPath.name]);
-    addAuditEntry({
-      timestamp: new Date(),
-      action: 'cascading-select',
-      details: { level: 2, pathName: subPath.name, riskScore: subPath.riskScore },
-    });
-  };
-
-  const handleFestivalOverride = (newMultiplier: number) => {
-    if (!festivalMultiplier) return;
-    const updated = { ...festivalMultiplier, userOverride: newMultiplier };
-    setFestivalMultiplier(updated);
-    addAuditEntry({
-      timestamp: new Date(),
-      action: 'festival-override',
-      details: { newMultiplier, original: festivalMultiplier.demandMultiplier },
-    });
-  };
-
-  const handleJugaadFeedback = async (ideaId: string, feedback: 'thumbs_up' | 'thumbs_down') => {
-    const idea = jugaadHistory.find((j) => j.id === ideaId);
-    if (!idea) return;
-    const evolvedRes = await fetch('/api/enhanced', {
-      method: 'POST',
-      body: JSON.stringify({ action: 'jugaad-evolve', payload: { idea, feedback } }),
-    }).then((r) => r.json());
-    addJugaadIdea(evolvedRes.data);
-    updateJugaadIdea(ideaId, { userFeedback: feedback });
-    addAuditEntry({
-      timestamp: new Date(),
-      action: 'jugaad-feedback',
-      details: { ideaId, feedback, generation: evolvedRes.data.generation },
-    });
-  };
-
-  const generateNewJugaad = () => {
-    const categories = ['partnership', 'frugal', 'pivot', 'growth-hack'];
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    const idea: JugaadIdea = {
-      id: `jugaad-${Date.now()}`,
-      createdAt: new Date(),
-      description: `Innovative ${category} strategy for growth`,
-      feasibilityScore: 65,
-      potentialImpact: 35,
-      category: category as any,
-      userFeedback: null,
-      generation: 1,
-    };
-    addJugaadIdea(idea);
-    addAuditEntry({
-      timestamp: new Date(),
-      action: 'jugaad-generate',
-      details: { category, ideaId: idea.id },
-    });
-  };
-
-  const handleExportAuditTrail = () => {
-    const csv = ['timestamp,action,details']
-      .concat(
-        auditTrail.map((entry) =>
-          `"${entry.timestamp.toISOString()}","${entry.action}","${JSON.stringify(entry.details).replace(/"/g, '\\"')}"`
-        )
-      )
-      .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `neobi-audit-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // Simulate decision intelligence
   const handleSimulate = async () => {
     if (!profile) return;
-
     setIsLoading(true);
+    setActiveAgents([]);
 
-    // Simulate agents thinking
     const agentIds: Array<keyof typeof agents> = [
-      'orchestrator',
-      'simulation_cluster',
-      'decision_intelligence',
-      'operations_optimizer',
+      'orchestrator', 'simulation_cluster', 'decision_intelligence', 'operations_optimizer',
+      'personal_coach', 'innovation_advisor', 'growth_strategist', 'learning_adaptation',
     ];
 
     for (const agentId of agentIds) {
+      setActiveAgents(prev => [...prev, agentId]);
       updateAgent(agentId, { status: 'thinking' });
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise(r => setTimeout(r, 200));
       updateAgent(agentId, { status: 'complete', contribution: Math.random() * 30 + 10 });
     }
 
-    // Generate paths
-    const agentContributions = Object.entries(agents).reduce(
-      (acc, [id, agent]) => ({
-        ...acc,
-        [id]: agent.contribution || 0,
-      }),
-      {} as Record<string, number>
-    );
-
+    const agentContributions = {
+      orchestrator: agents.orchestrator?.contribution || 12,
+      simulation_cluster: agents.simulation_cluster?.contribution || 16,
+      decision_intelligence: agents.decision_intelligence?.contribution || 20,
+      operations_optimizer: agents.operations_optimizer?.contribution || 18,
+      personal_coach: agents.personal_coach?.contribution || 10,
+      innovation_advisor: agents.innovation_advisor?.contribution || 8,
+      growth_strategist: agents.growth_strategist?.contribution || 10,
+      learning_adaptation: agents.learning_adaptation?.contribution || 6,
+    };
     const paths = generateDecisionPaths(profile, agentContributions);
 
-    // Simulate MARL
     let marlState: MARLState = {
-      episode: 0,
-      totalReward: 500,
-      agentRewards: {
-        orchestrator: 0,
-        simulation_cluster: 0,
-        decision_intelligence: 0,
-        operations_optimizer: 0,
-        personal_coach: 0,
-        innovation_advisor: 0,
-        growth_strategist: 0,
-        learning_adaptation: 0,
-      },
-      convergenceMetric: 0,
-      replayBufferSize: 0,
-      policyVersion: 0,
+      episode: 0, totalReward: 500,
+      agentRewards: { orchestrator: 0, simulation_cluster: 0, decision_intelligence: 0, operations_optimizer: 0, personal_coach: 0, innovation_advisor: 0, growth_strategist: 0, learning_adaptation: 0 },
+      convergenceMetric: 0, replayBufferSize: 0, policyVersion: 0,
     };
+    for (let i = 0; i < 10; i++) { marlState = simulateMARLEpisode(i, marlState, agentContributions); await new Promise(r => setTimeout(r, 50)); }
 
-    for (let i = 0; i < 10; i++) {
-      marlState = simulateMARLEpisode(i, marlState, agentContributions);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
-    updateAgent('learning_adaptation', { status: 'complete', contribution: 15 });
-
-    // NEW: Fetch all Tier 2/3 enhanced metrics in parallel with error handling
     const enhancedMetrics = await Promise.all([
-      fetch('/api/enhanced', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'festival-multiplier',
-          payload: { festivalName: formData.festival, daysUntil: 45 }
-        })
-      }).then(r => r.json()).catch(e => { console.error('Festival multiplier failed:', e); return { data: null }; }),
-      fetch('/api/enhanced', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'regional-adjustment',
-          payload: { cityTier: formData.cityTier, location: formData.location }
-        })
-      }).then(r => r.json()).catch(e => { console.error('Regional adjustment failed:', e); return { data: null }; }),
-      fetch('/api/enhanced', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'cascading-paths',
-          payload: { parentPath: paths[1], profile, level: 1 }
-        })
-      }).then(r => r.json()).catch(e => { console.error('Cascading paths failed:', e); return { data: [] }; }),
-      fetch('/api/enhanced', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'reward-decomposition',
-          payload: { path: paths[1], profile, cityTier: formData.cityTier, festivalMultiplier: 1.3 }
-        })
-      }).then(r => r.json()).catch(e => { console.error('Reward decomposition failed:', e); return { data: FALLBACK_REWARD_DECOMPOSITION }; }),
-      fetch('/api/enhanced', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'curriculum-learning',
-          payload: { episodes: 100 }
-        })
-      }).then(r => r.json()).catch(e => { console.error('Curriculum learning failed:', e); return { data: FALLBACK_CURRICULUM_LEVELS }; }),
-      fetch('/api/enhanced', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'burnout-trajectory',
-          payload: { vibeMode: 'balanced', timeline: 30 }
-        })
-      }).then(r => r.json()).catch(e => { console.error('Burnout trajectory failed:', e); return { data: FALLBACK_BURNOUT_TRAJECTORY }; }),
-      fetch('/api/enhanced', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'confidence-distribution',
-          payload: { ensembleSize: 10 }
-        })
-      }).then(r => r.json()).catch(e => { console.error('Confidence distribution failed:', e); return { data: FALLBACK_CONFIDENCE_DISTRIBUTION }; }),
-      fetch('/api/enhanced', {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'ablation-study',
-          payload: {}
-        })
-      }).then(r => r.json()).catch(e => { console.error('Ablation study failed:', e); return { data: FALLBACK_ABLATION_STUDY }; }),
+      fetch('/api/enhanced', { method: 'POST', body: JSON.stringify({ action: 'cascading-paths', payload: { parentPath: paths[1], profile, level: 1 } }) }).then(r => r.json()).catch(() => ({ data: [] })),
+      fetch('/api/enhanced', { method: 'POST', body: JSON.stringify({ action: 'reward-decomposition', payload: { path: paths[1], profile } }) }).then(r => r.json()).catch(() => ({ data: FALLBACK_REWARD_DECOMPOSITION })),
+      fetch('/api/enhanced', { method: 'POST', body: JSON.stringify({ action: 'curriculum-learning', payload: { episodes: 100 } }) }).then(r => r.json()).catch(() => ({ data: FALLBACK_CURRICULUM_LEVELS })),
+      fetch('/api/enhanced', { method: 'POST', body: JSON.stringify({ action: 'burnout-trajectory', payload: { vibeMode: 'balanced' } }) }).then(r => r.json()).catch(() => ({ data: FALLBACK_BURNOUT_TRAJECTORY })),
+      fetch('/api/enhanced', { method: 'POST', body: JSON.stringify({ action: 'confidence-distribution', payload: { ensembleSize: 10 } }) }).then(r => r.json()).catch(() => ({ data: FALLBACK_CONFIDENCE_DISTRIBUTION })),
+      fetch('/api/enhanced', { method: 'POST', body: JSON.stringify({ action: 'ablation-study', payload: {} }) }).then(r => r.json()).catch(() => ({ data: FALLBACK_ABLATION_STUDY })),
     ]);
 
     const result: SimulationResult & any = {
-      id: crypto.randomUUID(),
-      timestamp: new Date(),
-      profile,
-      query: 'What is the optimal growth strategy for my business?',
-      paths,
-      recommendation: paths[1],
-      marlState,
-      confidence: 92,
-      executionTime: 2100,
-      costUsed: 0,
-      // NEW: Tier 2/3 data
-      cascadingPaths: enhancedMetrics[2]?.data,
-      rewardDecomposition: enhancedMetrics[3]?.data,
-      curriculumLevels: enhancedMetrics[4]?.data,
-      burnoutTrajectory: enhancedMetrics[5]?.data,
-      confidenceDistribution: enhancedMetrics[6]?.data,
-      ablationStudy: enhancedMetrics[7]?.data,
+      id: crypto.randomUUID(), timestamp: new Date(), profile,
+      query: decisionQuery || `What is the optimal ${decisionType || 'growth'} strategy?`,
+      paths, recommendation: paths[1], marlState, confidence: 92, executionTime: 2100, costUsed: 0,
+      cascadingPaths: enhancedMetrics[0]?.data, rewardDecomposition: enhancedMetrics[1]?.data,
+      curriculumLevels: enhancedMetrics[2]?.data, burnoutTrajectory: enhancedMetrics[3]?.data,
+      confidenceDistribution: enhancedMetrics[4]?.data, ablationStudy: enhancedMetrics[5]?.data,
     };
 
-    setCurrentResult(result);
-    addResult(result);
-    setSelectedPath(paths[1]);
-    
-    // Update Tier 2/3 state
-    setFestivalMultiplier(enhancedMetrics[0]?.data);
-    setRegionalAdjustment(enhancedMetrics[1]?.data);
-    setCascadingPaths(enhancedMetrics[2]?.data);
-    setCascadingLevel(1);
-    setBreadcrumbPath(['Level 1', paths[1].name]);
-
-    addAuditEntry({
-      timestamp: new Date(),
-      action: 'simulation-run',
-      details: { profile: profile.name, paths: paths.length, selectedPath: paths[1].name }
-    });
-
-    setIsLoading(false);
-
-    // Reset agent statuses
-    agentIds.forEach((id) => {
-      updateAgent(id, { status: 'idle' });
-    });
+    setCurrentResult(result); addResult(result); setSelectedPath(paths[1]);
+    setCascadingPaths(enhancedMetrics[0]?.data); setCascadingLevel(1); setBreadcrumbPath(['Level 1', paths[1].name]);
+    addAuditEntry({ timestamp: new Date(), action: 'simulation-run', details: { profile: profile.name, query: decisionQuery } });
+    setIsLoading(false); setActiveAgents([]);
+    agentIds.forEach(id => updateAgent(id, { status: 'idle' }));
   };
 
-  // Onboarding Modal
+  const getPathColors = (path: DecisionPath) => {
+    if (!currentResult) return { bg: 'bg-gray-800', border: 'border-gray-600', text: 'text-gray-400' };
+    const sorted = [...currentResult.paths].sort((a, b) => a.riskScore - b.riskScore);
+    if (path.id === sorted[0]?.id) return { bg: 'bg-green-900/40', border: 'border-green-500', text: 'text-green-400', badge: 'bg-green-500' };
+    if (path.id === sorted[sorted.length - 1]?.id) return { bg: 'bg-red-900/40', border: 'border-red-500', text: 'text-red-400', badge: 'bg-red-500' };
+    return { bg: 'bg-orange-900/40', border: 'border-orange-500', text: 'text-orange-400', badge: 'bg-orange-500' };
+  };
+
+  // Profile Input Modal
   if (!profile) {
     return (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-50">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="glass p-8 max-w-2xl w-full mx-4"
-        >
-          <h1 className="text-3xl font-black bg-gradient-peach bg-clip-text text-transparent mb-2">
-            NeoBI India v2.0
-          </h1>
-          <p className="text-gray-400 mb-6">Agentic BI Co-pilot for Indian Entrepreneurs</p>
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-slate-900 border border-white/20 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <h1 className="text-2xl font-black bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent mb-1">NeoBI India v2.0</h1>
+          <p className="text-gray-400 text-sm mb-4">Agentic BI Co-pilot for Indian Entrepreneurs</p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
-              <label className="block text-sm font-bold mb-2">Business Name</label>
-              <input
-                type="text"
-                placeholder="Your startup name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth"
-              />
+              <label className="block text-xs font-bold mb-1 text-gray-300">Business Name *</label>
+              <input type="text" placeholder="Your startup name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 focus:border-amber-500 outline-none text-sm" />
             </div>
-
             <div>
-              <label className="block text-sm font-bold mb-2">Industry</label>
-              <select
-                value={formData.industry}
-                onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth appearance-none cursor-pointer"
-              >
+              <label className="block text-xs font-bold mb-1 text-gray-300">Industry *</label>
+              <select value={formData.industry} onChange={(e) => setFormData({ ...formData, industry: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 focus:border-amber-500 outline-none text-sm">
                 <option value="">Select Industry</option>
-                <option value="SaaS">SaaS</option>
-                <option value="E-commerce">E-commerce</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="FinTech">FinTech</option>
-                <option value="EdTech">EdTech</option>
-                <option value="Food & Beverage">Food & Beverage</option>
-                <option value="Hospitality">Hospitality</option>
-                <option value="Manufacturing">Manufacturing</option>
-                <option value="Logistics">Logistics</option>
-                <option value="Real Estate">Real Estate</option>
-                <option value="Retail">Retail</option>
-                <option value="Automotive">Automotive</option>
-                <option value="Agriculture">Agriculture</option>
-                <option value="Fashion">Fashion</option>
-                <option value="Media & Entertainment">Media & Entertainment</option>
-                <option value="Consulting">Consulting</option>
-                <option value="Telecom">Telecom</option>
-                <option value="Energy">Energy</option>
-                <option value="Travel & Tourism">Travel & Tourism</option>
-                <option value="Legal Services">Legal Services</option>
-                <option value="Beauty & Wellness">Beauty & Wellness</option>
-                <option value="Sports & Fitness">Sports & Fitness</option>
+                {['SaaS', 'E-commerce', 'Healthcare', 'FinTech', 'EdTech', 'Food & Beverage', 'Manufacturing', 'Logistics', 'Retail', 'Kirana/Grocery', 'D2C Fashion', 'Real Estate', 'Consulting', 'Beauty & Wellness'].map(i => <option key={i} value={i}>{i}</option>)}
               </select>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold mb-2">MRR (₹)</label>
-                <input
-                  type="number"
-                  value={formData.mrr}
-                  onChange={(e) => setFormData({ ...formData, mrr: Number(e.target.value) })}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Team Size</label>
-                <input
-                  type="number"
-                  value={formData.teamSize}
-                  onChange={(e) => setFormData({ ...formData, teamSize: Number(e.target.value) })}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth"
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="block text-xs font-bold mb-1 text-gray-300">MRR (₹)</label><input type="number" value={formData.mrr} onChange={(e) => setFormData({ ...formData, mrr: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 outline-none text-sm" /></div>
+              <div><label className="block text-xs font-bold mb-1 text-gray-300">Team Size</label><input type="number" value={formData.teamSize} onChange={(e) => setFormData({ ...formData, teamSize: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 outline-none text-sm" /></div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold mb-2">Customers</label>
-                <input
-                  type="number"
-                  value={formData.customers}
-                  onChange={(e) => setFormData({ ...formData, customers: Number(e.target.value) })}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Growth Target (%/yr)</label>
-                <input
-                  type="number"
-                  value={formData.growthTarget}
-                  onChange={(e) => setFormData({ ...formData, growthTarget: Number(e.target.value) })}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold mb-2">Location</label>
-              <select
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth appearance-none cursor-pointer"
-              >
-                <option>Select Location</option>
-                <option>Bangalore</option>
-                <option>Mumbai</option>
-                <option>Delhi</option>
-                <option>Hyderabad</option>
-                <option>Pune</option>
-                <option>Chennai</option>
-                <option>Kolkata</option>
-                <option>Indore</option>
-                <option>Jaipur</option>
-                <option>Chandigarh</option>
-                <option>Ahmedabad</option>
-                <option>Surat</option>
-                <option>Lucknow</option>
-                <option>Coimbatore</option>
-                <option>Kochi</option>
-                <option>Other</option>
-              </select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold mb-2">City Tier</label>
-                <select
-                  value={formData.cityTier}
-                  onChange={(e) => setFormData({ ...formData, cityTier: parseInt(e.target.value) as 1 | 2 | 3 })}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth appearance-none cursor-pointer"
-                >
-                  <option value="1">Tier 1 - Metro</option>
-                  <option value="2">Tier 2 - City</option>
-                  <option value="3">Tier 3 - Town</option>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="block text-xs font-bold mb-1 text-gray-300">Location</label>
+                <select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 outline-none text-sm">
+                  {['Bangalore', 'Mumbai', 'Delhi', 'Hyderabad', 'Pune', 'Chennai', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Other'].map(l => <option key={l}>{l}</option>)}
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Festival Preference</label>
-                <select
-                  value={formData.festival}
-                  onChange={(e) => setFormData({ ...formData, festival: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-agents-growth appearance-none cursor-pointer"
-                >
-                  <option value="Diwali">Diwali</option>
-                  <option value="Holi">Holi</option>
-                  <option value="Ganesh Chaturthi">Ganesh Chaturthi</option>
-                  <option value="Navratri">Navratri</option>
-                  <option value="Eid">Eid</option>
-                  <option value="Christmas">Christmas</option>
-                  <option value="New Year">New Year</option>
+              <div><label className="block text-xs font-bold mb-1 text-gray-300">City Tier</label>
+                <select value={formData.cityTier} onChange={(e) => setFormData({ ...formData, cityTier: parseInt(e.target.value) as 1 | 2 | 3 })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 outline-none text-sm">
+                  <option value="1">Tier 1 - Metro</option><option value="2">Tier 2 - City</option><option value="3">Tier 3 - Town</option>
                 </select>
               </div>
             </div>
+            <button onClick={handleProfileSubmit} disabled={!formData.name || !formData.industry} className="w-full py-3 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-black font-bold disabled:opacity-50 mt-2">
+              Continue →
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleProfileSubmit}
-              disabled={!formData.name || !formData.industry}
-              className="w-full py-3 rounded-lg bg-gradient-peach text-black font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Start Intelligence Journey →
-            </motion.button>
+  // Decision Query Modal
+  if (showDecisionInput && !currentResult) {
+    return (
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-slate-900 border border-white/20 rounded-2xl p-6 max-w-2xl w-full">
+          <h1 className="text-xl font-black text-white mb-1">What decision do you need help with?</h1>
+          <p className="text-gray-400 text-sm mb-4">Select a category or describe your question</p>
+
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {DECISION_TYPES.map((t) => (
+              <button key={t.value} onClick={() => setDecisionType(t.value)} className={`p-3 rounded-lg border text-left transition-all ${decisionType === t.value ? 'border-amber-500 bg-amber-500/20' : 'border-white/10 hover:border-white/30'}`}>
+                <t.icon size={20} className={decisionType === t.value ? 'text-amber-400' : 'text-gray-400'} />
+                <div className="font-bold text-xs mt-1">{t.label}</div>
+              </button>
+            ))}
+          </div>
+
+          <textarea placeholder="Describe your specific question (optional)..." value={decisionQuery} onChange={(e) => setDecisionQuery(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 h-20 resize-none outline-none text-sm mb-4" />
+
+          <div className="flex gap-3">
+            <button onClick={() => { setShowDecisionInput(false); setProfile(null); }} className="px-4 py-2 rounded-lg border border-white/20 hover:bg-white/10 text-sm">← Back</button>
+            <button onClick={() => { setShowDecisionInput(false); handleSimulate(); }} disabled={!decisionType && !decisionQuery} className="flex-1 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-black font-bold disabled:opacity-50 flex items-center justify-center gap-2">
+              <Zap size={18} /> Run Intelligence
+            </button>
           </div>
         </motion.div>
       </div>
@@ -569,492 +347,262 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-raven-base overflow-hidden">
-      {/* Particle Background */}
-      <div className="particle-bg" />
-
+    <div className="h-screen flex flex-col bg-slate-950 overflow-hidden">
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-agents-growth border-t-transparent mb-4"></div>
-            <h3 className="text-xl font-bold bg-gradient-peach bg-clip-text text-transparent">Running Intelligence...</h3>
-            <p className="text-gray-400 text-sm mt-2">Analyzing decision paths, MARL simulation, and enhanced metrics</p>
+            <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-amber-400 mb-2">Running Intelligence...</h3>
+            <div className="flex gap-2 justify-center">
+              {Object.entries(AGENT_CONFIG).map(([id, cfg]) => (
+                <motion.div key={id} className="w-3 h-3 rounded-full" style={{ backgroundColor: cfg.color }}
+                  animate={activeAgents.includes(id) ? { scale: [1, 1.5, 1], opacity: [1, 0.5, 1] } : {}}
+                  transition={{ duration: 0.5, repeat: activeAgents.includes(id) ? Infinity : 0 }} />
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Top Bar */}
       <LiveTickerBar />
 
-      {/* Main Grid */}
       <div className="flex-1 flex overflow-hidden mt-16 pb-16">
         {/* Left Sidebar */}
-        <motion.div
-          animate={{
-            width: sidebarOpen ? '20%' : '0px',
-            opacity: sidebarOpen ? 1 : 0,
-          }}
-          className="glass glass-dark border-r border-white/10 overflow-hidden flex flex-col"
-        >
+        <motion.div animate={{ width: sidebarOpen ? '220px' : '0px', opacity: sidebarOpen ? 1 : 0 }} className="bg-slate-900/50 border-r border-white/10 overflow-hidden flex flex-col">
           <AgentActivityTree />
-          <div className="border-t border-white/10">
-            <ControlBar />
-          </div>
+          <div className="border-t border-white/10"><ControlBar /></div>
         </motion.div>
 
         {/* Center Canvas */}
-        <div className="flex-1 flex flex-col overflow-hidden px-6 py-4 gap-4">
-          {/* Header with Simulate Button */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={toggleSidebar}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                title="Toggle sidebar"
-              >
-                {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-              </button>
-              <h2 className="text-2xl font-black bg-gradient-peach bg-clip-text text-transparent">
-                Decision Intelligence Canvas
-              </h2>
-            </div>
-
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSimulate}
-                disabled={isLoading}
-                className="px-4 py-2 rounded-lg bg-gradient-peach text-black font-bold flex items-center gap-2 disabled:opacity-50"
-              >
-                <Zap size={18} />
-                {isLoading ? 'Thinking...' : 'Run Intelligence'}
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowRoadmap(!showRoadmap)}
-                className="px-4 py-2 rounded-lg glass hover:bg-white/20 transition-all font-bold flex items-center gap-2"
-              >
-                <BookOpen size={18} />
-                Roadmap
-              </motion.button>
-
-              {/* NEW: Full Page Roadmap Button */}
-              {currentResult && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowFullRoadmap(true)}
-                  className="px-4 py-2 rounded-lg bg-amber-600/40 hover:bg-amber-600/60 border border-amber-400/40 font-bold flex items-center gap-2 text-amber-200"
-                >
-                  <Map size={18} />
-                  Full Roadmap
-                </motion.button>
-              )}
+              <button onClick={toggleSidebar} className="p-2 hover:bg-white/10 rounded-lg">{sidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}</button>
+              <h2 className="text-lg font-black bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">Decision Intelligence</h2>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowDecisionInput(true)} className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-black font-bold text-sm flex items-center gap-1"><Search size={14} /> New Query</button>
+              {currentResult && <button onClick={() => setShowFullRoadmap(true)} className="px-3 py-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/30 text-amber-200 font-bold text-sm flex items-center gap-1"><Map size={14} /> Roadmap</button>}
+              <button onClick={() => router.push('/benchmarks')} className="px-3 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/30 text-purple-200 font-bold text-sm">📊 Benchmarks</button>
             </div>
           </div>
 
-          {/* Dynamic Canvas View */}
-          {showRoadmap ? (
-            // Full-page Roadmap View with ALL 12 graphs
-            <div className="flex-1 overflow-y-auto space-y-4">
-              <h3 className="text-lg font-bold text-agents-growth">Core Metrics</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <MARLConvergenceCurve />
-                <WorldModelAccuracyChart />
-              </div>
-              
-              <h3 className="text-lg font-bold text-agents-growth mt-6">Financial & Operations</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <CashFlowProjectionChart />
-                <InventoryTurnoverChart />
-              </div>
-              
-              <h3 className="text-lg font-bold text-agents-growth mt-6">Advanced Analytics</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <SHAPBeeswarm />
-                <AgentContributionPie />
-              </div>
-              
-              <h3 className="text-lg font-bold text-agents-growth mt-6">Risk & Insights</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <ConfidenceDistributionHistogram />
-                <BurnoutRiskChart />
-              </div>
-            </div>
-          ) : (
-            // Default Decision Canvas - Shows decision paths then graphs
-            <div className="flex-1 overflow-y-auto space-y-4">
-              {currentResult ? (
-                <>
-                  {/* Decision Paths Roadmap */}
-                  <div>
-                    <h3 className="text-lg font-bold text-agents-growth mb-3">Decision Paths</h3>
-                    <div className="space-y-3">
-                      {currentResult.paths.map((path, idx) => (
-                        <motion.div
-                          key={path.id}
-                          layout
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.1 }}
-                        >
-                          <button
-                            onClick={() => setSelectedPath(selectedPath?.id === path.id ? null : path)}
-                            className={`w-full p-4 rounded-lg transition-all micro-hover text-left ${
-                              selectedPath?.id === path.id
-                                ? 'bg-gradient-peach shadow-2xl shadow-agents-growth/30 text-black'
-                                : 'glass hover:bg-white/10'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between mb-2">
-                              <div>
-                                <h4 className="font-bold">{path.name}</h4>
-                                <p className={`text-xs ${selectedPath?.id === path.id ? 'text-black/60' : 'text-gray-400'}`}>
-                                  {path.description}
-                                </p>
-                              </div>
-                              <span className={`text-xs font-bold px-2 py-1 rounded ${
-                                selectedPath?.id === path.id ? 'bg-black/20' : 'bg-white/10'
-                              }`}>
-                                {path.timeline}d
-                              </span>
-                            </div>
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {currentResult ? (
+              <div className="max-w-5xl mx-auto space-y-6">
+                {/* Query */}
+                <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                  <div className="text-xs text-gray-400">Your Query</div>
+                  <div className="font-bold">{currentResult.query}</div>
+                </div>
 
-                            <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
-                              <div>
-                                <span className={`${selectedPath?.id === path.id ? 'text-black/60' : 'text-gray-500'} block text-[10px]`}>EV</span>
-                                <span className="font-bold">₹{(path.expectedValue / 100000).toFixed(1)}L</span>
-                              </div>
-                              <div>
-                                <span className={`${selectedPath?.id === path.id ? 'text-black/60' : 'text-gray-500'} block text-[10px]`}>Prob</span>
-                                <span className="font-bold">{(path.probability * 100).toFixed(0)}%</span>
-                              </div>
-                              <div>
-                                <span className={`${selectedPath?.id === path.id ? 'text-black/60' : 'text-gray-500'} block text-[10px]`}>Risk</span>
-                                <span className={`font-bold ${
-                                  path.riskScore > 60 ? 'text-red-400' : path.riskScore > 30 ? 'text-yellow-400' : 'text-green-400'
-                                }`}>
-                                  {path.riskScore}/100
-                                </span>
-                              </div>
-                            </div>
+                {/* Decision Paths */}
+                <div>
+                  <h3 className="font-bold text-lg mb-3">Decision Paths <span className="text-xs text-gray-400 font-normal ml-2">Click to see details</span></h3>
+                  <div className="space-y-3">
+                    {currentResult.paths.map((path, idx) => {
+                      const colors = getPathColors(path);
+                      const sorted = [...currentResult.paths].sort((a, b) => a.riskScore - b.riskScore);
+                      const isRec = path.id === sorted[0]?.id;
+                      const isRisky = path.id === sorted[sorted.length - 1]?.id;
 
-                            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${path.probability * 100}%` }}
-                                className={`h-full ${selectedPath?.id === path.id ? 'bg-black/30' : 'bg-agents-growth'}`}
-                              />
+                      return (
+                        <motion.div key={path.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
+                          onClick={() => setSelectedDecisionPath(path)}
+                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:scale-[1.01] ${colors.bg} ${colors.border}`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold">{path.name}</h4>
+                              {isRec && <span className="px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-full">✓ RECOMMENDED</span>}
+                              {isRisky && <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">⚠ RISKY</span>}
                             </div>
-                          </button>
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${colors.badge} text-white`}>{path.timeline}d</span>
+                          </div>
+                          <p className="text-sm text-gray-300 mb-3">{path.description}</p>
+                          <div className="flex gap-6 text-sm">
+                            <div><span className="text-gray-400">EV:</span> <span className="font-bold">₹{(path.expectedValue / 100000).toFixed(1)}L</span></div>
+                            <div><span className="text-gray-400">Prob:</span> <span className="font-bold">{(path.probability * 100).toFixed(0)}%</span></div>
+                            <div><span className="text-gray-400">Risk:</span> <span className={`font-bold ${colors.text}`}>{path.riskScore}/100</span></div>
+                          </div>
                         </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex gap-2 border-b border-white/10 pb-2">
+                  {[
+                    { id: 'analytics', label: '📊 Analytics' },
+                    { id: 'calculators', label: '🧮 Calculators' },
+                    { id: 'advanced', label: '🔬 Advanced' },
+                  ].map((tab) => (
+                    <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
+                      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === tab.id ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'text-gray-400 hover:text-white'}`}>
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tab Content */}
+                {activeTab === 'analytics' && (
+                  <div className="space-y-4">
+                    <MRRHealthPulse currentMRR={profile.mrr} previousWeekMRR={profile.mrr * 0.95} cashOnHand={profile.mrr * 6} monthlyBurn={profile.mrr * 0.4} />
+
+                    <GraphCard title="MARL Convergence Curve" conclusion="System converged to optimal reward of 850 after 10 episodes. Multi-agent coordination is effective.">
+                      <MARLConvergenceCurve />
+                    </GraphCard>
+
+                    <GraphCard title="Cash Flow Projection (12 months)" conclusion="Projected positive cash flow from month 4. Runway is sufficient for balanced growth strategy.">
+                      <CashFlowProjectionChart />
+                    </GraphCard>
+
+                    <GraphCard title="SHAP Feature Importance" conclusion="MRR and team size are the strongest predictors. Consider optimizing these factors first.">
+                      <SHAPBeeswarm />
+                    </GraphCard>
+
+                    <GraphCard title="Agent Contribution Analysis" conclusion="Decision Intelligence (22%) and Operations Optimizer (18%) contributed most to recommendations.">
+                      <AgentContributionPie />
+                    </GraphCard>
+
+                    <GraphCard title="Burnout Risk Assessment" conclusion="Current burnout risk is moderate (45%). Balanced approach recommended to prevent escalation.">
+                      <BurnoutRiskChart />
+                    </GraphCard>
+
+                    <GraphCard title="Confidence Distribution" conclusion="92% of predictions fall within 70-95% confidence range. Recommendations are reliable.">
+                      <ConfidenceDistributionHistogram distribution={currentResult.confidenceDistribution ?? FALLBACK_CONFIDENCE_DISTRIBUTION} />
+                    </GraphCard>
+                  </div>
+                )}
+
+                {activeTab === 'calculators' && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-slate-900/50 rounded-xl border border-white/10">
+                      <h4 className="font-bold text-lg mb-2">🧮 Financial Calculators</h4>
+                      <p className="text-sm text-gray-400 mb-4">Use these tools to calculate GST, TDS, invoice discounts, and assess fraud risk.</p>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="bg-black/30 rounded-xl p-4 border border-white/10">
+                          <h5 className="font-bold text-green-400 mb-3">GST & Compliance</h5>
+                          <CompliancePanel />
+                        </div>
+
+                        <div className="bg-black/30 rounded-xl p-4 border border-white/10">
+                          <h5 className="font-bold text-blue-400 mb-3">Invoice Discounting</h5>
+                          <InvoiceDiscountCalculator />
+                        </div>
+
+                        <div className="lg:col-span-2 bg-black/30 rounded-xl p-4 border border-white/10">
+                          <h5 className="font-bold text-red-400 mb-3">UPI Fraud Risk Simulator</h5>
+                          <UFraudRiskSimulator fraudScore={{
+                            score: 45,
+                            fraudAttempts: 12,
+                            defenseLevel: 70,
+                            mitigationStrategies: [
+                              'Enable transaction monitoring',
+                              'Implement 2FA on high-value transactions',
+                              'Add device binding for authentication',
+                            ],
+                            estimatedLoss: 15000,
+                          }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'advanced' && (
+                  <div className="space-y-4">
+                    <GraphCard title="Reward Decomposition" conclusion="Revenue (35%) drives most value. Operational efficiency (22%) is the second-highest contributor.">
+                      <RewardDecompositionChart decomposition={currentResult.rewardDecomposition ?? FALLBACK_REWARD_DECOMPOSITION} />
+                    </GraphCard>
+
+                    <GraphCard title="Curriculum Learning Progress" conclusion="System mastered 3-level hierarchical learning. Ready for complex multi-agent decisions.">
+                      <CurriculumBreakdown levels={currentResult.curriculumLevels ?? FALLBACK_CURRICULUM_LEVELS} />
+                    </GraphCard>
+
+                    <GraphCard title="Ablation Study" conclusion="MARL contributes 30.4% to performance. Removing it causes the largest accuracy drop.">
+                      <AblationStudyChart ablations={currentResult.ablationStudy ?? FALLBACK_ABLATION_STUDY} />
+                    </GraphCard>
+
+                    <GraphCard title="Burnout Trajectory" conclusion="With recommended path, burnout risk reduces by 33% over 30 days compared to baseline.">
+                      <BurnoutTrajectoryChart trajectory={currentResult.burnoutTrajectory ?? FALLBACK_BURNOUT_TRAJECTORY} />
+                    </GraphCard>
+                  </div>
+                )}
+
+                {/* Explored Path */}
+                {exploredPaths.length > 0 && (
+                  <div className="p-4 bg-green-900/20 rounded-xl border border-green-500/30">
+                    <h4 className="font-bold text-green-400 mb-2">Your Explored Path</h4>
+                    <div className="flex items-center gap-2 text-sm flex-wrap">
+                      {exploredPaths.map((p, i) => (
+                        <React.Fragment key={i}>
+                          <span className="px-3 py-1 bg-green-500/20 rounded-lg">{p}</span>
+                          {i < exploredPaths.length - 1 && <ArrowRight size={14} className="text-green-400" />}
+                        </React.Fragment>
                       ))}
                     </div>
                   </div>
+                )}
 
-                  {/* Graphs Below Paths */}
-                  <div className="mt-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold text-agents-growth">Analytics Dashboard</h3>
-                      <button
-                        onClick={() => router.push('/benchmarks')}
-                        className="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg transition-all shadow-lg flex items-center gap-2"
-                      >
-                        📊 View Full Benchmarks
-                      </button>
-                    </div>
+                {showFullRoadmap && <FullPageRoadmap onClose={() => setShowFullRoadmap(false)} />}
 
-                    {/* MRR Health Pulse Widget */}
-                    <div className="mb-6">
-                      <MRRHealthPulse
-                        currentMRR={profile.mrr}
-                        previousWeekMRR={profile.mrr * 0.95} // Simulated previous week data
-                        cashOnHand={profile.mrr * 6} // Simulated 6 months runway
-                        monthlyBurn={profile.mrr * 0.4} // Simulated burn rate
-                      />
-                    </div>
-
-                    {/* Analytics Grid - 3 columns for better visibility */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      <MARLConvergenceCurve />
-                      <CashFlowProjectionChart />
-                      <SHAPBeeswarm />
-                      <AgentContributionPie />
-                      <BurnoutRiskChart />
-                      <ConfidenceDistributionHistogram />
-                    </div>
-                  </div>
-
-                  {/* NEW: TIER 1 - Game-Changing Novelties */}
-                  {cascadingPaths && cascadingPaths.length > 0 && (
-                    <div className="mt-8">
-                      <h3 className="text-lg font-bold text-amber-300 mb-3">🎯 Tier 1: Game-Changing Novelties</h3>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <CascadingPathSelector
-                          parentName={selectedPath?.name || 'Strategy'}
-                          cascadingPaths={cascadingPaths}
-                          onSelectPath={handleCascadingSelect}
-                          breadcrumb={['Level 1', selectedPath?.name || 'Root']}
-                        />
-                        {festivalMultiplier && (
-                          <FestivalMultiplierSlider
-                            festivalMultiplier={festivalMultiplier}
-                            onOverrideChange={handleFestivalOverride}
-                          />
-                        )}
-                        {regionalAdjustment && (
-                          <RegionalAdjustmentGauge adjustment={regionalAdjustment} />
-                        )}
-                        <JugaadGenerator
-                          ideas={jugaadHistory}
-                          onGenerateNew={generateNewJugaad}
-                          onEvolve={handleJugaadFeedback}
-                        />
-                      </div>
-                    </div>
+                <AnimatePresence>
+                  {selectedDecisionPath && (
+                    <DecisionPopup
+                      path={selectedDecisionPath}
+                      onClose={() => setSelectedDecisionPath(null)}
+                      onExplorePath={() => { setExploredPaths([...exploredPaths, selectedDecisionPath.name]); setSelectedDecisionPath(null); setShowFullRoadmap(true); }}
+                      isRecommended={selectedDecisionPath.id === [...currentResult.paths].sort((a, b) => a.riskScore - b.riskScore)[0]?.id}
+                      isRisky={selectedDecisionPath.id === [...currentResult.paths].sort((a, b) => a.riskScore - b.riskScore)[currentResult.paths.length - 1]?.id}
+                    />
                   )}
-
-                  {/* TIER 2 - Critical Visualizations (always show with fallback data) */}
-                  <div className="mt-8">
-                    <h3 className="text-lg font-bold text-amber-300 mb-3">📊 Tier 2: Advanced Analytics</h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <div style={{ height: '300px' }}>
-                        <GlobalSHAPBeeswarm
-                          features={['MRR', 'Team Size', 'Market Growth', 'Seasonality', 'Competitor']}
-                          baseValue={currentResult.marlState?.totalReward ?? 500}
-                        />
-                      </div>
-                      <div style={{ height: '300px' }}>
-                        <RewardDecompositionChart decomposition={currentResult.rewardDecomposition ?? FALLBACK_REWARD_DECOMPOSITION} />
-                      </div>
-                      <div style={{ height: '300px' }}>
-                        <CurriculumBreakdown levels={currentResult.curriculumLevels ?? FALLBACK_CURRICULUM_LEVELS} />
-                      </div>
-                      <div style={{ height: '300px' }}>
-                        <AblationStudyChart ablations={currentResult.ablationStudy ?? FALLBACK_ABLATION_STUDY} />
-                      </div>
-                      <div style={{ height: '300px' }}>
-                        <BurnoutTrajectoryChart trajectory={currentResult.burnoutTrajectory ?? FALLBACK_BURNOUT_TRAJECTORY} />
-                      </div>
-                      <div style={{ height: '300px' }}>
-                        <ConfidenceDistributionHistogram distribution={currentResult.confidenceDistribution ?? FALLBACK_CONFIDENCE_DISTRIBUTION} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* TIER 3 - Deep Intelligence (always show with fallback data) */}
-                  <div className="mt-8">
-                    <h3 className="text-lg font-bold text-amber-300 mb-3">🔬 Tier 3: Deep Intelligence</h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <div style={{ height: '340px' }}>
-                        <BurnoutMitigationPathways
-                          trajectories={currentResult.burnoutTrajectory
-                            ? burnoutTrajectoryToMitigation(currentResult.burnoutTrajectory)
-                            : FALLBACK_MITIGATION_TRAJECTORIES}
-                        />
-                      </div>
-                      <UPIFraudDefense
-                        currentRisk={65}
-                        vulnerabilities={[
-                          { type: 'Transaction Spoofing', severity: 'high', description: 'Fraudulent payment requests', mitigation: 'Implement 2FA on all transactions', defenseLevel: 75 },
-                          { type: 'Phishing Links', severity: 'medium', description: 'Fake UPI links in messages', mitigation: 'Real-time link validation', defenseLevel: 82 },
-                          { type: 'SIM Swap', severity: 'high', description: 'OTP interception', mitigation: 'Biometric + device binding', defenseLevel: 70 },
-                        ]}
-                      />
-                      <SelfEvolvingJugaadGenerator ideas={jugaadHistory} onGenerateNew={generateNewJugaad} />
-                      <RegionalInequalityAdjustment regions={DEFAULT_REGIONS} selectedTier={selectedRegion} />
-                    </div>
-                  </div>
-
-                  {/* Festival Awareness */}
-                  <FestivalAwareDemandMultiplier
-                    festivals={[
-                      {
-                        name: formData.festival,
-                        date: formData.festival,
-                        daysUntil: 45,
-                        baseMultiplier: 1.0,
-                        peakMultiplier: 2.5,
-                        demandCurve: Array.from({ length: 30 }, (_, i) => ({
-                          day: i,
-                          multiplier: 1 + (Math.sin((i / 30) * Math.PI) * 1.5),
-                        })),
-                        affectedCategories: ['Gifts', 'Electronics', 'Clothing', 'Home Decor'],
-                        historicalSales: 5000,
-                      },
-                    ]}
-                    selectedFestival={formData.festival}
-                    onSelectFestival={setSelectedFestival}
-                  />
-
-                  {/* Advanced Audit Trail */}
-                  <AdvancedAuditTrail entries={auditTrail} onExport={handleExportAuditTrail} />
-
-                  {/* Full Page Roadmap Modal */}
-                  {showFullRoadmap && <FullPageRoadmap onClose={() => setShowFullRoadmap(false)} />}
-                </>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <div className="text-6xl mb-4">🎯</div>
-                    <h3 className="text-xl font-bold mb-2">Run Intelligence</h3>
-                    <p className="text-gray-400">Click "Run Intelligence" to generate decision paths with MARL simulation</p>
-                    <p className="text-gray-500 text-sm mt-2">All Tier 1, 2, 3 features will appear here</p>
-                  </div>
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="text-5xl mb-4">🎯</div>
+                  <h3 className="text-xl font-bold mb-2">Ready to Analyze</h3>
+                  <p className="text-gray-400 mb-4">Enter your business details and decision query</p>
+                  <button onClick={() => setShowDecisionInput(true)} className="px-6 py-3 bg-gradient-to-r from-amber-500 to-pink-500 text-black font-bold rounded-lg">
+                    Start Decision Query
+                  </button>
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Sidebar */}
-        <motion.div
-          animate={{
-            width: rightPanelOpen ? '20%' : '0px',
-            opacity: rightPanelOpen ? 1 : 0,
-          }}
-          className="glass glass-dark border-l border-white/10 overflow-hidden flex flex-col"
-        >
+        <motion.div animate={{ width: rightPanelOpen ? '280px' : '0px', opacity: rightPanelOpen ? 1 : 0 }} className="bg-slate-900/50 border-l border-white/10 overflow-hidden flex flex-col">
           {rightPanelOpen && (
             <>
-              {/* Tabs */}
-              <div className="flex border-b border-white/10 overflow-x-auto text-xs">
-                <button 
-                  onClick={() => setRightPanelTab('deep-dive')}
-                  className={`flex-1 py-3 font-bold border-b-2 transition-colors whitespace-nowrap ${
-                    rightPanelTab === 'deep-dive' 
-                      ? 'border-agents-growth text-agents-growth' 
-                      : 'border-transparent text-gray-400 hover:text-white'
-                  }`}
-                >
-                  Deep Dive
-                </button>
-                <button 
-                  onClick={() => setRightPanelTab('operations')}
-                  className={`flex-1 py-3 font-bold border-b-2 transition-colors whitespace-nowrap ${
-                    rightPanelTab === 'operations' 
-                      ? 'border-agents-growth text-agents-growth' 
-                      : 'border-transparent text-gray-400 hover:text-white'
-                  }`}
-                >
-                  Operations
-                </button>
-                <button 
-                  onClick={() => setRightPanelTab('tier2')}
-                  className={`flex-1 py-3 font-bold border-b-2 transition-colors whitespace-nowrap ${
-                    rightPanelTab === 'tier2' 
-                      ? 'border-amber-400 text-amber-300' 
-                      : 'border-transparent text-gray-400 hover:text-white'
-                  }`}
-                >
-                  Tier 2
-                </button>
-                <button 
-                  onClick={() => setRightPanelTab('compliance')}
-                  className={`flex-1 py-3 font-bold border-b-2 transition-colors whitespace-nowrap ${
-                    rightPanelTab === 'compliance' 
-                      ? 'border-green-400 text-green-300' 
-                      : 'border-transparent text-gray-400 hover:text-white'
-                  }`}
-                >
-                  Compliance
-                </button>
-                <button 
-                  onClick={() => setRightPanelTab('tier3')}
-                  className={`flex-1 py-3 font-bold border-b-2 transition-colors whitespace-nowrap ${
-                    rightPanelTab === 'tier3' 
-                      ? 'border-amber-400 text-amber-300' 
-                      : 'border-transparent text-gray-400 hover:text-white'
-                  }`}
-                >
-                  Tier 3
-                </button>
+              <div className="flex border-b border-white/10">
+                {['deep-dive', 'operations'].map((tab) => (
+                  <button key={tab} onClick={() => setRightPanelTab(tab as any)}
+                    className={`flex-1 py-3 text-xs font-bold border-b-2 transition-colors capitalize ${rightPanelTab === tab ? 'border-amber-500 text-amber-400' : 'border-transparent text-gray-400'}`}>
+                    {tab.replace('-', ' ')}
+                  </button>
+                ))}
               </div>
-
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto px-4 py-4">
+              <div className="flex-1 overflow-y-auto p-3">
                 {rightPanelTab === 'deep-dive' && <RiskAndCoachPanel />}
                 {rightPanelTab === 'operations' && <OperationsPanel />}
-                {rightPanelTab === 'compliance' && <CompliancePanel />}
-                {rightPanelTab === 'tier2' && (
-                  <div className="space-y-4">
-                    <h4 className="font-bold text-amber-300 sticky top-0 bg-raven-base/95 py-1 z-10">📊 Tier 2: Advanced Analytics</h4>
-                    {!currentResult ? (
-                      <p className="text-xs text-gray-400">Run Intelligence to load Tier 2 data, or explore with sample data below.</p>
-                    ) : null}
-                    <div className="space-y-3">
-                      <div className="h-64">
-                        <GlobalSHAPBeeswarm
-                          features={['MRR', 'Team Size', 'Market Growth', 'Seasonality', 'Competitor']}
-                          baseValue={currentResult?.marlState?.totalReward ?? 500}
-                        />
-                      </div>
-                      <div className="h-64">
-                        <RewardDecompositionChart decomposition={currentResult?.rewardDecomposition ?? FALLBACK_REWARD_DECOMPOSITION} />
-                      </div>
-                      <div className="h-64">
-                        <CurriculumBreakdown levels={currentResult?.curriculumLevels ?? FALLBACK_CURRICULUM_LEVELS} />
-                      </div>
-                      <div className="h-64">
-                        <AblationStudyChart ablations={currentResult?.ablationStudy ?? FALLBACK_ABLATION_STUDY} />
-                      </div>
-                      <div className="h-64">
-                        <BurnoutTrajectoryChart trajectory={currentResult?.burnoutTrajectory ?? FALLBACK_BURNOUT_TRAJECTORY} />
-                      </div>
-                      <div className="h-64">
-                        <ConfidenceDistributionHistogram distribution={currentResult?.confidenceDistribution ?? FALLBACK_CONFIDENCE_DISTRIBUTION} />
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {rightPanelTab === 'tier3' && (
-                  <div className="space-y-4">
-                    <h4 className="font-bold text-amber-300 sticky top-0 bg-raven-base/95 py-1 z-10">🔬 Tier 3: Deep Intelligence</h4>
-                    {!currentResult ? (
-                      <p className="text-xs text-gray-400">Run Intelligence to load Tier 3 data, or explore with sample data below.</p>
-                    ) : null}
-                    <div className="space-y-3">
-                      <div className="h-72">
-                        <BurnoutMitigationPathways
-                          trajectories={currentResult?.burnoutTrajectory
-                            ? burnoutTrajectoryToMitigation(currentResult.burnoutTrajectory)
-                            : FALLBACK_MITIGATION_TRAJECTORIES}
-                        />
-                      </div>
-                      <UPIFraudDefense
-                        currentRisk={65}
-                        vulnerabilities={[
-                          { type: 'Transaction Spoofing', severity: 'high', description: 'Fraudulent payment requests', mitigation: 'Implement 2FA on all transactions', defenseLevel: 75 },
-                          { type: 'Phishing Links', severity: 'medium', description: 'Fake UPI links in messages', mitigation: 'Real-time link validation', defenseLevel: 82 },
-                        ]}
-                      />
-                      <SelfEvolvingJugaadGenerator ideas={jugaadHistory} onGenerateNew={generateNewJugaad} />
-                      <RegionalInequalityAdjustment regions={DEFAULT_REGIONS} selectedTier={selectedRegion} />
-                      <div className="pt-2">
-                        <AdvancedAuditTrail entries={auditTrail} onExport={handleExportAuditTrail} />
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </>
           )}
         </motion.div>
 
-        {/* Toggle Right Panel Button */}
-        <button
-          onClick={toggleRightPanel}
-          className="fixed right-0 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-l-lg transition-colors z-30"
-        >
-          {rightPanelOpen ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        <button onClick={toggleRightPanel} className="fixed right-0 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-l-lg z-30">
+          {rightPanelOpen ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
 
-      {/* Bottom Metrics & Export Bar */}
       <MetricsAndExportBar />
     </div>
   );

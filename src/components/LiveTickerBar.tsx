@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNeoBIStore } from '@/lib/store';
 import { format } from 'date-fns';
-import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw, Calendar, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const LiveTickerBar: React.FC = () => {
   const { indiaContext, updateIndiaContext, setProfile } = useNeoBIStore();
+  const [marketStatus, setMarketStatus] = useState<string>('');
+  const [nextMarketTime, setNextMarketTime] = useState<string>('');
 
-  // Fetch NIFTY data from API in real-time
   useEffect(() => {
     const fetchNIFTY = async () => {
       try {
@@ -27,21 +29,19 @@ export const LiveTickerBar: React.FC = () => {
             nextOpen: indiaContext.marketHours.nextOpen,
           },
         });
+
+        setMarketStatus(data.marketStatus || (data.isMarketOpen ? 'Market Open' : 'Market Closed'));
+        setNextMarketTime(data.nextMarketTime || '');
       } catch (error) {
         console.error('Failed to fetch NIFTY data:', error);
       }
     };
 
-    // Fetch immediately on mount
     fetchNIFTY();
-
-    // Then fetch every 60 seconds
     const interval = setInterval(fetchNIFTY, 60000);
-
     return () => clearInterval(interval);
   }, [updateIndiaContext]);
 
-  // Update festival countdown in real-time
   useEffect(() => {
     const updateFestivalCountdown = async () => {
       try {
@@ -60,12 +60,8 @@ export const LiveTickerBar: React.FC = () => {
       }
     };
 
-    // Fetch immediately
     updateFestivalCountdown();
-
-    // Update every 6 hours (countdown changes once per day, but check periodically)
     const interval = setInterval(updateFestivalCountdown, 6 * 60 * 60 * 1000);
-
     return () => clearInterval(interval);
   }, [updateIndiaContext]);
 
@@ -73,8 +69,8 @@ export const LiveTickerBar: React.FC = () => {
   const isPositive = niftyLive.change >= 0;
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-16 glass glass-dark border-b border-white/10 z-50 flex items-center px-6 gap-8 no-print">
-      {/* Logo & Title */}
+    <div className="fixed top-0 left-0 right-0 h-16 glass glass-dark border-b border-white/10 z-50 flex items-center px-6 gap-6 no-print">
+      {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="text-2xl font-black bg-gradient-peach bg-clip-text text-transparent">
           NeoBI
@@ -85,7 +81,10 @@ export const LiveTickerBar: React.FC = () => {
       </div>
 
       {/* NIFTY Ticker */}
-      <div className="flex items-center gap-2 cursor-pointer micro-hover">
+      <motion.div
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10"
+        whileHover={{ scale: 1.02 }}
+      >
         <span className="text-xs text-gray-400">NIFTY 50</span>
         <span className="text-lg font-bold">{niftyLive.value.toFixed(0)}</span>
         <div className={`flex items-center gap-1 ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
@@ -94,28 +93,41 @@ export const LiveTickerBar: React.FC = () => {
             {isPositive ? '+' : ''}{niftyLive.changePercent.toFixed(2)}%
           </span>
         </div>
+      </motion.div>
+
+      {/* Market Status */}
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+        <motion.div
+          className={`w-2.5 h-2.5 rounded-full ${marketHours.isOpen ? 'bg-green-500' : 'bg-red-500'}`}
+          animate={marketHours.isOpen ? { scale: [1, 1.3, 1], opacity: [1, 0.6, 1] } : {}}
+          transition={{ duration: 1.5, repeat: marketHours.isOpen ? Infinity : 0 }}
+        />
+        <div className="flex flex-col leading-tight">
+          <span className={`text-xs font-semibold ${marketHours.isOpen ? 'text-green-400' : 'text-gray-400'}`}>
+            {marketStatus || (marketHours.isOpen ? 'Market Open' : 'Market Closed')}
+          </span>
+          {nextMarketTime && (
+            <span className="text-[10px] text-gray-500">{nextMarketTime}</span>
+          )}
+        </div>
       </div>
 
       {/* Festival Countdown */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-400">{festivalCountdown.next}</span>
+      <motion.div
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-agents-growth/10 border border-agents-growth/20"
+        whileHover={{ scale: 1.02 }}
+      >
+        <Calendar size={14} className="text-agents-growth" />
+        <span className="text-xs text-gray-300">{festivalCountdown.next}</span>
         <span className="text-sm font-bold text-agents-growth">
           {festivalCountdown.daysUntil}d
         </span>
-        <span className="text-xs text-agents-growth/60 font-mono">
+        <span className="text-xs text-agents-growth/70 font-mono bg-agents-growth/20 px-1.5 py-0.5 rounded">
           +{festivalCountdown.expectedDemandLift}%
         </span>
-      </div>
+      </motion.div>
 
-      {/* Market Status */}
-      <div className="flex items-center gap-2">
-        <div className={`w-2 h-2 rounded-full ${marketHours.isOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-        <span className="text-xs text-gray-400">
-          {marketHours.isOpen ? 'Market Open' : 'Market Closed'}
-        </span>
-      </div>
-
-      {/* Right Spacer */}
+      {/* Spacer */}
       <div className="flex-1" />
 
       {/* New Profile Button */}
@@ -128,8 +140,9 @@ export const LiveTickerBar: React.FC = () => {
         New Profile
       </button>
 
-      {/* Timestamp */}
-      <div className="text-xs text-gray-500 font-mono">
+      {/* Current Time */}
+      <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
+        <Clock size={12} />
         {format(new Date(), 'HH:mm:ss')}
       </div>
     </div>
