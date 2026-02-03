@@ -56,54 +56,52 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
         animate={{ opacity: 1, x: 0 }}
         className="pl-4 py-3 border-l-2 transition-all relative"
         style={{
-          borderLeftColor: isActive ? agentColor : 'rgba(255,255,255,0.1)',
-          backgroundColor: isActive ? `${agentColor}10` : 'transparent',
+          borderLeftColor: agentColor,
+          backgroundColor: isActive ? `${agentColor}15` : `${agentColor}05`,
         }}
       >
-        {/* Glowing effect when active */}
-        {isActive && (
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            style={{
-              background: `radial-gradient(ellipse at left, ${agentColor}20, transparent 70%)`,
-            }}
-          />
-        )}
+        {/* Subtle constant glow for all agents */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{
+            opacity: isActive ? [0.4, 0.7, 0.4] : [0.1, 0.2, 0.1],
+          }}
+          transition={{ duration: isActive ? 1.5 : 3, repeat: Infinity }}
+          style={{
+            background: `radial-gradient(ellipse at left, ${agentColor}${isActive ? '30' : '15'}, transparent 70%)`,
+          }}
+        />
 
         <div className="flex items-center gap-3 mb-1 relative">
-          {/* Agent Icon with Glow */}
+          {/* Agent Icon with Constant Glow */}
           <motion.div
             className={`p-2 rounded-lg relative ${isActive ? 'animate-pulse' : ''}`}
             style={{
-              backgroundColor: isActive || isComplete ? `${agentColor}30` : 'rgba(255,255,255,0.05)',
-              boxShadow: isActive ? `0 0 20px ${agentColor}60, 0 0 40px ${agentColor}30` : 'none',
+              backgroundColor: `${agentColor}${isActive ? '40' : '20'}`,
+              boxShadow: `0 0 ${isActive ? '20' : '10'}px ${agentColor}${isActive ? '60' : '30'}`,
             }}
-            animate={isActive ? {
-              scale: [1, 1.1, 1],
-              boxShadow: [
-                `0 0 10px ${agentColor}40`,
-                `0 0 25px ${agentColor}70`,
-                `0 0 10px ${agentColor}40`,
-              ],
-            } : {}}
-            transition={{ duration: 1, repeat: isActive ? Infinity : 0 }}
+            animate={{
+              scale: isActive ? [1, 1.1, 1] : [1, 1.02, 1],
+              boxShadow: isActive
+                ? [`0 0 10px ${agentColor}40`, `0 0 25px ${agentColor}70`, `0 0 10px ${agentColor}40`]
+                : [`0 0 8px ${agentColor}25`, `0 0 12px ${agentColor}35`, `0 0 8px ${agentColor}25`],
+            }}
+            transition={{ duration: isActive ? 1 : 2.5, repeat: Infinity }}
           >
             <span style={{ color: agentColor }}>
               {AGENT_ICONS[agent.id] || agent.icon}
             </span>
 
-            {/* Activity indicator */}
-            {isActive && (
-              <motion.div
-                className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                style={{ backgroundColor: agentColor }}
-                animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-              />
-            )}
+            {/* Activity indicator - always visible but pulses faster when active */}
+            <motion.div
+              className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full"
+              style={{ backgroundColor: agentColor }}
+              animate={{
+                scale: isActive ? [1, 1.4, 1] : [1, 1.15, 1],
+                opacity: isActive ? [1, 0.5, 1] : [0.6, 0.9, 0.6],
+              }}
+              transition={{ duration: isActive ? 0.8 : 2, repeat: Infinity }}
+            />
           </motion.div>
 
           {/* Agent Name */}
@@ -142,22 +140,28 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
 
         <p className="text-xs text-gray-500 ml-11">{agent.description}</p>
 
-        {/* Status bar */}
-        {(isActive || isComplete) && (
+        {/* Status bar - always visible with subtle glow */}
+        <motion.div
+          className="mt-2 ml-11 h-1.5 rounded-full overflow-hidden bg-white/10"
+          initial={{ width: 0 }}
+          animate={{ width: '100%' }}
+        >
           <motion.div
-            className="mt-2 ml-11 h-1 rounded-full overflow-hidden bg-white/10"
-            initial={{ width: 0 }}
-            animate={{ width: '100%' }}
-          >
-            <motion.div
-              className="h-full rounded-full"
-              style={{ backgroundColor: agentColor }}
-              initial={{ width: '0%' }}
-              animate={{ width: isComplete ? '100%' : '60%' }}
-              transition={{ duration: isActive ? 2 : 0.5, repeat: isActive ? Infinity : 0 }}
-            />
-          </motion.div>
-        )}
+            className="h-full rounded-full"
+            style={{
+              backgroundColor: agentColor,
+              boxShadow: `0 0 6px ${agentColor}`,
+            }}
+            initial={{ width: '0%' }}
+            animate={{
+              width: isActive ? ['40%', '80%', '40%'] : isComplete ? '100%' : `${Math.max(20, agentContrib * 2)}%`,
+            }}
+            transition={{
+              duration: isActive ? 1.5 : 0.5,
+              repeat: isActive ? Infinity : 0,
+            }}
+          />
+        </motion.div>
       </motion.div>
     );
   };
@@ -185,7 +189,7 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
         <p className="text-xs text-gray-400 mt-1">Live status & contributions</p>
       </div>
 
-      {/* Agent Activity Summary */}
+      {/* Agent Activity Summary - All agents glow */}
       <div className="px-4 py-2 border-b border-white/10 flex gap-2">
         {Object.entries(AGENT_COLORS).map(([id, color]) => {
           const agent = agents[id as keyof typeof agents];
@@ -193,13 +197,18 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
           return (
             <motion.div
               key={id}
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: color }}
-              animate={isActive ? {
-                scale: [1, 1.5, 1],
-                boxShadow: [`0 0 0px ${color}`, `0 0 8px ${color}`, `0 0 0px ${color}`],
-              } : {}}
-              transition={{ duration: 0.8, repeat: isActive ? Infinity : 0 }}
+              className="w-3 h-3 rounded-full"
+              style={{
+                backgroundColor: color,
+                boxShadow: `0 0 ${isActive ? '10' : '5'}px ${color}`,
+              }}
+              animate={{
+                scale: isActive ? [1, 1.5, 1] : [1, 1.15, 1],
+                boxShadow: isActive
+                  ? [`0 0 5px ${color}`, `0 0 12px ${color}`, `0 0 5px ${color}`]
+                  : [`0 0 3px ${color}`, `0 0 6px ${color}`, `0 0 3px ${color}`],
+              }}
+              transition={{ duration: isActive ? 0.8 : 2, repeat: Infinity }}
             />
           );
         })}

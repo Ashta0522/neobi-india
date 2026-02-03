@@ -48,6 +48,9 @@ export { AngelESOPSimulator } from './AngelESOPSimulator';
 export { InvoiceDiscountCalculator } from './InvoiceDiscountCalculator';
 export { DelayedPaymentPredictor } from './DelayedPaymentPredictor';
 
+// Operational Tools
+export { InventoryControlPanel, StaffHiringPanel, SupplierFinderPanel } from './OperationalTools';
+
 // Component Bundles
 export * as AdvancedGraphs from './AdvancedGraphs';
 export * as Graphs from './Graphs';

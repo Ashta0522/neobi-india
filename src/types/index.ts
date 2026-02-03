@@ -299,6 +299,7 @@ export interface CompetitorHeatmap {
 export interface JugaadIdea {
   id: string;
   createdAt: Date;
+  title?: string; // Optional short title for display
   description: string;
   feasibilityScore: number; // 0-100
   potentialImpact: number; // ₹ or %

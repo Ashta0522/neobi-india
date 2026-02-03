@@ -132,12 +132,87 @@ select:focus {
 
 /* Print Styles */
 @media print {
-  body {
-    background: white;
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  html, body {
+    background: #0a0a12 !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .no-print {
     display: none !important;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+
+  /* Keep glass effects for printed report */
+  .glass {
+    background: rgba(30, 30, 50, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    page-break-inside: avoid;
+  }
+
+  /* Improve text contrast */
+  h1, h2, h3, h4, h5, h6 {
+    color: #ffffff !important;
+  }
+
+  p, span, div {
+    color: #e0e0e0 !important;
+  }
+
+  /* Charts and graphs */
+  .recharts-wrapper {
+    page-break-inside: avoid;
+  }
+
+  /* Cards should not break across pages */
+  .p-4, .p-6 {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure graphs are visible */
+  svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Remove animations */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Fix gradient backgrounds */
+  [class*="bg-gradient"] {
+    background: rgba(40, 40, 60, 0.8) !important;
+  }
+
+  /* Agent colors should be preserved */
+  [class*="text-agents"] {
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* Better visibility for metrics */
+  .font-bold {
+    font-weight: 700 !important;
+  }
+
+  /* Ensure links are visible */
+  a {
+    color: #ff9f43 !important;
+    text-decoration: underline !important;
   }
 }
 

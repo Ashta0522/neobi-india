@@ -18,7 +18,23 @@ import {
   FullPageRoadmap, CompliancePanel, UFraudRiskSimulator,
   RewardDecompositionChart, CurriculumBreakdown, AblationStudyChart,
   BurnoutTrajectoryChart, InvoiceDiscountCalculator,
+  BurnoutMitigationPathways, AdvancedAuditTrail, SelfEvolvingJugaadGenerator,
+  RegionalInequalityAdjustment, FestivalAwareDemandMultiplier,
 } from '@/components';
+import GSTComplianceChecker from '@/components/GSTComplianceChecker';
+import FundingReadinessScore from '@/components/FundingReadinessScore';
+import SupplierRiskMap from '@/components/SupplierRiskMap';
+import MarketEntrySimulator from '@/components/MarketEntrySimulator';
+import CashFlowPredictor from '@/components/CashFlowPredictor';
+import SeasonalWorkforcePlanner from '@/components/SeasonalWorkforcePlanner';
+import { InventoryControlPanel, StaffHiringPanel, SupplierFinderPanel } from '@/components/OperationalTools';
+// NEW v2.2 Features
+import IntegrationDashboard from '@/components/IntegrationDashboard';
+import CompetitorBenchmark from '@/components/CompetitorBenchmark';
+import ExcelExport from '@/components/ExcelExport';
+import VoiceInput from '@/components/VoiceInput';
+import WhatsAppShare from '@/components/WhatsAppShare';
+import LanguageSelector from '@/components/LanguageSelector';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, ChevronLeft, ChevronRight, Map, Search, ArrowRight, Check, AlertTriangle, TrendingUp, Shield, Calculator, BarChart3, Users, Target, Lightbulb, Brain, Info } from 'lucide-react';
 
@@ -49,6 +65,195 @@ const FALLBACK_CURRICULUM_LEVELS: CurriculumLevel[] = [
   { level: 2, description: 'Sequential', episodes: [0, 15, 30], rewards: [500, 650, 780], convergenceMetric: [0, 50, 90], agentContributions: { orchestrator: 12, simulation_cluster: 22, decision_intelligence: 28, operations_optimizer: 18, personal_coach: 6, innovation_advisor: 6, growth_strategist: 4, learning_adaptation: 4 } },
   { level: 3, description: 'Multi-Agent', episodes: [0, 20], rewards: [600, 820], convergenceMetric: [0, 75], agentContributions: { orchestrator: 10, simulation_cluster: 25, decision_intelligence: 25, operations_optimizer: 20, personal_coach: 5, innovation_advisor: 5, growth_strategist: 5, learning_adaptation: 5 } },
 ];
+
+// Tier 2/3 Fallback Data
+const FALLBACK_BURNOUT_MITIGATION = Array.from({ length: 30 }, (_, i) => ({
+  day: i + 1,
+  baseline: 45 + i * 1.5 + Math.random() * 5,
+  withPathA: Math.max(20, 45 - i * 0.5 + Math.random() * 3),
+  withPathB: Math.max(25, 45 - i * 0.3 + Math.random() * 4),
+  withPathC: Math.max(30, 45 - i * 0.1 + Math.random() * 5),
+  threshold: 70,
+}));
+
+const FALLBACK_REGIONAL_DATA = [
+  { tier: 1 as const, cities: ['Mumbai', 'Delhi', 'Bangalore'], demandMultiplier: 1.4, costMultiplier: 1.6, competitionLevel: 85, growthPotential: 65, marketSize: 1000000, averageRevenue: 850000 },
+  { tier: 2 as const, cities: ['Pune', 'Ahmedabad', 'Jaipur'], demandMultiplier: 1.2, costMultiplier: 1.2, competitionLevel: 60, growthPotential: 80, marketSize: 500000, averageRevenue: 420000 },
+  { tier: 3 as const, cities: ['Indore', 'Nagpur', 'Vadodara'], demandMultiplier: 1.0, costMultiplier: 0.8, competitionLevel: 35, growthPotential: 90, marketSize: 200000, averageRevenue: 180000 },
+];
+
+const FALLBACK_FESTIVALS = [
+  { name: "Valentine's Day", date: '2026-02-14', daysUntil: 12, baseMultiplier: 1.3, peakMultiplier: 2.5, demandCurve: [{ day: 14, multiplier: 1.2 }, { day: 7, multiplier: 1.8 }, { day: 3, multiplier: 2.2 }, { day: 1, multiplier: 2.5 }, { day: 0, multiplier: 2.0 }], affectedCategories: ['Gifts', 'Flowers', 'Chocolates', 'Restaurants'], historicalSales: 180000 },
+  { name: 'Holi', date: '2026-03-03', daysUntil: 29, baseMultiplier: 1.5, peakMultiplier: 3.0, demandCurve: [{ day: 10, multiplier: 1.3 }, { day: 5, multiplier: 2.0 }, { day: 2, multiplier: 2.7 }, { day: 0, multiplier: 3.0 }], affectedCategories: ['Colors', 'Water Guns', 'Sweets', 'Beverages'], historicalSales: 220000 },
+  { name: 'Diwali', date: '2026-11-08', daysUntil: 279, baseMultiplier: 1.5, peakMultiplier: 3.5, demandCurve: [{ day: 14, multiplier: 1.2 }, { day: 7, multiplier: 2.0 }, { day: 3, multiplier: 3.0 }, { day: 1, multiplier: 3.5 }, { day: 0, multiplier: 2.5 }], affectedCategories: ['Electronics', 'Clothing', 'Sweets', 'Home Decor'], historicalSales: 500000 },
+];
+
+const FALLBACK_JUGAAD_IDEAS = [
+  { id: '1', title: 'WhatsApp-based CRM', description: 'Use WhatsApp Business API for customer relationship management', generation: 1, category: 'technology', feasibility: 85, impact: 70 },
+  { id: '2', title: 'Shared Delivery Network', description: 'Partner with local kirana stores for last-mile delivery', generation: 2, category: 'operations', feasibility: 90, impact: 65 },
+  { id: '3', title: 'Festival Pop-up Strategy', description: 'Temporary stalls during peak festival seasons', generation: 3, category: 'marketing', feasibility: 80, impact: 75 },
+];
+
+const FALLBACK_AUDIT_ENTRIES = [
+  { timestamp: new Date(Date.now() - 300000), action: 'simulation-complete', details: { paths: 3, confidence: 92 }, status: 'success' as const },
+  { timestamp: new Date(Date.now() - 600000), action: 'profile-created', details: { industry: 'SaaS' }, status: 'success' as const },
+  { timestamp: new Date(Date.now() - 900000), action: 'agent-override-warning', details: { agent: 'risk_analyzer', reason: 'High volatility detected' }, status: 'warning' as const },
+];
+
+// NEW FEATURE FALLBACK DATA
+const FALLBACK_GST_DATA = {
+  gstNumber: '27AABCU9603R1ZM',
+  filingStatus: 'pending' as const,
+  lastFiledDate: '2026-01-20',
+  nextDueDate: '2026-02-20',
+  pendingReturns: [
+    { type: 'GSTR-1', period: 'Jan 2026', dueDate: '2026-02-11', status: 'filed' as const },
+    { type: 'GSTR-3B', period: 'Jan 2026', dueDate: '2026-02-20', status: 'pending' as const },
+    { type: 'GSTR-9', period: 'FY 2024-25', dueDate: '2026-03-31', status: 'pending' as const, penalty: 5000 },
+  ],
+  complianceScore: 78,
+  totalTaxLiability: 245000,
+  inputTaxCredit: 180000,
+  alerts: [
+    { type: 'warning' as const, message: 'GSTR-3B due in 18 days - file before 20th Feb to avoid late fees' },
+    { type: 'info' as const, message: 'ITC reconciliation pending for 3 invoices worth ₹45,000' },
+    { type: 'error' as const, message: 'GSTR-9 filing overdue - penalty accruing daily' },
+  ],
+};
+
+const FALLBACK_FUNDING_DATA = {
+  overallScore: 72,
+  fundingStage: 'Seed' as const,
+  metrics: {
+    revenueGrowth: 75, marketSize: 80, teamStrength: 65, productMarketFit: 78,
+    unitEconomics: 60, competitiveAdvantage: 70, scalability: 85, financialHealth: 68,
+  },
+  strengths: ['Strong month-over-month growth (15%)', 'Large addressable market in India', 'Scalable tech stack'],
+  improvements: ['Unit economics need optimization', 'Team gaps in sales leadership', 'Longer runway recommended'],
+  estimatedValuation: { min: 50000000, max: 80000000 },
+  investorMatch: [
+    { name: 'Sequoia Surge', fit: 85, focus: 'Early-stage SaaS' },
+    { name: 'Blume Ventures', fit: 78, focus: 'B2B India' },
+    { name: 'Accel India', fit: 72, focus: 'Series A ready' },
+  ],
+  recommendations: ['Hire VP Sales in next quarter', 'Improve gross margins to 70%+', 'Document customer success stories'],
+};
+
+const FALLBACK_SUPPLIER_DATA = {
+  suppliers: [
+    { id: '1', name: 'Tata Steel', location: 'Jamshedpur', state: 'Jharkhand', riskScore: 15, reliabilityScore: 92, leadTime: 7, costIndex: 85, category: 'Raw Materials', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+    { id: '2', name: 'Reliance Logistics', location: 'Mumbai', state: 'Maharashtra', riskScore: 25, reliabilityScore: 88, leadTime: 3, costIndex: 90, category: 'Logistics', dependencies: 5, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+    { id: '3', name: 'Local Vendor A', location: 'Pune', state: 'Maharashtra', riskScore: 65, reliabilityScore: 55, leadTime: 14, costIndex: 60, category: 'Components', dependencies: 2, lastDeliveryStatus: 'delayed' as const, alerts: ['Payment terms dispute', 'Quality issues reported'] },
+    { id: '4', name: 'China Import Co', location: 'Shenzhen', state: 'International', riskScore: 75, reliabilityScore: 70, leadTime: 45, costIndex: 40, category: 'Electronics', dependencies: 4, lastDeliveryStatus: 'delayed' as const, alerts: ['Shipping delays due to port congestion', 'Currency fluctuation risk'] },
+  ],
+  overallRiskScore: 38,
+  highRiskCount: 2,
+  avgLeadTime: 17,
+  topRisks: [
+    { risk: 'Single-source dependency for electronics', impact: 'Production halt if supplier fails', mitigation: 'Identify alternate suppliers in Taiwan/Vietnam' },
+    { risk: 'International shipping delays', impact: '20-30 day lead time variance', mitigation: 'Increase safety stock by 2 weeks' },
+  ],
+  alternativeSuppliers: [
+    { name: 'Vedanta Ltd', state: 'Rajasthan', riskScore: 20 },
+    { name: 'Blue Dart', state: 'Karnataka', riskScore: 18 },
+  ],
+};
+
+const FALLBACK_MARKET_ENTRY = {
+  targetState: {
+    name: 'Karnataka', code: 'KA', tier: 'Tier 1' as const, population: 67, gdpPerCapita: 285000,
+    marketSize: 45000, competitionLevel: 'High' as const, regulatoryEase: 78, infrastructureScore: 82,
+    digitalPenetration: 72, laborCost: 85, entryBarriers: ['High competition', 'Established players'],
+    keyIndustries: ['IT/ITES', 'Biotechnology', 'Aerospace'], recommendedEntry: 'Partner with local distributor, focus on Bangalore first',
+  },
+  alternativeStates: [
+    { name: 'Tamil Nadu', code: 'TN', tier: 'Tier 1' as const, population: 77, gdpPerCapita: 265000, marketSize: 42000, competitionLevel: 'High' as const, regulatoryEase: 75, infrastructureScore: 80, digitalPenetration: 68, laborCost: 75, entryBarriers: ['Language barrier'], keyIndustries: ['Auto', 'Manufacturing'], recommendedEntry: 'Direct entry with local team' },
+    { name: 'Telangana', code: 'TS', tier: 'Tier 1' as const, population: 38, gdpPerCapita: 275000, marketSize: 28000, competitionLevel: 'Medium' as const, regulatoryEase: 82, infrastructureScore: 78, digitalPenetration: 70, laborCost: 70, entryBarriers: ['Emerging market'], keyIndustries: ['Pharma', 'IT'], recommendedEntry: 'Hyderabad-first strategy' },
+    { name: 'Gujarat', code: 'GJ', tier: 'Tier 1' as const, population: 70, gdpPerCapita: 255000, marketSize: 38000, competitionLevel: 'Medium' as const, regulatoryEase: 85, infrastructureScore: 85, digitalPenetration: 62, laborCost: 65, entryBarriers: ['Business culture difference'], keyIndustries: ['Chemicals', 'Textiles', 'Pharma'], recommendedEntry: 'GIFT City as entry point' },
+  ],
+  projectedROI: [
+    { month: 3, conservative: -15, moderate: -8, aggressive: 5 },
+    { month: 6, conservative: -5, moderate: 10, aggressive: 25 },
+    { month: 9, conservative: 8, moderate: 22, aggressive: 45 },
+    { month: 12, conservative: 18, moderate: 35, aggressive: 65 },
+  ],
+  investmentRequired: { min: 1500000, max: 3000000 },
+  breakEvenMonths: 9,
+  riskFactors: [
+    { factor: 'Competition from established players', severity: 'High' as const, mitigation: 'Differentiate on pricing and service' },
+    { factor: 'Regulatory compliance costs', severity: 'Medium' as const, mitigation: 'Partner with local CA firm' },
+  ],
+  successProbability: 68,
+  recommendations: ['Start with Bangalore IT corridor', 'Build local partnerships first', 'Allocate 20% budget for marketing'],
+};
+
+const FALLBACK_CASHFLOW = {
+  currentBalance: 2500000,
+  projectedBalance30: 2200000,
+  projectedBalance60: 1850000,
+  projectedBalance90: 1600000,
+  burnRate: 650000,
+  runway: 4,
+  cashFlowHistory: [
+    { period: 'Oct 2025', inflow: 800000, outflow: 720000, netFlow: 80000, balance: 2800000, predicted: false },
+    { period: 'Nov 2025', inflow: 850000, outflow: 750000, netFlow: 100000, balance: 2900000, predicted: false },
+    { period: 'Dec 2025', inflow: 700000, outflow: 800000, netFlow: -100000, balance: 2800000, predicted: false },
+    { period: 'Jan 2026', inflow: 600000, outflow: 900000, netFlow: -300000, balance: 2500000, predicted: false },
+    { period: 'Feb 2026', inflow: 750000, outflow: 800000, netFlow: -50000, balance: 2200000, predicted: true },
+    { period: 'Mar 2026', inflow: 700000, outflow: 650000, netFlow: 50000, balance: 1850000, predicted: true },
+    { period: 'Apr 2026', inflow: 800000, outflow: 600000, netFlow: 200000, balance: 1600000, predicted: true },
+  ],
+  inflowCategories: [
+    { category: 'Product Sales', amount: 450000, percentage: 60, trend: 'up' as const },
+    { category: 'Services', amount: 180000, percentage: 24, trend: 'stable' as const },
+    { category: 'Other', amount: 120000, percentage: 16, trend: 'down' as const },
+  ],
+  outflowCategories: [
+    { category: 'Salaries', amount: 380000, percentage: 48, trend: 'up' as const },
+    { category: 'Operations', amount: 200000, percentage: 25, trend: 'stable' as const },
+    { category: 'Marketing', amount: 120000, percentage: 15, trend: 'down' as const },
+    { category: 'Others', amount: 100000, percentage: 12, trend: 'stable' as const },
+  ],
+  alerts: [
+    { type: 'warning' as const, message: 'Runway below 6 months - consider fundraising', date: 'Feb 2026' },
+    { type: 'info' as const, message: 'Q4 typically sees 20% higher collections', date: 'Mar 2026' },
+  ],
+  recommendations: ['Accelerate receivables collection', 'Negotiate 60-day terms with vendors', 'Consider invoice factoring for immediate cash'],
+};
+
+const FALLBACK_WORKFORCE = {
+  currentHeadcount: 24,
+  recommendedHeadcount: 32,
+  staffingGap: 8,
+  monthlyBurnIncrease: 480000,
+  seasonalPlan: [
+    { month: 'Feb', currentStaff: 24, requiredStaff: 26, gap: 2, seasonalFactor: 1.0, festivals: [] },
+    { month: 'Mar', currentStaff: 26, requiredStaff: 28, gap: 2, seasonalFactor: 1.1, festivals: ['Holi'] },
+    { month: 'Apr', currentStaff: 28, requiredStaff: 28, gap: 0, seasonalFactor: 0.95, festivals: [] },
+    { month: 'May', currentStaff: 28, requiredStaff: 30, gap: 2, seasonalFactor: 1.0, festivals: [] },
+    { month: 'Jun', currentStaff: 30, requiredStaff: 30, gap: 0, seasonalFactor: 0.9, festivals: [] },
+    { month: 'Jul', currentStaff: 30, requiredStaff: 28, gap: -2, seasonalFactor: 0.85, festivals: [] },
+    { month: 'Aug', currentStaff: 28, requiredStaff: 30, gap: 2, seasonalFactor: 1.0, festivals: ['Raksha Bandhan'] },
+    { month: 'Sep', currentStaff: 30, requiredStaff: 32, gap: 2, seasonalFactor: 1.1, festivals: ['Ganesh Chaturthi'] },
+    { month: 'Oct', currentStaff: 32, requiredStaff: 36, gap: 4, seasonalFactor: 1.3, festivals: ['Navratri', 'Dussehra'] },
+    { month: 'Nov', currentStaff: 34, requiredStaff: 40, gap: 6, seasonalFactor: 1.5, festivals: ['Diwali'] },
+    { month: 'Dec', currentStaff: 36, requiredStaff: 34, gap: -2, seasonalFactor: 1.1, festivals: ['Christmas'] },
+    { month: 'Jan', currentStaff: 32, requiredStaff: 28, gap: -4, seasonalFactor: 0.9, festivals: [] },
+  ],
+  roleRequirements: [
+    { role: 'Sales Executive', current: 6, required: 10, gap: 4, priority: 'Critical' as const, costPerMonth: 45000 },
+    { role: 'Customer Support', current: 4, required: 6, gap: 2, priority: 'High' as const, costPerMonth: 30000 },
+    { role: 'Operations', current: 3, required: 4, gap: 1, priority: 'Medium' as const, costPerMonth: 35000 },
+    { role: 'Marketing', current: 2, required: 3, gap: 1, priority: 'Medium' as const, costPerMonth: 50000 },
+  ],
+  hiringTimeline: [
+    { role: 'Sales Executive', hireBy: 'Mar 2026', count: 2 },
+    { role: 'Customer Support', hireBy: 'Apr 2026', count: 1 },
+    { role: 'Sales Executive', hireBy: 'Sep 2026', count: 2 },
+  ],
+  costImpact: { currentMonthlyCost: 960000, projectedMonthlyCost: 1440000, annualSavings: 720000 },
+  recommendations: ['Hire sales team before festival season', 'Consider contract staff for peak periods', 'Cross-train existing team for flexibility'],
+};
 
 const DECISION_TYPES = [
   { value: 'growth', label: 'Growth Strategy', icon: TrendingUp, description: 'How to scale my business?' },
@@ -229,7 +434,8 @@ export default function Home() {
       growth_strategist: agents.growth_strategist?.contribution || 10,
       learning_adaptation: agents.learning_adaptation?.contribution || 6,
     };
-    const paths = generateDecisionPaths(profile, agentContributions);
+    // Pass query to generateDecisionPaths for intent-specific recommendations
+    const paths = generateDecisionPaths(profile, agentContributions, decisionQuery);
 
     let marlState: MARLState = {
       episode: 0, totalReward: 500,
@@ -369,9 +575,13 @@ export default function Home() {
 
       <div className="flex-1 flex overflow-hidden mt-16 pb-16">
         {/* Left Sidebar */}
-        <motion.div animate={{ width: sidebarOpen ? '220px' : '0px', opacity: sidebarOpen ? 1 : 0 }} className="bg-slate-900/50 border-r border-white/10 overflow-hidden flex flex-col">
-          <AgentActivityTree />
-          <div className="border-t border-white/10"><ControlBar /></div>
+        <motion.div animate={{ width: sidebarOpen ? '250px' : '0px', opacity: sidebarOpen ? 1 : 0 }} className="bg-slate-900/50 border-r border-white/10 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <AgentActivityTree />
+          </div>
+          <div className="border-t-2 border-amber-500/30 flex-shrink-0 bg-slate-900/80 backdrop-blur">
+            <ControlBar />
+          </div>
         </motion.div>
 
         {/* Center Canvas */}
@@ -479,24 +689,23 @@ export default function Home() {
                 )}
 
                 {activeTab === 'calculators' && (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
+                    {/* Financial Calculators */}
                     <div className="p-4 bg-slate-900/50 rounded-xl border border-white/10">
                       <h4 className="font-bold text-lg mb-2">🧮 Financial Calculators</h4>
-                      <p className="text-sm text-gray-400 mb-4">Use these tools to calculate GST, TDS, invoice discounts, and assess fraud risk.</p>
+                      <p className="text-sm text-gray-400 mb-4">Calculate GST, TDS, invoice discounts, and assess fraud risk.</p>
 
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div className="bg-black/30 rounded-xl p-4 border border-white/10">
-                          <h5 className="font-bold text-green-400 mb-3">GST & Compliance</h5>
                           <CompliancePanel />
                         </div>
 
                         <div className="bg-black/30 rounded-xl p-4 border border-white/10">
-                          <h5 className="font-bold text-blue-400 mb-3">Invoice Discounting</h5>
                           <InvoiceDiscountCalculator />
                         </div>
 
                         <div className="lg:col-span-2 bg-black/30 rounded-xl p-4 border border-white/10">
-                          <h5 className="font-bold text-red-400 mb-3">UPI Fraud Risk Simulator</h5>
+                          <h5 className="font-bold text-red-400 mb-3">🛡️ UPI Fraud Risk Simulator</h5>
                           <UFraudRiskSimulator fraudScore={{
                             score: 45,
                             fraudAttempts: 12,
@@ -511,26 +720,163 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Operational Tools */}
+                    <div className="p-4 bg-slate-900/50 rounded-xl border border-white/10">
+                      <h4 className="font-bold text-lg mb-2">⚙️ Operational Tools</h4>
+                      <p className="text-sm text-gray-400 mb-4">Manage inventory, find suppliers, and hire staff.</p>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div className="bg-black/30 rounded-xl p-4 border border-cyan-500/20">
+                          <InventoryControlPanel />
+                        </div>
+
+                        <div className="bg-black/30 rounded-xl p-4 border border-purple-500/20">
+                          <StaffHiringPanel />
+                        </div>
+
+                        <div className="bg-black/30 rounded-xl p-4 border border-orange-500/20">
+                          <SupplierFinderPanel />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {activeTab === 'advanced' && (
-                  <div className="space-y-4">
-                    <GraphCard title="Reward Decomposition" conclusion="Revenue (35%) drives most value. Operational efficiency (22%) is the second-highest contributor.">
-                      <RewardDecompositionChart decomposition={currentResult.rewardDecomposition ?? FALLBACK_REWARD_DECOMPOSITION} />
-                    </GraphCard>
+                  <div className="space-y-6">
+                    {/* Advanced India-Specific Features - One per row for clarity */}
+                    <div className="space-y-4">
+                      {/* Burnout Mitigation */}
+                      <div className="bg-gradient-to-br from-pink-900/20 to-purple-900/10 rounded-xl p-4 border border-pink-500/30">
+                        <BurnoutMitigationPathways trajectories={FALLBACK_BURNOUT_MITIGATION} />
+                      </div>
 
-                    <GraphCard title="Curriculum Learning Progress" conclusion="System mastered 3-level hierarchical learning. Ready for complex multi-agent decisions.">
-                      <CurriculumBreakdown levels={currentResult.curriculumLevels ?? FALLBACK_CURRICULUM_LEVELS} />
-                    </GraphCard>
+                      {/* Regional Adjustment */}
+                      <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/10 rounded-xl p-4 border border-cyan-500/30">
+                        <RegionalInequalityAdjustment regions={FALLBACK_REGIONAL_DATA} selectedTier={1} />
+                      </div>
 
-                    <GraphCard title="Ablation Study" conclusion="MARL contributes 30.4% to performance. Removing it causes the largest accuracy drop.">
-                      <AblationStudyChart ablations={currentResult.ablationStudy ?? FALLBACK_ABLATION_STUDY} />
-                    </GraphCard>
+                      {/* Festival Demand Multiplier */}
+                      <div className="bg-gradient-to-br from-amber-900/20 to-orange-900/10 rounded-xl p-4 border border-amber-500/30">
+                        <FestivalAwareDemandMultiplier
+                          festivals={FALLBACK_FESTIVALS}
+                          selectedFestival="Valentine's Day"
+                          onSelectFestival={() => {}}
+                        />
+                      </div>
 
-                    <GraphCard title="Burnout Trajectory" conclusion="With recommended path, burnout risk reduces by 33% over 30 days compared to baseline.">
-                      <BurnoutTrajectoryChart trajectory={currentResult.burnoutTrajectory ?? FALLBACK_BURNOUT_TRAJECTORY} />
-                    </GraphCard>
+                      {/* Self-Evolving Jugaad */}
+                      <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/10 rounded-xl p-4 border border-green-500/30">
+                        <SelfEvolvingJugaadGenerator
+                          ideas={FALLBACK_JUGAAD_IDEAS as any}
+                          onGenerateNew={() => {}}
+                        />
+                      </div>
+
+                      {/* NEW FEATURES - Business Intelligence Suite */}
+                      <div className="mt-6 mb-4">
+                        <h3 className="text-lg font-bold text-white mb-1">Business Intelligence Suite</h3>
+                        <p className="text-sm text-gray-400">Advanced analytics and planning tools for Indian businesses</p>
+                      </div>
+
+                      {/* GST Compliance Checker */}
+                      <div className="bg-gradient-to-br from-indigo-900/20 to-blue-900/10 rounded-xl p-4 border border-indigo-500/30">
+                        <GSTComplianceChecker data={FALLBACK_GST_DATA} />
+                      </div>
+
+                      {/* Funding Readiness Score */}
+                      <div className="bg-gradient-to-br from-purple-900/20 to-violet-900/10 rounded-xl p-4 border border-purple-500/30">
+                        <FundingReadinessScore data={FALLBACK_FUNDING_DATA} />
+                      </div>
+
+                      {/* Supplier Risk Map */}
+                      <div className="bg-gradient-to-br from-orange-900/20 to-red-900/10 rounded-xl p-4 border border-orange-500/30">
+                        <SupplierRiskMap data={FALLBACK_SUPPLIER_DATA} />
+                      </div>
+
+                      {/* Market Entry Simulator */}
+                      <div className="bg-gradient-to-br from-emerald-900/20 to-teal-900/10 rounded-xl p-4 border border-emerald-500/30">
+                        <MarketEntrySimulator data={FALLBACK_MARKET_ENTRY} />
+                      </div>
+
+                      {/* Cash Flow Predictor */}
+                      <div className="bg-gradient-to-br from-sky-900/20 to-indigo-900/10 rounded-xl p-4 border border-sky-500/30">
+                        <CashFlowPredictor data={FALLBACK_CASHFLOW} />
+                      </div>
+
+                      {/* Seasonal Workforce Planner */}
+                      <div className="bg-gradient-to-br from-violet-900/20 to-purple-900/10 rounded-xl p-4 border border-violet-500/30">
+                        <SeasonalWorkforcePlanner data={FALLBACK_WORKFORCE} />
+                      </div>
+
+                      {/* NEW v2.2 - Integration & Export Suite */}
+                      <div className="mt-6 mb-4">
+                        <h3 className="text-lg font-bold text-white mb-1">Integration & Export Suite</h3>
+                        <p className="text-sm text-gray-400">Connect with Tally, Zoho, export to Excel, and share via WhatsApp</p>
+                      </div>
+
+                      {/* Integration Dashboard - Tally, Zoho, GST */}
+                      <div className="bg-gradient-to-br from-blue-900/20 to-cyan-900/10 rounded-xl p-4 border border-blue-500/30">
+                        <IntegrationDashboard />
+                      </div>
+
+                      {/* Competitor Benchmarking */}
+                      <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/10 rounded-xl p-4 border border-purple-500/30">
+                        <CompetitorBenchmark />
+                      </div>
+
+                      {/* Excel Export */}
+                      <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/10 rounded-xl p-4 border border-green-500/30">
+                        <ExcelExport />
+                      </div>
+
+                      {/* Voice Input & WhatsApp Share - Side by Side */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="bg-gradient-to-br from-red-900/20 to-orange-900/10 rounded-xl p-4 border border-red-500/30">
+                          <VoiceInput
+                            onTranscript={(text) => console.log('Voice:', text)}
+                            onCommand={(cmd) => console.log('Command:', cmd)}
+                          />
+                        </div>
+                        <div className="bg-gradient-to-br from-green-900/20 to-teal-900/10 rounded-xl p-4 border border-green-500/30">
+                          <WhatsAppShare />
+                        </div>
+                      </div>
+
+                      {/* Language Selector */}
+                      <div className="bg-gradient-to-br from-indigo-900/20 to-violet-900/10 rounded-xl p-4 border border-indigo-500/30">
+                        <LanguageSelector />
+                      </div>
+                    </div>
+
+                    {/* Audit Trail */}
+                    <div className="p-4 bg-slate-900/50 rounded-xl border border-white/10">
+                      <h4 className="font-bold text-lg mb-2">📋 Advanced Audit Trail</h4>
+                      <p className="text-sm text-gray-400 mb-4">Full transparency of all AI decisions and recommendations.</p>
+                      <div className="bg-black/30 rounded-xl p-4 border border-white/10">
+                        <AdvancedAuditTrail entries={FALLBACK_AUDIT_ENTRIES} onExport={() => {}} />
+                      </div>
+                    </div>
+
+                    {/* Analytics Charts */}
+                    <div className="space-y-4">
+                      <GraphCard title="Reward Decomposition" conclusion="Revenue (35%) drives most value. Operational efficiency (22%) is the second-highest contributor.">
+                        <RewardDecompositionChart decomposition={currentResult.rewardDecomposition ?? FALLBACK_REWARD_DECOMPOSITION} />
+                      </GraphCard>
+
+                      <GraphCard title="Curriculum Learning Progress" conclusion="System mastered 3-level hierarchical learning. Ready for complex multi-agent decisions.">
+                        <CurriculumBreakdown levels={currentResult.curriculumLevels ?? FALLBACK_CURRICULUM_LEVELS} />
+                      </GraphCard>
+
+                      <GraphCard title="Ablation Study" conclusion="MARL contributes 30.4% to performance. Removing it causes the largest accuracy drop.">
+                        <AblationStudyChart ablations={currentResult.ablationStudy ?? FALLBACK_ABLATION_STUDY} />
+                      </GraphCard>
+
+                      <GraphCard title="Burnout Trajectory" conclusion="With recommended path, burnout risk reduces by 33% over 30 days compared to baseline.">
+                        <BurnoutTrajectoryChart trajectory={currentResult.burnoutTrajectory ?? FALLBACK_BURNOUT_TRAJECTORY} />
+                      </GraphCard>
+                    </div>
                   </div>
                 )}
 

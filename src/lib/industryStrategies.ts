@@ -81,11 +81,133 @@ const industryStrategies: Record<string, (profile: BusinessProfile, parentPath: 
   'spa': generateWellnessStrategies,
 };
 
+// Market Entry / Geographic Expansion Strategies
+function generateMarketEntryStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {
+  const baseRevenue = profile.mrr / 100000;
+  const targetCity = profile.location === 'Bangalore' ? 'Hyderabad' :
+                     profile.location === 'Mumbai' ? 'Pune' :
+                     profile.location === 'Delhi' ? 'Jaipur' : 'Tier-2 City';
+
+  return [
+    {
+      id: `${parentPath}-pilot-launch`,
+      title: `Pilot Launch in ${targetCity}`,
+      description: `Start with minimal team (2-3 people) to test market fit`,
+      projectedRevenue: Math.round(35 + baseRevenue * 6),
+      riskDelta: 25,
+      burnoutDelta: 15,
+      timelineDays: 60,
+      cost: Math.round(profile.mrr * 0.15),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-local-partnerships`,
+      title: 'Local Business Partnerships',
+      description: `Partner with established ${targetCity} businesses for quick market access`,
+      projectedRevenue: Math.round(45 + baseRevenue * 8),
+      riskDelta: 20,
+      burnoutDelta: 10,
+      timelineDays: 45,
+      cost: Math.round(profile.mrr * 0.1),
+      category: 'partnerships',
+    },
+    {
+      id: `${parentPath}-franchise-model`,
+      title: 'Franchise/Licensing Model',
+      description: `Expand through local franchise partners instead of direct operations`,
+      projectedRevenue: Math.round(50 + baseRevenue * 10),
+      riskDelta: 30,
+      burnoutDelta: 5,
+      timelineDays: 90,
+      cost: Math.round(profile.mrr * 0.08),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-remote-sales-first`,
+      title: 'Remote Sales Team',
+      description: `Hire local sales reps who work remotely without office setup`,
+      projectedRevenue: Math.round(30 + baseRevenue * 5),
+      riskDelta: 15,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: Math.round(profile.mrr * 0.12),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-digital-first-entry`,
+      title: 'Digital-First Market Entry',
+      description: `Enter ${targetCity} through online channels before physical presence`,
+      projectedRevenue: Math.round(40 + baseRevenue * 7),
+      riskDelta: 15,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: Math.round(profile.mrr * 0.1),
+      category: 'marketing',
+    },
+    {
+      id: `${parentPath}-acquisition-entry`,
+      title: 'Acquire Local Player',
+      description: `Acquire a small local competitor for instant market presence`,
+      projectedRevenue: Math.round(70 + baseRevenue * 15),
+      riskDelta: 45,
+      burnoutDelta: 25,
+      timelineDays: 120,
+      cost: Math.round(profile.mrr * 0.5),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-coworking-setup`,
+      title: 'Co-working Space Setup',
+      description: `Start with flexible co-working space instead of full office`,
+      projectedRevenue: Math.round(25 + baseRevenue * 4),
+      riskDelta: 10,
+      burnoutDelta: 5,
+      timelineDays: 14,
+      cost: Math.round(profile.mrr * 0.05),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-event-marketing`,
+      title: 'Local Event Marketing',
+      description: `Sponsor/participate in ${targetCity} industry events for visibility`,
+      projectedRevenue: Math.round(35 + baseRevenue * 6),
+      riskDelta: 15,
+      burnoutDelta: 20,
+      timelineDays: 45,
+      cost: Math.round(profile.mrr * 0.08),
+      category: 'marketing',
+    },
+    {
+      id: `${parentPath}-tier2-expansion`,
+      title: 'Tier-2 City Network',
+      description: `Target multiple Tier-2 cities simultaneously for scale`,
+      projectedRevenue: Math.round(60 + baseRevenue * 12),
+      riskDelta: 35,
+      burnoutDelta: 30,
+      timelineDays: 90,
+      cost: Math.round(profile.mrr * 0.25),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-local-influencers`,
+      title: 'Regional Influencer Campaign',
+      description: `Partner with local influencers for ${targetCity} market awareness`,
+      projectedRevenue: Math.round(40 + baseRevenue * 7),
+      riskDelta: 20,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: Math.round(profile.mrr * 0.12),
+      category: 'marketing',
+    },
+  ];
+}
+
 // Default generic strategies
 function generateGenericStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {
   const baseRevenue = profile.mrr / 100000; // in lakhs
 
-  return [
+  // Combine generic + market entry strategies for variety
+  const genericStrategies: ExecutionOption[] = [
     {
       id: `${parentPath}-digital-marketing`,
       title: 'Digital Marketing Campaign',
@@ -141,7 +263,67 @@ function generateGenericStrategies(profile: BusinessProfile, parentPath: string)
       cost: Math.round(profile.mrr * 0.3),
       category: 'operations',
     },
+    {
+      id: `${parentPath}-content-marketing`,
+      title: 'Content & SEO Strategy',
+      description: 'Build organic traffic through quality content and SEO',
+      projectedRevenue: Math.round(25 + baseRevenue * 4),
+      riskDelta: 10,
+      burnoutDelta: 15,
+      timelineDays: 90,
+      cost: Math.round(profile.mrr * 0.08),
+      category: 'marketing',
+    },
+    {
+      id: `${parentPath}-customer-success`,
+      title: 'Customer Success Program',
+      description: 'Reduce churn and increase upsells with dedicated success team',
+      projectedRevenue: Math.round(35 + baseRevenue * 5),
+      riskDelta: 15,
+      burnoutDelta: 10,
+      timelineDays: 45,
+      cost: Math.round(profile.mrr * 0.12),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-pricing-optimization`,
+      title: 'Pricing Strategy Optimization',
+      description: 'Revise pricing tiers to maximize revenue per customer',
+      projectedRevenue: Math.round(30 + baseRevenue * 6),
+      riskDelta: 20,
+      burnoutDelta: 5,
+      timelineDays: 30,
+      cost: Math.round(profile.mrr * 0.03),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-product-improvement`,
+      title: 'Product Enhancement',
+      description: 'Add high-demand features based on customer feedback',
+      projectedRevenue: Math.round(40 + baseRevenue * 8),
+      riskDelta: 25,
+      burnoutDelta: 20,
+      timelineDays: 60,
+      cost: Math.round(profile.mrr * 0.2),
+      category: 'technology',
+    },
+    {
+      id: `${parentPath}-community-building`,
+      title: 'Community Building',
+      description: 'Create engaged user community for retention and advocacy',
+      projectedRevenue: Math.round(20 + baseRevenue * 4),
+      riskDelta: 10,
+      burnoutDelta: 15,
+      timelineDays: 60,
+      cost: Math.round(profile.mrr * 0.05),
+      category: 'marketing',
+    },
   ];
+
+  // Add market entry strategies for variety
+  const marketStrategies = generateMarketEntryStrategies(profile, parentPath);
+
+  return [...genericStrategies, ...marketStrategies];
 }
 
 function generateFoodStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {

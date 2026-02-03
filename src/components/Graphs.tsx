@@ -4,36 +4,51 @@ import React from 'react';
 import { useNeoBIStore } from '@/lib/store';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+// Custom legend to avoid overlapping
+const CompactLegend = ({ payload }: any) => (
+  <div className="flex gap-4 justify-center text-xs mt-1">
+    {payload?.map((entry: any, index: number) => (
+      <div key={index} className="flex items-center gap-1">
+        <div className="w-3 h-0.5" style={{ backgroundColor: entry.color }} />
+        <span className="text-gray-400">{entry.value}</span>
+      </div>
+    ))}
+  </div>
+);
+
 export const MARLConvergenceCurve: React.FC = () => {
   const { graphData } = useNeoBIStore();
   const { marlConvergence } = graphData;
 
-  const data = marlConvergence.episodes.map((ep, idx) => ({
-    episode: ep,
-    reward: marlConvergence.rewards[idx],
-    mean: marlConvergence.mean[idx],
-  }));
+  // Sample data to reduce x-axis crowding
+  const sampledData = marlConvergence.episodes
+    .filter((_, idx) => idx % 3 === 0 || idx === marlConvergence.episodes.length - 1)
+    .map((ep, idx) => ({
+      episode: ep,
+      reward: marlConvergence.rewards[idx * 3] || marlConvergence.rewards[marlConvergence.rewards.length - 1],
+      mean: marlConvergence.mean[idx * 3] || marlConvergence.mean[marlConvergence.mean.length - 1],
+    }));
 
   return (
-    <div className="glass p-4 h-80">
-      <h4 className="text-sm font-bold mb-3 flex items-center gap-2">
-        📈 MARL Reward Convergence
-        <span className="text-xs text-gray-400 font-normal">5 seeds mean</span>
-      </h4>
-      <ResponsiveContainer width="100%" height="90%">
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-          <XAxis dataKey="episode" stroke="#888" />
-          <YAxis stroke="#888" />
-          <Tooltip
-            contentStyle={{ background: 'rgba(15,15,23,0.9)', border: '1px solid rgba(255,255,255,0.1)' }}
-          />
-          <Legend />
-          <Line type="monotone" dataKey="reward" stroke="#FF6B6B" dot={false} name="Episode Reward" />
-          <Line type="monotone" dataKey="mean" stroke="#FFB347" strokeWidth={2} dot={false} name="Mean (Converged)" />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={sampledData} margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+        <XAxis
+          dataKey="episode"
+          stroke="#666"
+          tick={{ fontSize: 10 }}
+          tickLine={false}
+          interval="preserveStartEnd"
+        />
+        <YAxis stroke="#666" tick={{ fontSize: 10 }} tickLine={false} width={35} />
+        <Tooltip
+          contentStyle={{ background: 'rgba(15,15,23,0.95)', border: '1px solid rgba(255,255,255,0.1)', fontSize: 11 }}
+        />
+        <Legend content={<CompactLegend />} />
+        <Line type="monotone" dataKey="reward" stroke="#FF6B6B" dot={false} strokeWidth={1.5} name="Episode Reward" />
+        <Line type="monotone" dataKey="mean" stroke="#FFB347" strokeWidth={2} dot={false} name="Mean (Converged)" />
+      </LineChart>
+    </ResponsiveContainer>
   );
 };
 
@@ -82,27 +97,32 @@ export const CashFlowProjectionChart: React.FC = () => {
   }));
 
   return (
-    <div className="glass p-4 h-80">
-      <h4 className="text-sm font-bold mb-3 flex items-center gap-2">
-        💰 Cash Flow Projection (6M)
-        <span className="text-xs text-gray-400 font-normal">3 paths + CI</span>
-      </h4>
-      <ResponsiveContainer width="100%" height="90%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-          <XAxis dataKey="month" stroke="#888" />
-          <YAxis stroke="#888" />
-          <Tooltip
-            contentStyle={{ background: 'rgba(15,15,23,0.9)', border: '1px solid rgba(255,255,255,0.1)' }}
-            formatter={(value) => `₹${(Number(value) / 100000).toFixed(1)}L`}
-          />
-          <Legend />
-          <Line type="monotone" dataKey="path1" stroke="#EC4899" name="Aggressive" strokeWidth={2} />
-          <Line type="monotone" dataKey="path2" stroke="#FFB347" name="Balanced" strokeWidth={2} />
-          <Line type="monotone" dataKey="path3" stroke="#10B981" name="Conservative" strokeWidth={2} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={data} margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+        <XAxis
+          dataKey="month"
+          stroke="#666"
+          tick={{ fontSize: 10 }}
+          tickLine={false}
+        />
+        <YAxis
+          stroke="#666"
+          tick={{ fontSize: 10 }}
+          tickLine={false}
+          width={45}
+          tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+        />
+        <Tooltip
+          contentStyle={{ background: 'rgba(15,15,23,0.95)', border: '1px solid rgba(255,255,255,0.1)', fontSize: 11 }}
+          formatter={(value) => `₹${(Number(value) / 100000).toFixed(1)}L`}
+        />
+        <Legend content={<CompactLegend />} />
+        <Line type="monotone" dataKey="path1" stroke="#EC4899" name="Aggressive" strokeWidth={2} dot={{ r: 2 }} />
+        <Line type="monotone" dataKey="path2" stroke="#FFB347" name="Balanced" strokeWidth={2} dot={{ r: 2 }} />
+        <Line type="monotone" dataKey="path3" stroke="#10B981" name="Conservative" strokeWidth={2} dot={{ r: 2 }} />
+      </LineChart>
+    </ResponsiveContainer>
   );
 };
 

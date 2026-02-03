@@ -7,38 +7,70 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 export const GraphContainer: React.FC<{ title: string; subtitle?: string } & React.HTMLAttributes<HTMLDivElement>> = ({ title, subtitle, children }) => {
   const [expanded, setExpanded] = useState(false);
 
-  return (
-    <>
-      <div className="glass p-4" style={{ height: expanded ? 'auto' : 320 }}>
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <h4 className="text-sm font-bold flex items-center gap-2">{title} {subtitle && <span className="text-xs text-gray-400 font-normal">{subtitle}</span>}</h4>
-          </div>
-          <div className="flex gap-2">
+  // When expanded, render a portal-like full-screen modal
+  if (expanded) {
+    return (
+      <>
+        {/* Backdrop - clicking closes */}
+        <div
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-lg"
+          onClick={() => setExpanded(false)}
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+        {/* Modal content - doesn't close when clicking inside */}
+        <div
+          className="fixed z-[10000] bg-slate-900 border border-white/20 rounded-2xl p-6 shadow-2xl flex flex-col"
+          style={{
+            position: 'fixed',
+            top: '5vh',
+            left: '5vw',
+            right: '5vw',
+            bottom: '5vh',
+            width: '90vw',
+            height: '90vh',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-4 flex-shrink-0">
+            <div>
+              <h3 className="text-2xl font-bold text-white">{title}</h3>
+              {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
+            </div>
             <button
-              onClick={() => setExpanded((s) => !s)}
-              className="px-2 py-1 text-xs bg-amber-600/30 hover:bg-amber-600 rounded text-amber-100"
+              onClick={() => setExpanded(false)}
+              className="px-6 py-3 text-base bg-amber-500 hover:bg-amber-600 rounded-lg text-black font-bold transition-colors"
             >
-              {expanded ? 'Collapse' : 'Expand'}
+              ✕ Close
             </button>
           </div>
-        </div>
-        <div style={{ height: expanded ? 600 : 256 }} className="w-full">
-          {children}
-        </div>
-      </div>
-      {expanded && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
-          <div className="w-full max-w-6xl h-[80vh] glass p-6 overflow-auto">
-            <div className="flex justify-between mb-4">
-              <h3 className="text-lg font-bold">{title}</h3>
-              <button onClick={() => setExpanded(false)} className="px-3 py-1 text-sm bg-amber-600/30 rounded">Close</button>
-            </div>
-            <div style={{ height: 'calc(100% - 50px)' }}>{children}</div>
+          {/* Full height chart container */}
+          <div className="flex-1 w-full" style={{ minHeight: 0, height: 'calc(90vh - 100px)' }}>
+            {children}
           </div>
         </div>
-      )}
-    </>
+      </>
+    );
+  }
+
+  return (
+    <div className="glass p-4" style={{ height: 320 }}>
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <h4 className="text-sm font-bold flex items-center gap-2">{title} {subtitle && <span className="text-xs text-gray-400 font-normal">{subtitle}</span>}</h4>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setExpanded(true)}
+            className="px-3 py-1.5 text-xs bg-amber-600/30 hover:bg-amber-600 rounded text-amber-100 font-semibold transition-colors"
+          >
+            ⛶ Expand
+          </button>
+        </div>
+      </div>
+      <div style={{ height: 256 }} className="w-full">
+        {children}
+      </div>
+    </div>
   );
 };
 

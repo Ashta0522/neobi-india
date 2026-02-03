@@ -47,12 +47,287 @@ export const calculateSHAPValues = (
   return shap;
 };
 
+// Query Intent Detection - Parse user queries to understand intent
+export type QueryIntent =
+  | 'market_entry'
+  | 'growth'
+  | 'hiring'
+  | 'funding'
+  | 'marketing'
+  | 'operations'
+  | 'pivot'
+  | 'compliance'
+  | 'general';
+
+export const detectQueryIntent = (query: string): QueryIntent => {
+  const lowerQuery = query.toLowerCase();
+
+  // Market Entry / New Market / Geographic Expansion
+  // First check if any city is mentioned in the query
+  const mentionedCity = INDIAN_CITIES.some(city => lowerQuery.includes(city));
+
+  if (
+    mentionedCity ||
+    lowerQuery.includes('new market') ||
+    lowerQuery.includes('enter') ||
+    lowerQuery.includes('entering') ||
+    lowerQuery.includes('expand') ||
+    lowerQuery.includes('expansion') ||
+    lowerQuery.includes('move to') ||
+    lowerQuery.includes('relocate') ||
+    lowerQuery.includes('shift to') ||
+    lowerQuery.includes('tier 2') ||
+    lowerQuery.includes('tier-2') ||
+    lowerQuery.includes('tier 3') ||
+    lowerQuery.includes('tier-3') ||
+    lowerQuery.includes('new city') ||
+    lowerQuery.includes('new location') ||
+    lowerQuery.includes('geographic') ||
+    lowerQuery.includes('international')
+  ) {
+    return 'market_entry';
+  }
+
+  // Growth
+  if (lowerQuery.includes('grow') || lowerQuery.includes('scale') || lowerQuery.includes('growth')) {
+    return 'growth';
+  }
+
+  // Hiring
+  if (lowerQuery.includes('hire') || lowerQuery.includes('hiring') || lowerQuery.includes('team') || lowerQuery.includes('recruit')) {
+    return 'hiring';
+  }
+
+  // Funding
+  if (lowerQuery.includes('fund') || lowerQuery.includes('invest') || lowerQuery.includes('capital') || lowerQuery.includes('raise')) {
+    return 'funding';
+  }
+
+  // Marketing
+  if (lowerQuery.includes('market') || lowerQuery.includes('customer') || lowerQuery.includes('acquire') || lowerQuery.includes('sales')) {
+    return 'marketing';
+  }
+
+  // Operations
+  if (lowerQuery.includes('operation') || lowerQuery.includes('efficien') || lowerQuery.includes('process') || lowerQuery.includes('optimize')) {
+    return 'operations';
+  }
+
+  // Pivot
+  if (lowerQuery.includes('pivot') || lowerQuery.includes('change') || lowerQuery.includes('transform')) {
+    return 'pivot';
+  }
+
+  // Compliance
+  if (lowerQuery.includes('gst') || lowerQuery.includes('tax') || lowerQuery.includes('compli') || lowerQuery.includes('legal')) {
+    return 'compliance';
+  }
+
+  return 'general';
+};
+
+// Indian cities database for query extraction
+const INDIAN_CITIES = [
+  // Metro cities
+  'mumbai', 'delhi', 'bangalore', 'bengaluru', 'chennai', 'kolkata', 'hyderabad', 'pune',
+  // Tier 1
+  'ahmedabad', 'surat', 'jaipur', 'lucknow', 'kanpur', 'nagpur', 'indore', 'thane', 'bhopal',
+  'visakhapatnam', 'vizag', 'patna', 'vadodara', 'ghaziabad', 'ludhiana', 'agra', 'nashik',
+  // Tier 2
+  'faridabad', 'meerut', 'rajkot', 'varanasi', 'srinagar', 'aurangabad', 'dhanbad', 'amritsar',
+  'allahabad', 'prayagraj', 'ranchi', 'howrah', 'coimbatore', 'jabalpur', 'gwalior', 'vijayawada',
+  'jodhpur', 'madurai', 'raipur', 'kota', 'chandigarh', 'guwahati', 'solapur', 'hubli',
+  // Tier 3 / Growing cities
+  'thiruvananthapuram', 'trivandrum', 'kochi', 'cochin', 'thrissur', 'kozhikode', 'calicut',
+  'mysore', 'mysuru', 'mangalore', 'mangaluru', 'belgaum', 'belagavi', 'gulbarga', 'shimoga',
+  'noida', 'greater noida', 'gurgaon', 'gurugram', 'faridabad', 'dehradun', 'haridwar',
+  'rishikesh', 'jamshedpur', 'bokaro', 'dhanbad', 'ranchi', 'bhubaneswar', 'cuttack',
+  'puducherry', 'pondicherry', 'salem', 'tirupur', 'erode', 'tiruchirappalli', 'trichy',
+  'nellore', 'guntur', 'warangal', 'karimnagar', 'nizamabad', 'khammam',
+];
+
+// Extract city from user query
+const extractCityFromQuery = (query: string): string | null => {
+  const lowerQuery = query.toLowerCase();
+
+  // Check for city mentions in query
+  for (const city of INDIAN_CITIES) {
+    if (lowerQuery.includes(city)) {
+      // Capitalize first letter of each word
+      return city.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+  }
+
+  return null;
+};
+
+// Generate Market Entry specific paths
+const generateMarketEntryPaths = (
+  profile: BusinessProfile,
+  baseExpectedValue: number,
+  query?: string
+): DecisionPath[] => {
+  // First, try to extract city from user's query
+  const queryCity = query ? extractCityFromQuery(query) : null;
+
+  // Use query city if found, otherwise fall back to default mapping
+  const targetCity = queryCity || (
+    profile.location === 'Bangalore' ? 'Hyderabad' :
+    profile.location === 'Mumbai' ? 'Pune' :
+    profile.location === 'Delhi' ? 'Jaipur' : 'Tier-2 City'
+  );
+
+  return [
+    {
+      id: 'aggressive-market-entry',
+      name: 'Rapid Market Capture',
+      description: `Launch aggressively in ${targetCity} with full team, heavy marketing spend`,
+      expectedValue: baseExpectedValue * 2.2,
+      probability: 0.55,
+      riskScore: 78,
+      timeline: 90,
+      costs: {
+        immediate: profile.mrr * 8,
+        monthly: profile.mrr * 0.5,
+      },
+      benefits: {
+        revenue: baseExpectedValue * 2.5,
+        efficiency: 20,
+        riskReduction: 10,
+      },
+      steps: [
+        `Open office in ${targetCity} with 5-10 member team`,
+        'Launch aggressive digital marketing campaign',
+        'Hire local sales team within 30 days',
+        'Partner with local businesses for quick traction',
+      ],
+      risks: [
+        'High burn rate may affect runway',
+        'Local market dynamics may differ',
+        'Team management across locations challenging',
+      ],
+      shapleySHAP: calculateSHAPValues({
+        market_size: 50,
+        competition_level: 30,
+        local_demand: 20,
+      }),
+      agentContributions: {
+        orchestrator: 8,
+        simulation_cluster: 18,
+        decision_intelligence: 15,
+        operations_optimizer: 20,
+        personal_coach: 5,
+        innovation_advisor: 10,
+        growth_strategist: 20,
+        learning_adaptation: 4,
+      },
+    },
+    {
+      id: 'balanced-market-entry',
+      name: 'Phased Market Entry',
+      description: `Test ${targetCity} market with pilot, then scale based on results`,
+      expectedValue: baseExpectedValue * 1.4,
+      probability: 0.80,
+      riskScore: 42,
+      timeline: 180,
+      costs: {
+        immediate: profile.mrr * 3,
+        monthly: profile.mrr * 0.2,
+      },
+      benefits: {
+        revenue: baseExpectedValue * 1.6,
+        efficiency: 30,
+        riskReduction: 45,
+      },
+      steps: [
+        `Run 60-day pilot in ${targetCity} with 2-3 team members`,
+        'Validate product-market fit with local customers',
+        'Scale team to 8-10 if pilot succeeds',
+        'Establish local partnerships gradually',
+      ],
+      risks: [
+        'Slower time to market',
+        'Competitors may capture market first',
+        'Pilot results may not scale',
+      ],
+      shapleySHAP: calculateSHAPValues({
+        market_validation: 45,
+        resource_efficiency: 35,
+        risk_mitigation: 20,
+      }),
+      agentContributions: {
+        orchestrator: 12,
+        simulation_cluster: 16,
+        decision_intelligence: 18,
+        operations_optimizer: 18,
+        personal_coach: 10,
+        innovation_advisor: 6,
+        growth_strategist: 14,
+        learning_adaptation: 6,
+      },
+    },
+    {
+      id: 'conservative-market-entry',
+      name: 'Remote Market Expansion',
+      description: `Serve ${targetCity} remotely first, then establish presence`,
+      expectedValue: baseExpectedValue * 0.8,
+      probability: 0.92,
+      riskScore: 18,
+      timeline: 365,
+      costs: {
+        immediate: profile.mrr * 1,
+        monthly: profile.mrr * 0.08,
+      },
+      benefits: {
+        revenue: baseExpectedValue * 1.0,
+        efficiency: 40,
+        riskReduction: 70,
+      },
+      steps: [
+        `Start serving ${targetCity} customers remotely`,
+        'Build referral network without physical presence',
+        'Hire 1-2 local representatives after 6 months',
+        'Open office only after achieving ₹5L+ MRR from that market',
+      ],
+      risks: [
+        'Limited market penetration',
+        'Miss high-touch customer opportunities',
+        'May not be viable for all business types',
+      ],
+      shapleySHAP: calculateSHAPValues({
+        cash_preservation: 50,
+        organic_growth: 30,
+        market_learning: 20,
+      }),
+      agentContributions: {
+        orchestrator: 10,
+        simulation_cluster: 12,
+        decision_intelligence: 15,
+        operations_optimizer: 20,
+        personal_coach: 15,
+        innovation_advisor: 5,
+        growth_strategist: 8,
+        learning_adaptation: 15,
+      },
+    },
+  ];
+};
+
 // Decision Path Generator with Multi-Agent Contributions
 export const generateDecisionPaths = (
   profile: BusinessProfile,
-  agentContributions: Record<AgentId, number>
+  agentContributions: Record<AgentId, number>,
+  query?: string
 ): DecisionPath[] => {
   const baseExpectedValue = profile.mrr * 12 * 0.3; // 30% annual growth potential
+
+  // Detect query intent
+  const intent = query ? detectQueryIntent(query) : 'general';
+
+  // Return intent-specific paths
+  if (intent === 'market_entry') {
+    return generateMarketEntryPaths(profile, baseExpectedValue, query);
+  }
 
   const paths: DecisionPath[] = [
     {
@@ -72,6 +347,17 @@ export const generateDecisionPaths = (
         efficiency: 35,
         riskReduction: 15,
       },
+      steps: [
+        'Raise seed/Series A funding within 60 days',
+        'Hire 10+ team members across functions',
+        'Launch aggressive paid marketing campaigns',
+        'Expand to 2-3 new cities simultaneously',
+      ],
+      risks: [
+        'High burn rate requires external funding',
+        'Rapid hiring may affect culture',
+        'Market conditions may change',
+      ],
       shapleySHAP: calculateSHAPValues({
         team_capacity: 45,
         market_timing: 35,
@@ -106,6 +392,17 @@ export const generateDecisionPaths = (
         efficiency: 25,
         riskReduction: 40,
       },
+      steps: [
+        'Optimize current operations for efficiency',
+        'Hire 3-5 key roles strategically',
+        'Focus on organic and referral growth',
+        'Build sustainable unit economics',
+      ],
+      risks: [
+        'Slower growth may miss market window',
+        'Competitors may scale faster',
+        'Limited resources for experimentation',
+      ],
       shapleySHAP: calculateSHAPValues({
         operational_efficiency: 40,
         market_stability: 35,
@@ -140,6 +437,17 @@ export const generateDecisionPaths = (
         efficiency: 15,
         riskReduction: 75,
       },
+      steps: [
+        'Focus on existing customer retention',
+        'Build 12+ months runway',
+        'Improve profit margins by 20%',
+        'Minimal new hires, upskill existing team',
+      ],
+      risks: [
+        'May miss growth opportunities',
+        'Team may get demotivated',
+        'Market share may decline',
+      ],
       shapleySHAP: calculateSHAPValues({
         cash_preservation: 50,
         risk_mitigation: 35,

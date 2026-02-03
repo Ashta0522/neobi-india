@@ -6,9 +6,16 @@ import { motion } from 'framer-motion';
 import {
   Share2, Copy, MessageCircle, Mail, QrCode, Download,
   TrendingUp, AlertTriangle, Clock, DollarSign, Users, Target,
-  ChevronLeft, CheckCircle
+  ChevronLeft, CheckCircle, Map, ArrowRight, Brain, FileText
 } from 'lucide-react';
 import { getShareableReport, generateWhatsAppText, generateEmailText, copyReportUrl, generateQRCodeUrl, ShareableReport } from '@/utils/shareableReport';
+
+// Roadmap Data Interface
+interface RoadmapExport {
+  decisionHistory: string[];
+  profile: any;
+  timestamp: string;
+}
 
 export default function ReportPage() {
   const params = useParams();
@@ -19,14 +26,58 @@ export default function ReportPage() {
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [roadmapData, setRoadmapData] = useState<RoadmapExport | null>(null);
 
   useEffect(() => {
     if (reportId) {
       const fetchedReport = getShareableReport(reportId);
       setReport(fetchedReport);
       setLoading(false);
+
+      // Try to load roadmap export data
+      if (typeof window !== 'undefined') {
+        const savedRoadmap = localStorage.getItem('neobi_roadmap_export');
+        if (savedRoadmap) {
+          try {
+            setRoadmapData(JSON.parse(savedRoadmap));
+          } catch (e) {
+            console.error('Failed to parse roadmap data:', e);
+          }
+        }
+      }
     }
   }, [reportId]);
+
+  // Calculate optimal path based on profile
+  const getOptimalPath = (profile: any) => {
+    const riskTolerance = profile?.riskTolerance || 'medium';
+
+    if (riskTolerance === 'low') {
+      return {
+        strategy: 'Conservative Path',
+        steps: ['Focus on customer retention', 'Build cash reserves', 'Optimize profit margins', 'Organic growth only'],
+        expectedROI: '60-80%',
+        risk: 'Low (20/100)',
+        timeline: '12-18 months',
+      };
+    } else if (riskTolerance === 'high') {
+      return {
+        strategy: 'Aggressive Scaling',
+        steps: ['Raise funding immediately', 'Hire aggressively', 'Multi-city expansion', 'Heavy marketing spend'],
+        expectedROI: '150-200%',
+        risk: 'High (72/100)',
+        timeline: '3-6 months',
+      };
+    } else {
+      return {
+        strategy: 'Balanced Growth',
+        steps: ['Optimize operations', 'Strategic hiring (3-5 roles)', 'Phased expansion', 'Focus on unit economics'],
+        expectedROI: '100-120%',
+        risk: 'Medium (45/100)',
+        timeline: '6-12 months',
+      };
+    }
+  };
 
   const handleCopyLink = async () => {
     if (!report) return;
@@ -83,9 +134,31 @@ export default function ReportPage() {
   const { profile, selectedPath, simulationResult } = report;
 
   return (
-    <div className="min-h-screen bg-raven-base">
+    <div className="min-h-screen bg-raven-base print:bg-white print:text-black">
+      {/* Print Styles */}
+      <style jsx global>{`
+        @media print {
+          body { background: white !important; }
+          .glass, .glass-dark { background: white !important; border: 1px solid #e5e7eb !important; }
+          .text-white { color: #111827 !important; }
+          .text-gray-300, .text-gray-400 { color: #4b5563 !important; }
+          .text-agents-growth { color: #059669 !important; }
+          .text-purple-400, .text-purple-300 { color: #7c3aed !important; }
+          .text-blue-400, .text-blue-300 { color: #2563eb !important; }
+          .text-green-400, .text-green-300 { color: #059669 !important; }
+          .text-orange-400 { color: #d97706 !important; }
+          .text-red-400 { color: #dc2626 !important; }
+          .bg-white\\/5, .bg-black\\/40, .bg-white\\/10 { background: #f9fafb !important; }
+          .bg-blue-900\\/30, .bg-green-900\\/30, .bg-purple-900\\/20 { background: #f3f4f6 !important; border: 1px solid #d1d5db !important; }
+          .border-white\\/10 { border-color: #e5e7eb !important; }
+          h2, h3, h4 { color: #111827 !important; }
+          .particle-bg { display: none !important; }
+          .sticky { position: relative !important; }
+          @page { margin: 1cm; }
+        }
+      `}</style>
       {/* Particle Background */}
-      <div className="particle-bg" />
+      <div className="particle-bg print:hidden" />
 
       {/* Header */}
       <div className="glass glass-dark border-b border-white/10 sticky top-0 z-40">
@@ -113,7 +186,17 @@ export default function ReportPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 print:hidden">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.print()}
+              className="px-3 py-2 glass hover:bg-white/20 rounded-lg transition-all flex items-center gap-2 text-sm font-semibold"
+              title="Print/Save as PDF"
+            >
+              <Download size={16} />
+              Save PDF
+            </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -161,19 +244,40 @@ export default function ReportPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center"
+            className="fixed inset-0 bg-black/90 backdrop-blur-lg z-50 flex items-center justify-center p-4"
             onClick={() => setShowQR(false)}
           >
-            <div className="glass p-8 rounded-2xl text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="glass p-6 rounded-2xl text-center max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-xl font-bold mb-4">Scan to View Report</h3>
-              <img src={generateQRCodeUrl(report.shareUrl)} alt="QR Code" className="mx-auto rounded-lg" />
-              <p className="text-sm text-gray-400 mt-4">Scan with any QR code reader</p>
-              <button
-                onClick={() => setShowQR(false)}
-                className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold"
-              >
-                Close
-              </button>
+              <div className="bg-white p-3 rounded-lg inline-block mb-4">
+                <img
+                  src={generateQRCodeUrl(report.shareUrl)}
+                  alt="QR Code"
+                  className="mx-auto"
+                  width={180}
+                  height={180}
+                />
+              </div>
+              <p className="text-sm text-gray-400 mb-2">Scan with any QR code reader</p>
+              {report.shareUrl.includes('localhost') && (
+                <div className="text-xs text-amber-400 bg-amber-500/10 rounded-lg p-2 mb-4">
+                  ⚠️ QR links to localhost - only works on this device. In production, the link will be publicly accessible.
+                </div>
+              )}
+              <div className="space-y-2">
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full px-4 py-2 bg-agents-growth/20 hover:bg-agents-growth/30 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+                >
+                  {copied ? <><CheckCircle size={16} className="text-green-400" /> Copied!</> : <><Copy size={16} /> Copy Link</>}
+                </button>
+                <button
+                  onClick={() => setShowQR(false)}
+                  className="w-full px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -327,6 +431,105 @@ export default function ReportPage() {
               <div className="p-4 bg-white/5 rounded-lg">
                 <div className="text-xs text-gray-400 mb-1">Cost per Query</div>
                 <div className="font-black text-2xl text-green-400">₹{simulationResult.costUsed.toFixed(2)}</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Roadmap Comparison Section */}
+        {roadmapData && roadmapData.decisionHistory.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="glass p-6 rounded-2xl mt-6 print:break-before-page print:mt-8"
+          >
+            <h2 className="text-xl font-black text-white mb-2 flex items-center gap-2 print:text-2xl print:mb-4">
+              <Map size={24} className="text-purple-400" />
+              Decision Roadmap Comparison
+            </h2>
+            <p className="text-sm text-gray-400 mb-6 print:text-base print:mb-4">
+              Your exploration path vs AI-recommended optimal strategy
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* User's Explored Path */}
+              <div className="p-5 bg-blue-900/30 rounded-xl border-2 border-blue-500/50 print:border-blue-500">
+                <h3 className="font-bold text-blue-400 mb-4 flex items-center gap-2 text-base print:text-lg">
+                  <Users size={20} />
+                  Your Explored Path ({roadmapData.decisionHistory.length} steps)
+                </h3>
+                <div className="space-y-3">
+                  {roadmapData.decisionHistory.map((step, idx) => (
+                    <div key={idx} className="flex items-start gap-3 print:text-base">
+                      <span className="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0 print:w-8 print:h-8">
+                        {idx + 1}
+                      </span>
+                      <span className="text-white text-sm pt-1 print:text-base">{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Optimal Path */}
+              <div className="p-5 bg-green-900/30 rounded-xl border-2 border-green-500/50 print:border-green-500">
+                <h3 className="font-bold text-green-400 mb-4 flex items-center gap-2 text-base print:text-lg">
+                  <Brain size={20} />
+                  AI Optimal: {getOptimalPath(profile).strategy}
+                </h3>
+                <div className="space-y-3">
+                  {getOptimalPath(profile).steps.map((step, idx) => (
+                    <div key={idx} className="flex items-start gap-3 print:text-base">
+                      <span className="w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0 print:w-8 print:h-8">
+                        {idx + 1}
+                      </span>
+                      <span className="text-white text-sm pt-1 print:text-base">{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Comparison Metrics */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="p-4 bg-white/5 rounded-lg text-center border border-green-500/30 print:border-green-500">
+                <div className="text-xs text-gray-400 mb-1 print:text-sm">Expected ROI</div>
+                <div className="font-black text-2xl text-green-400 print:text-3xl">{getOptimalPath(profile).expectedROI}</div>
+                <div className="text-xs text-green-400/60 mt-1">annual return</div>
+              </div>
+              <div className="p-4 bg-white/5 rounded-lg text-center border border-orange-500/30 print:border-orange-500">
+                <div className="text-xs text-gray-400 mb-1 print:text-sm">Risk Level</div>
+                <div className="font-black text-2xl text-orange-400 print:text-3xl">{getOptimalPath(profile).risk}</div>
+                <div className="text-xs text-orange-400/60 mt-1">risk score</div>
+              </div>
+              <div className="p-4 bg-white/5 rounded-lg text-center border border-blue-500/30 print:border-blue-500">
+                <div className="text-xs text-gray-400 mb-1 print:text-sm">Timeline</div>
+                <div className="font-black text-2xl text-blue-400 print:text-3xl">{getOptimalPath(profile).timeline}</div>
+                <div className="text-xs text-blue-400/60 mt-1">to achieve</div>
+              </div>
+            </div>
+
+            {/* AI Recommendation */}
+            <div className="p-5 bg-purple-900/20 rounded-xl border-2 border-purple-500/50 print:border-purple-500">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                  <Brain size={24} className="text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-base font-bold text-purple-300 mb-2 print:text-lg">AI Recommendation Summary</div>
+                  <p className="text-sm text-gray-300 leading-relaxed print:text-base">
+                    Based on your business profile <strong>({profile.industry} in {profile.location})</strong> with
+                    ₹{(profile.mrr / 100000).toFixed(1)}L MRR and {profile.teamSize} team members,
+                    the <span className="text-green-400 font-bold">{getOptimalPath(profile).strategy}</span> offers
+                    the best balance of growth potential ({getOptimalPath(profile).expectedROI} ROI) and risk management
+                    ({getOptimalPath(profile).risk}).
+                  </p>
+                  <p className="text-sm text-gray-300 mt-3 leading-relaxed print:text-base">
+                    <strong>Key Insight:</strong> Your explored path demonstrates thoughtful decision-making.
+                    For optimal results, focus on the top 2-3 strategies that align with your current
+                    resources and growth trajectory within the {getOptimalPath(profile).timeline} timeframe.
+                  </p>
+                </div>
               </div>
             </div>
           </motion.div>
