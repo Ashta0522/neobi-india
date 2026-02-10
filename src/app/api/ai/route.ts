@@ -1,17 +1,22 @@
 // AI API Route - Provides AI-powered business insights
-import { NextRequest, NextResponse } from 'next/server';
 import { aiClient, BusinessContext } from '@/lib/ai-client';
 
-export const runtime = 'edge';
+// Helper function to return JSON response
+function jsonResponse(data: any, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { action, context, query } = body;
 
     // Check if AI is configured
     if (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY && !process.env.GOOGLE_AI_API_KEY) {
-      return NextResponse.json({
+      return jsonResponse({
         success: false,
         error: 'AI provider not configured. Please add API keys to environment variables.',
         fallback: true,
@@ -46,20 +51,20 @@ export async function POST(request: NextRequest) {
         break;
     }
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       data: response,
     });
   } catch (error) {
     console.error('AI API Error:', error);
-    return NextResponse.json(
+    return jsonResponse(
       {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred',
         fallback: true,
         message: 'AI service temporarily unavailable. Using fallback analysis.',
       },
-      { status: 500 }
+      500
     );
   }
 }
@@ -171,7 +176,7 @@ For detailed AI-powered insights, please configure an AI provider (OpenAI, Anthr
 }
 
 export async function GET() {
-  return NextResponse.json({
+  return jsonResponse({
     status: 'AI API is running',
     configured: !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.GOOGLE_AI_API_KEY),
     provider: process.env.AI_PROVIDER || 'openai',

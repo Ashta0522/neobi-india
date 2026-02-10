@@ -13,7 +13,7 @@ interface NeoBIStore {
   // Simulation Results
   currentResult: SimulationResult | null;
   results: SimulationResult[];
-  setCurrentResult: (result: SimulationResult) => void;
+  setCurrentResult: (result: SimulationResult | null) => void;
   addResult: (result: SimulationResult) => void;
 
   // Selected Decision Path & Cascading

@@ -1,8 +1,15 @@
 // Integration APIs Route - Connect to Tally, Zoho, GST Portal
-import { NextRequest, NextResponse } from 'next/server';
 import { integrationManager, tallyClient, zohoClient, gstPortalClient } from '@/lib/integrations';
 
-export async function GET(request: NextRequest) {
+// Helper function to return JSON response
+function jsonResponse(data: any, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const source = searchParams.get('source');
   const action = searchParams.get('action');
@@ -17,9 +24,9 @@ export async function GET(request: NextRequest) {
         return handleGSTRequest(action);
       case 'all':
         const overview = await integrationManager.getFinancialOverview();
-        return NextResponse.json({ success: true, data: overview });
+        return jsonResponse({ success: true, data: overview });
       default:
-        return NextResponse.json({
+        return jsonResponse({
           success: true,
           status: integrationManager.getStatus(),
           endpoints: {
@@ -31,9 +38,9 @@ export async function GET(request: NextRequest) {
         });
     }
   } catch (error) {
-    return NextResponse.json(
+    return jsonResponse(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      500
     );
   }
 }
@@ -42,18 +49,18 @@ async function handleTallyRequest(action: string | null) {
   switch (action) {
     case 'sales':
       const salesData = await tallyClient.getSalesData();
-      return NextResponse.json({ success: true, data: salesData });
+      return jsonResponse({ success: true, data: salesData });
     case 'ledgers':
       const ledgers = await tallyClient.getLedgers();
-      return NextResponse.json({ success: true, data: ledgers });
+      return jsonResponse({ success: true, data: ledgers });
     case 'vouchers':
       const vouchers = await tallyClient.getVouchers(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
         new Date().toISOString()
       );
-      return NextResponse.json({ success: true, data: vouchers });
+      return jsonResponse({ success: true, data: vouchers });
     default:
-      return NextResponse.json({ success: true, data: await tallyClient.getSalesData() });
+      return jsonResponse({ success: true, data: await tallyClient.getSalesData() });
   }
 }
 
@@ -61,15 +68,15 @@ async function handleZohoRequest(action: string | null) {
   switch (action) {
     case 'invoices':
       const invoices = await zohoClient.getInvoices();
-      return NextResponse.json({ success: true, data: invoices });
+      return jsonResponse({ success: true, data: invoices });
     case 'expenses':
       const expenses = await zohoClient.getExpenses();
-      return NextResponse.json({ success: true, data: expenses });
+      return jsonResponse({ success: true, data: expenses });
     case 'transactions':
       const transactions = await zohoClient.getBankTransactions();
-      return NextResponse.json({ success: true, data: transactions });
+      return jsonResponse({ success: true, data: transactions });
     default:
-      return NextResponse.json({ success: true, data: await zohoClient.getInvoices() });
+      return jsonResponse({ success: true, data: await zohoClient.getInvoices() });
   }
 }
 
@@ -77,19 +84,19 @@ async function handleGSTRequest(action: string | null) {
   switch (action) {
     case 'returns':
       const returns = await gstPortalClient.getReturns();
-      return NextResponse.json({ success: true, data: returns });
+      return jsonResponse({ success: true, data: returns });
     case 'summary':
       const summary = await gstPortalClient.getGSTSummary();
-      return NextResponse.json({ success: true, data: summary });
+      return jsonResponse({ success: true, data: summary });
     case 'validate':
       // GSTIN validation handled via POST
-      return NextResponse.json({ success: false, error: 'Use POST with gstin parameter' });
+      return jsonResponse({ success: false, error: 'Use POST with gstin parameter' });
     default:
-      return NextResponse.json({ success: true, data: await gstPortalClient.getGSTSummary() });
+      return jsonResponse({ success: true, data: await gstPortalClient.getGSTSummary() });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { action, config, gstin } = body;
@@ -97,27 +104,27 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'configure-tally':
         integrationManager.configureTally(config);
-        return NextResponse.json({ success: true, message: 'Tally configured successfully' });
+        return jsonResponse({ success: true, message: 'Tally configured successfully' });
 
       case 'configure-zoho':
         integrationManager.configureZoho(config);
-        return NextResponse.json({ success: true, message: 'Zoho configured successfully' });
+        return jsonResponse({ success: true, message: 'Zoho configured successfully' });
 
       case 'configure-gst':
         integrationManager.configureGST(config);
-        return NextResponse.json({ success: true, message: 'GST Portal configured successfully' });
+        return jsonResponse({ success: true, message: 'GST Portal configured successfully' });
 
       case 'validate-gstin':
         const validation = await gstPortalClient.validateGSTIN(gstin);
-        return NextResponse.json({ success: true, data: validation });
+        return jsonResponse({ success: true, data: validation });
 
       default:
-        return NextResponse.json({ success: false, error: 'Unknown action' }, { status: 400 });
+        return jsonResponse({ success: false, error: 'Unknown action' }, 400);
     }
   } catch (error) {
-    return NextResponse.json(
+    return jsonResponse(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      500
     );
   }
 }

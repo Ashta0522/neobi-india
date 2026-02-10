@@ -13,21 +13,37 @@ const RoadmapSummary = memo(({ decisionHistory, profile, onClose, onExportPDF }:
   onClose: () => void;
   onExportPDF: () => void;
 }) => {
-  const { vibeMode, riskSlider } = useNeoBIStore();
+  const { vibeMode, riskSlider, currentResult } = useNeoBIStore();
 
-  // Calculate optimal path based on risk tolerance and vibe mode
+  // Calculate optimal path based on recommendation from simulation or fallback to vibe mode
   const optimalPath = useMemo(() => {
+    const recommendation = currentResult?.recommendation;
+    const query = currentResult?.query || '';
+
+    // If we have a recommendation from the simulation, use it
+    if (recommendation) {
+      return {
+        strategy: recommendation.name,
+        steps: recommendation.steps || [
+          `Implement ${recommendation.name}`,
+          'Monitor key metrics',
+          'Adjust based on results',
+          'Scale successful strategies',
+        ],
+        expectedROI: `${Math.round((recommendation.expectedValue / (profile?.mrr * 12 || 100000)) * 100)}%`,
+        risk: `${recommendation.riskScore > 60 ? 'High' : recommendation.riskScore > 40 ? 'Medium' : 'Low'} (${recommendation.riskScore}/100)`,
+        timeline: `${Math.round(recommendation.timeline / 30)} months`,
+        reasoning: `Based on your query "${query.substring(0, 40)}${query.length > 40 ? '...' : ''}", this ${recommendation.name} path is recommended with ${Math.round(recommendation.probability * 100)}% success probability.`,
+      };
+    }
+
+    // Fallback to vibe mode based recommendations
     const riskTolerance = riskSlider / 100;
 
     if (vibeMode === 'conservative' || riskTolerance < 0.33) {
       return {
         strategy: 'Conservative Path',
-        steps: [
-          'Focus on customer retention',
-          'Build 12+ months runway',
-          'Optimize profit margins',
-          'Organic growth only',
-        ],
+        steps: ['Focus on customer retention', 'Build 12+ months runway', 'Optimize profit margins', 'Organic growth only'],
         expectedROI: '60-80%',
         risk: 'Low (20/100)',
         timeline: '12-18 months',
@@ -36,12 +52,7 @@ const RoadmapSummary = memo(({ decisionHistory, profile, onClose, onExportPDF }:
     } else if (vibeMode === 'aggressive' || riskTolerance > 0.66) {
       return {
         strategy: 'Aggressive Scaling',
-        steps: [
-          'Raise funding immediately',
-          'Hire aggressively (10+ roles)',
-          'Launch multi-city expansion',
-          'Heavy marketing spend',
-        ],
+        steps: ['Raise funding immediately', 'Hire aggressively (10+ roles)', 'Launch multi-city expansion', 'Heavy marketing spend'],
         expectedROI: '150-200%',
         risk: 'High (72/100)',
         timeline: '3-6 months',
@@ -50,19 +61,14 @@ const RoadmapSummary = memo(({ decisionHistory, profile, onClose, onExportPDF }:
     } else {
       return {
         strategy: 'Balanced Growth',
-        steps: [
-          'Optimize current operations',
-          'Hire 3-5 key roles strategically',
-          'Phased market expansion',
-          'Focus on unit economics',
-        ],
+        steps: ['Optimize current operations', 'Hire 3-5 key roles strategically', 'Phased market expansion', 'Focus on unit economics'],
         expectedROI: '100-120%',
         risk: 'Medium (45/100)',
         timeline: '6-12 months',
         reasoning: 'Based on your balanced vibe mode, this path offers sustainable growth with manageable risk.',
       };
     }
-  }, [vibeMode, riskSlider]);
+  }, [vibeMode, riskSlider, currentResult, profile]);
 
   // Calculate match score between user path and optimal path
   const matchScore = useMemo(() => {
@@ -356,79 +362,132 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     return getIndustryPaths(profile?.industry || 'generic');
   }, [profile?.industry]);
 
+  // Determine roadmap context based on user query
+  const queryContext = useMemo(() => {
+    const query = currentResult?.query || '';
+    const queryLower = query.toLowerCase();
+
+    if (queryLower.includes('legal') || queryLower.includes('compliance') || queryLower.includes('staff') || queryLower.includes('hr')) {
+      return { type: 'compliance', title: 'Compliance & Legal Strategy', icon: <Shield className="w-8 h-8" /> };
+    }
+    if (queryLower.includes('fund') || queryLower.includes('money') || queryLower.includes('cash') || queryLower.includes('runway')) {
+      return { type: 'funding', title: 'Funding & Financial Strategy', icon: <TrendingUp className="w-8 h-8" /> };
+    }
+    if (queryLower.includes('hir') || queryLower.includes('team') || queryLower.includes('recruit')) {
+      return { type: 'hiring', title: 'Hiring & Team Strategy', icon: <Users className="w-8 h-8" /> };
+    }
+    if (queryLower.includes('market') || queryLower.includes('expand') || queryLower.includes('growth')) {
+      return { type: 'growth', title: 'Market Expansion Strategy', icon: <Target className="w-8 h-8" /> };
+    }
+    if (queryLower.includes('operation') || queryLower.includes('efficien') || queryLower.includes('process')) {
+      return { type: 'operations', title: 'Operations Optimization', icon: <Zap className="w-8 h-8" /> };
+    }
+    if (queryLower.includes('pivot') || queryLower.includes('change') || queryLower.includes('new direction')) {
+      return { type: 'pivot', title: 'Business Pivot Strategy', icon: <Lightbulb className="w-8 h-8" /> };
+    }
+    return { type: 'growth', title: `${profile?.industry || 'Business'} Growth Strategy`, icon: <Target className="w-8 h-8" /> };
+  }, [currentResult?.query, profile?.industry]);
+
   const nodes: Record<string, RoadmapNode> = useMemo(() => {
     const businessName = profile?.name || 'Your Business';
     const industry = profile?.industry || 'Business';
     const location = profile?.location || 'India';
+    const paths = currentResult?.paths || [];
 
-    return {
+    // Build dynamic child IDs from actual paths
+    const pathIds = paths.map(p => p.id);
+
+    // Base nodes with dynamic context
+    const baseNodes: Record<string, RoadmapNode> = {
       root: {
         id: 'root',
-        title: `${industry} Growth Strategy`,
-        description: `Strategic decision tree for ${businessName} in ${location}`,
-        icon: <Target className="w-8 h-8" />,
+        title: queryContext.title,
+        description: currentResult?.query
+          ? `Strategy for: "${currentResult.query.substring(0, 50)}${currentResult.query.length > 50 ? '...' : ''}"`
+          : `Strategic decision tree for ${businessName} in ${location}`,
+        icon: queryContext.icon,
         level: 1,
-        children: ['conservative', 'balanced', 'aggressive'],
+        children: pathIds.length > 0 ? pathIds : ['conservative', 'balanced', 'aggressive'],
         metrics: [
           { label: 'Risk Score', value: profile?.riskTolerance === 'high' ? 70 : profile?.riskTolerance === 'low' ? 30 : 50 },
           { label: 'Growth Target', value: profile?.growthTarget || 30 },
-          { label: 'Team Size', value: Math.min(100, (profile?.teamSize || 5) * 10) },
+          { label: 'Confidence', value: currentResult?.confidence || 85 },
         ],
         actions: [],
       },
-      conservative: {
+    };
+
+    // Add dynamic nodes from currentResult.paths
+    paths.forEach((path, idx) => {
+      const iconMap: Record<string, React.ReactNode> = {
+        aggressive: <Zap className="w-6 h-6" />,
+        balanced: <TrendingUp className="w-6 h-6" />,
+        conservative: <Shield className="w-6 h-6" />,
+      };
+      const defaultIcon = idx === 0 ? <Target className="w-6 h-6" /> : idx === 1 ? <Brain className="w-6 h-6" /> : <Lightbulb className="w-6 h-6" />;
+
+      baseNodes[path.id] = {
+        id: path.id,
+        title: path.name,
+        description: path.description,
+        icon: iconMap[path.id] || defaultIcon,
+        level: 2,
+        children: [],
+        metrics: [
+          { label: 'Success Prob', value: Math.round(path.probability * 100) },
+          { label: 'Risk Score', value: path.riskScore },
+          { label: 'Timeline', value: Math.min(100, Math.round(path.timeline / 3)) },
+        ],
+        actions: [],
+      };
+    });
+
+    // Fallback nodes if no paths from currentResult
+    if (paths.length === 0) {
+      baseNodes.conservative = {
         id: 'conservative',
         title: industryPaths.conservative,
         description: 'Low-risk, steady growth approach',
         icon: <Shield className="w-6 h-6" />,
         level: 2,
         children: ['partnership', 'organic', 'optimization'],
-        metrics: [
-          { label: 'Risk', value: 20 },
-          { label: 'Timeline', value: 120 },
-          { label: 'ROI', value: 60 },
-        ],
+        metrics: [{ label: 'Risk', value: 20 }, { label: 'Timeline', value: 120 }, { label: 'ROI', value: 60 }],
         actions: [],
-      },
-      balanced: {
+      };
+      baseNodes.balanced = {
         id: 'balanced',
         title: industryPaths.balanced,
         description: 'Balanced growth with sustainability',
         icon: <TrendingUp className="w-6 h-6" />,
         level: 2,
         children: ['market-expansion', 'team-scaling', 'product-launch'],
-        metrics: [
-          { label: 'Risk', value: 50 },
-          { label: 'Timeline', value: 150 },
-          { label: 'ROI', value: 120 },
-        ],
+        metrics: [{ label: 'Risk', value: 50 }, { label: 'Timeline', value: 150 }, { label: 'ROI', value: 120 }],
         actions: [],
-      },
-      aggressive: {
+      };
+      baseNodes.aggressive = {
         id: 'aggressive',
         title: industryPaths.aggressive,
         description: 'High-growth market capture',
         icon: <Zap className="w-6 h-6" />,
         level: 2,
         children: ['vc-funding', 'market-takeover', 'international'],
-        metrics: [
-          { label: 'Risk', value: 75 },
-          { label: 'Timeline', value: 200 },
-          { label: 'ROI', value: 200 },
-        ],
+        metrics: [{ label: 'Risk', value: 75 }, { label: 'Timeline', value: 200 }, { label: 'ROI', value: 200 }],
         actions: [],
-      },
-      partnership: { id: 'partnership', title: 'Strategic Partnerships', description: `Partner with ${industry} businesses`, icon: <Users className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Cost', value: 30 }, { label: 'Speed', value: 85 }, { label: 'Sustainability', value: 80 }], actions: [] },
-      organic: { id: 'organic', title: 'Organic Growth', description: 'Bootstrap with existing profits', icon: <Brain className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Cost', value: 20 }, { label: 'Speed', value: 40 }, { label: 'Independence', value: 95 }], actions: [] },
-      optimization: { id: 'optimization', title: 'Process Optimization', description: 'Improve efficiency', icon: <TrendingUp className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Impact', value: 70 }, { label: 'Implementation', value: 60 }, { label: 'Payback', value: 50 }], actions: [] },
-      'market-expansion': { id: 'market-expansion', title: 'Market Expansion', description: 'Expand to new markets', icon: <Zap className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Market Size', value: 90 }, { label: 'Competition', value: 65 }, { label: 'Entry Cost', value: 75 }], actions: [] },
-      'team-scaling': { id: 'team-scaling', title: 'Team Scaling', description: `Grow from ${profile?.teamSize || 5}`, icon: <Users className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Hiring Needs', value: 55 }, { label: 'Training', value: 45 }, { label: 'Retention', value: 70 }], actions: [] },
-      'product-launch': { id: 'product-launch', title: 'New Product', description: 'Launch new offerings', icon: <Package className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Development', value: 60 }, { label: 'Market Fit', value: 50 }, { label: 'Revenue', value: 85 }], actions: [] },
-      'vc-funding': { id: 'vc-funding', title: 'Funding Round', description: 'Raise capital', icon: <Zap className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Capital', value: 95 }, { label: 'Dilution', value: 40 }, { label: 'Timeline', value: 75 }], actions: [] },
-      'market-takeover': { id: 'market-takeover', title: 'Market Leadership', description: 'Become market leader', icon: <Shield className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Market Share', value: 85 }, { label: 'Brand', value: 90 }, { label: 'Risk', value: 85 }], actions: [] },
-      international: { id: 'international', title: 'Geographic Expansion', description: 'Expand beyond current', icon: <Target className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Potential', value: 95 }, { label: 'Complexity', value: 80 }, { label: 'Investment', value: 90 }], actions: [] },
-    };
-  }, [profile, industryPaths]);
+      };
+      // Level 3 fallback nodes
+      baseNodes.partnership = { id: 'partnership', title: 'Strategic Partnerships', description: `Partner with ${industry} businesses`, icon: <Users className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Cost', value: 30 }, { label: 'Speed', value: 85 }, { label: 'Sustainability', value: 80 }], actions: [] };
+      baseNodes.organic = { id: 'organic', title: 'Organic Growth', description: 'Bootstrap with existing profits', icon: <Brain className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Cost', value: 20 }, { label: 'Speed', value: 40 }, { label: 'Independence', value: 95 }], actions: [] };
+      baseNodes.optimization = { id: 'optimization', title: 'Process Optimization', description: 'Improve efficiency', icon: <TrendingUp className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Impact', value: 70 }, { label: 'Implementation', value: 60 }, { label: 'Payback', value: 50 }], actions: [] };
+      baseNodes['market-expansion'] = { id: 'market-expansion', title: 'Market Expansion', description: 'Expand to new markets', icon: <Zap className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Market Size', value: 90 }, { label: 'Competition', value: 65 }, { label: 'Entry Cost', value: 75 }], actions: [] };
+      baseNodes['team-scaling'] = { id: 'team-scaling', title: 'Team Scaling', description: `Grow from ${profile?.teamSize || 5}`, icon: <Users className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Hiring Needs', value: 55 }, { label: 'Training', value: 45 }, { label: 'Retention', value: 70 }], actions: [] };
+      baseNodes['product-launch'] = { id: 'product-launch', title: 'New Product', description: 'Launch new offerings', icon: <Package className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Development', value: 60 }, { label: 'Market Fit', value: 50 }, { label: 'Revenue', value: 85 }], actions: [] };
+      baseNodes['vc-funding'] = { id: 'vc-funding', title: 'Funding Round', description: 'Raise capital', icon: <Zap className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Capital', value: 95 }, { label: 'Dilution', value: 40 }, { label: 'Timeline', value: 75 }], actions: [] };
+      baseNodes['market-takeover'] = { id: 'market-takeover', title: 'Market Leadership', description: 'Become market leader', icon: <Shield className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Market Share', value: 85 }, { label: 'Brand', value: 90 }, { label: 'Risk', value: 85 }], actions: [] };
+      baseNodes.international = { id: 'international', title: 'Geographic Expansion', description: 'Expand beyond current', icon: <Target className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Potential', value: 95 }, { label: 'Complexity', value: 80 }, { label: 'Investment', value: 90 }], actions: [] };
+    }
+
+    return baseNodes;
+  }, [profile, industryPaths, currentResult, queryContext]);
 
   const getNodeColor = useCallback((level: 1 | 2 | 3) => {
     const colors = { 1: 'from-amber-600 to-amber-700', 2: 'from-amber-500 to-amber-600', 3: 'from-amber-400 to-amber-500' };

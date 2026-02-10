@@ -3,7 +3,7 @@ import { Providers } from './providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'NeoBI India v2.0 - Agentic BI Co-pilot',
+  title: 'NeoBI India - Agentic BI Co-pilot',
   description: 'Publication-ready BI decision intelligence for Indian entrepreneurs',
   viewport: 'width=device-width, initial-scale=1',
 };

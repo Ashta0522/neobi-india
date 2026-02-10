@@ -36,7 +36,7 @@ import VoiceInput from '@/components/VoiceInput';
 import WhatsAppShare from '@/components/WhatsAppShare';
 import LanguageSelector from '@/components/LanguageSelector';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ChevronLeft, ChevronRight, Map, Search, ArrowRight, Check, AlertTriangle, TrendingUp, Shield, Calculator, BarChart3, Users, Target, Lightbulb, Brain, Info } from 'lucide-react';
+import { Zap, ChevronLeft, ChevronRight, Map, Search, ArrowRight, Check, AlertTriangle, TrendingUp, Shield, Calculator, BarChart3, Users, Target, Lightbulb, Brain, Info, Maximize2, X } from 'lucide-react';
 
 // Fallback data
 const FALLBACK_REWARD_DECOMPOSITION: RewardDecomposition = {
@@ -277,23 +277,74 @@ const AGENT_CONFIG = {
   learning_adaptation: { name: 'Learning Agent', color: '#84CC16', level: 'L4' },
 };
 
-// Graph Card with Conclusion
+// Graph Card with Conclusion and Expand functionality
 function GraphCard({ title, conclusion, children }: { title: string; conclusion: string; children: React.ReactNode }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
-    <div className="bg-slate-900/50 rounded-xl border border-white/10 overflow-hidden">
-      <div className="p-4 border-b border-white/10">
-        <h4 className="font-bold text-white">{title}</h4>
-      </div>
-      <div className="p-4 h-72">
-        {children}
-      </div>
-      <div className="px-4 py-3 bg-gradient-to-r from-green-900/20 to-blue-900/20 border-t border-white/5">
-        <div className="flex items-start gap-2">
-          <Info size={14} className="text-blue-400 mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-gray-300">{conclusion}</p>
+    <>
+      <div className="bg-slate-900/50 rounded-xl border border-white/10 overflow-hidden">
+        <div className="p-4 border-b border-white/10 flex items-center justify-between">
+          <h4 className="font-bold text-white">{title}</h4>
+          <button
+            onClick={() => setIsExpanded(true)}
+            className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-gray-400 hover:text-white"
+            title="Expand chart"
+          >
+            <Maximize2 size={16} />
+          </button>
+        </div>
+        <div className="p-6 h-72">
+          {children}
+        </div>
+        <div className="px-4 py-3 bg-gradient-to-r from-green-900/20 to-blue-900/20 border-t border-white/5">
+          <div className="flex items-start gap-2">
+            <Info size={14} className="text-blue-400 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-gray-300">{conclusion}</p>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Expanded Modal */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-8"
+            onClick={() => setIsExpanded(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-slate-900 rounded-2xl border border-white/20 w-full max-w-6xl max-h-[90vh] overflow-hidden"
+            >
+              <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                <h4 className="font-bold text-white text-lg">{title}</h4>
+                <button
+                  onClick={() => setIsExpanded(false)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-all text-gray-400 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-8 h-[60vh]">
+                {children}
+              </div>
+              <div className="px-6 py-4 bg-gradient-to-r from-green-900/20 to-blue-900/20 border-t border-white/5">
+                <div className="flex items-start gap-2">
+                  <Info size={16} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-gray-300">{conclusion}</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -326,21 +377,21 @@ function DecisionPopup({ path, onClose, onExplorePath, isRecommended, isRisky }:
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg text-xl">×</button>
         </div>
 
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
           {[
             { label: 'Expected Value', value: `₹${(path.expectedValue / 100000).toFixed(1)}L` },
             { label: 'Probability', value: `${(path.probability * 100).toFixed(0)}%` },
             { label: 'Risk', value: `${path.riskScore}/100`, color: path.riskScore > 60 ? 'text-red-400' : path.riskScore > 30 ? 'text-yellow-400' : 'text-green-400' },
             { label: 'Timeline', value: `${path.timeline}d` },
           ].map((m) => (
-            <div key={m.label} className="p-3 rounded-lg bg-black/30">
+            <div key={m.label} className="p-2 sm:p-3 rounded-lg bg-black/30">
               <div className="text-[10px] text-gray-400">{m.label}</div>
-              <div className={`text-lg font-bold ${m.color || ''}`}>{m.value}</div>
+              <div className={`text-base sm:text-lg font-bold ${m.color || ''}`}>{m.value}</div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div className="p-3 rounded-lg bg-green-900/30 border border-green-500/30">
             <h4 className="font-bold text-green-400 text-sm mb-2">✓ Strengths</h4>
             <ul className="text-xs space-y-1 text-green-200">
@@ -482,7 +533,7 @@ export default function Home() {
     return (
       <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-slate-900 border border-white/20 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-          <h1 className="text-2xl font-black bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent mb-1">NeoBI India v2.0</h1>
+          <h1 className="text-2xl font-black bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent mb-1">NeoBI India</h1>
           <p className="text-gray-400 text-sm mb-4">Agentic BI Co-pilot for Indian Entrepreneurs</p>
 
           <div className="space-y-3">
@@ -497,11 +548,11 @@ export default function Home() {
                 {['SaaS', 'E-commerce', 'Healthcare', 'FinTech', 'EdTech', 'Food & Beverage', 'Manufacturing', 'Logistics', 'Retail', 'Kirana/Grocery', 'D2C Fashion', 'Real Estate', 'Consulting', 'Beauty & Wellness'].map(i => <option key={i} value={i}>{i}</option>)}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className="block text-xs font-bold mb-1 text-gray-300">MRR (₹)</label><input type="number" value={formData.mrr} onChange={(e) => setFormData({ ...formData, mrr: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 outline-none text-sm" /></div>
               <div><label className="block text-xs font-bold mb-1 text-gray-300">Team Size</label><input type="number" value={formData.teamSize} onChange={(e) => setFormData({ ...formData, teamSize: Number(e.target.value) })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 outline-none text-sm" /></div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className="block text-xs font-bold mb-1 text-gray-300">Location</label>
                 <select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/20 outline-none text-sm">
                   {['Bangalore', 'Mumbai', 'Delhi', 'Hyderabad', 'Pune', 'Chennai', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Other'].map(l => <option key={l}>{l}</option>)}
@@ -523,18 +574,18 @@ export default function Home() {
   }
 
   // Decision Query Modal
-  if (showDecisionInput && !currentResult) {
+  if (showDecisionInput) {
     return (
       <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-slate-900 border border-white/20 rounded-2xl p-6 max-w-2xl w-full">
           <h1 className="text-xl font-black text-white mb-1">What decision do you need help with?</h1>
           <p className="text-gray-400 text-sm mb-4">Select a category or describe your question</p>
 
-          <div className="grid grid-cols-4 gap-2 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
             {DECISION_TYPES.map((t) => (
-              <button key={t.value} onClick={() => setDecisionType(t.value)} className={`p-3 rounded-lg border text-left transition-all ${decisionType === t.value ? 'border-amber-500 bg-amber-500/20' : 'border-white/10 hover:border-white/30'}`}>
-                <t.icon size={20} className={decisionType === t.value ? 'text-amber-400' : 'text-gray-400'} />
-                <div className="font-bold text-xs mt-1">{t.label}</div>
+              <button key={t.value} onClick={() => setDecisionType(t.value)} className={`p-2 sm:p-3 rounded-lg border text-left transition-all ${decisionType === t.value ? 'border-amber-500 bg-amber-500/20' : 'border-white/10 hover:border-white/30'}`}>
+                <t.icon size={18} className={decisionType === t.value ? 'text-amber-400' : 'text-gray-400'} />
+                <div className="font-bold text-[10px] sm:text-xs mt-1">{t.label}</div>
               </button>
             ))}
           </div>
@@ -574,8 +625,11 @@ export default function Home() {
       <LiveTickerBar />
 
       <div className="flex-1 flex overflow-hidden mt-16 pb-16">
-        {/* Left Sidebar */}
-        <motion.div animate={{ width: sidebarOpen ? '250px' : '0px', opacity: sidebarOpen ? 1 : 0 }} className="bg-slate-900/50 border-r border-white/10 flex flex-col overflow-hidden">
+        {/* Left Sidebar - Hidden on mobile, overlay when opened */}
+        <motion.div
+          animate={{ width: sidebarOpen ? '250px' : '0px', opacity: sidebarOpen ? 1 : 0 }}
+          className="hidden md:flex bg-slate-900/50 border-r border-white/10 flex-col overflow-hidden"
+        >
           <div className="flex-1 overflow-y-auto min-h-0">
             <AgentActivityTree />
           </div>
@@ -584,18 +638,49 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* Mobile Sidebar Overlay */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <motion.div
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              className="md:hidden fixed inset-y-0 left-0 w-[280px] bg-slate-900 border-r border-white/10 flex flex-col z-40 mt-16"
+            >
+              <div className="flex-1 overflow-y-auto min-h-0">
+                <AgentActivityTree />
+              </div>
+              <div className="border-t-2 border-amber-500/30 flex-shrink-0 bg-slate-900/80 backdrop-blur safe-bottom">
+                <ControlBar />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {/* Mobile Sidebar Backdrop */}
+        {sidebarOpen && <div onClick={toggleSidebar} className="md:hidden fixed inset-0 bg-black/50 z-30 mt-16" />}
+
         {/* Center Canvas */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-            <div className="flex items-center gap-3">
+        <div className="flex-1 flex flex-col overflow-hidden w-full">
+          {/* Header - Responsive */}
+          <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 border-b border-white/10">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button onClick={toggleSidebar} className="p-2 hover:bg-white/10 rounded-lg">{sidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}</button>
-              <h2 className="text-lg font-black bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">Decision Intelligence</h2>
+              <h2 className="text-base sm:text-lg font-black bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">
+                <span className="hidden sm:inline">Decision Intelligence</span>
+                <span className="sm:hidden">NeoBI</span>
+              </h2>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => setShowDecisionInput(true)} className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-black font-bold text-sm flex items-center gap-1"><Search size={14} /> New Query</button>
-              {currentResult && <button onClick={() => setShowFullRoadmap(true)} className="px-3 py-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/30 text-amber-200 font-bold text-sm flex items-center gap-1"><Map size={14} /> Roadmap</button>}
-              <button onClick={() => router.push('/benchmarks')} className="px-3 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/30 text-purple-200 font-bold text-sm">📊 Benchmarks</button>
+            <div className="flex gap-1 sm:gap-2">
+              <button onClick={() => { setCurrentResult(null); setDecisionQuery(''); setDecisionType(''); setShowDecisionInput(true); }} className="px-2 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-black font-bold text-xs sm:text-sm flex items-center gap-1">
+                <Search size={14} /> <span className="hidden sm:inline">New Query</span>
+              </button>
+              {currentResult && <button onClick={() => setShowFullRoadmap(true)} className="px-2 sm:px-3 py-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/30 text-amber-200 font-bold text-xs sm:text-sm flex items-center gap-1">
+                <Map size={14} /> <span className="hidden sm:inline">Roadmap</span>
+              </button>}
+              <button onClick={() => router.push('/benchmarks')} className="px-2 sm:px-3 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/30 text-purple-200 font-bold text-xs sm:text-sm">
+                <span className="hidden sm:inline">📊 Benchmarks</span>
+                <span className="sm:hidden">📊</span>
+              </button>
             </div>
           </div>
 
