@@ -609,7 +609,8 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const isSelected = selectedNode === nodeId;
     const hasChildren = node.children.length > 0;
     const rootLabel = decisionHistory?.length ? decisionHistory[decisionHistory.length - 1] : node.title;
-    const dynamicChildren = !hasChildren && node.level === 3 ? generateSubPaths(rootLabel, nodeId) : [];
+    // Show execution options for level 2 and level 3 nodes when they don't have predefined children
+    const dynamicChildren = !hasChildren && (node.level === 2 || node.level === 3) ? generateSubPaths(rootLabel, nodeId) : [];
 
     return (
       <motion.div
@@ -655,16 +656,25 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
         )}
 
-        {dynamicChildren.length > 0 && (
-          <div className="flex gap-4 justify-center flex-wrap max-w-4xl mt-4">
-            <div className="w-full text-center mb-2">
-              <span className="text-sm text-amber-300/80 font-semibold">Execution Options for {node.title}</span>
-            </div>
-            {dynamicChildren.map((child: any) => (
-              <ExecutionOptionCard key={child.id} child={child} onExplore={() => handleExplore(child)} />
-            ))}
-          </div>
-        )}
+        {/* Show execution options when node is selected and has dynamic children */}
+        <AnimatePresence>
+          {isSelected && dynamicChildren.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex gap-4 justify-center flex-wrap max-w-5xl mt-4"
+            >
+              <div className="w-full text-center mb-3">
+                <span className="text-sm text-amber-300 font-bold">🚀 Execution Options for "{node.title}"</span>
+                <p className="text-xs text-gray-400 mt-1">Click "Explore Strategy →" to dive deeper</p>
+              </div>
+              {dynamicChildren.map((child: any) => (
+                <ExecutionOptionCard key={child.id} child={child} onExplore={() => handleExplore(child)} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     );
   }, [nodes, selectedNode, decisionHistory, generateSubPaths, getNodeColor, handleExplore]);
