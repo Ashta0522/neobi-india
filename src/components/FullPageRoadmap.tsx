@@ -1,548 +1,766 @@
 'use client';
 
-import React, { useState, useMemo, memo, useCallback } from 'react';
+import React, { useCallback, useState, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, ChevronDown, Target, Shield, Zap, TrendingUp, Users, Brain, CheckCircle, Clock, AlertTriangle, DollarSign, ArrowRight, Play, Flag } from 'lucide-react';
+import { ChevronRight, X, Zap, Target, TrendingUp, Shield, Brain, Code2, Package, Users, Lightbulb, Loader2, CheckCircle, AlertTriangle, ArrowRight, FileText } from 'lucide-react';
 import { useNeoBIStore } from '@/lib/store';
+import { generateExecutionOptions, getIndustryPaths, ExecutionOption } from '@/lib/industryStrategies';
 
-// Roadmap Node Component
-const RoadmapNode = memo(({
-  node,
-  isExpanded,
-  isSelected,
-  isCompleted,
-  onToggle,
-  onSelect,
-  depth = 0,
-  isLast = false,
-  parentExpanded = true
-}: {
-  node: any;
-  isExpanded: boolean;
-  isSelected: boolean;
-  isCompleted: boolean;
-  onToggle: () => void;
-  onSelect: () => void;
-  depth: number;
-  isLast?: boolean;
-  parentExpanded?: boolean;
+// Roadmap Summary Component - Shows user path vs optimal path
+const RoadmapSummary = memo(({ decisionHistory, profile, onClose, onExportPDF }: {
+  decisionHistory: string[];
+  profile: any;
+  onClose: () => void;
+  onExportPDF: () => void;
 }) => {
-  const hasChildren = node.children && node.children.length > 0;
-  const hasSteps = node.steps && node.steps.length > 0;
+  const { vibeMode, riskSlider, currentResult } = useNeoBIStore();
 
-  const nodeColors = {
-    root: 'from-purple-600 to-purple-800 border-purple-400',
-    aggressive: 'from-red-600 to-red-800 border-red-400',
-    balanced: 'from-amber-600 to-amber-800 border-amber-400',
-    conservative: 'from-green-600 to-green-800 border-green-400',
-    default: 'from-blue-600 to-blue-800 border-blue-400',
-  };
+  // Calculate optimal path based on recommendation from simulation or fallback to vibe mode
+  const optimalPath = useMemo(() => {
+    const recommendation = currentResult?.recommendation;
+    const query = currentResult?.query || '';
 
-  const getNodeColor = () => {
-    if (node.id === 'root') return nodeColors.root;
-    if (node.id.includes('aggressive') || node.id.includes('legal-formal')) return nodeColors.aggressive;
-    if (node.id.includes('balanced') || node.id.includes('mediation') || node.id.includes('settlement')) return nodeColors.balanced;
-    if (node.id.includes('conservative') || node.id.includes('improvement') || node.id.includes('due-process')) return nodeColors.conservative;
-    return nodeColors.default;
-  };
+    // If we have a recommendation from the simulation, use it
+    if (recommendation) {
+      return {
+        strategy: recommendation.name,
+        steps: recommendation.steps || [
+          `Implement ${recommendation.name}`,
+          'Monitor key metrics',
+          'Adjust based on results',
+          'Scale successful strategies',
+        ],
+        expectedROI: `${Math.round((recommendation.expectedValue / (profile?.mrr * 12 || 100000)) * 100)}%`,
+        risk: `${recommendation.riskScore > 60 ? 'High' : recommendation.riskScore > 40 ? 'Medium' : 'Low'} (${recommendation.riskScore}/100)`,
+        timeline: `${Math.round(recommendation.timeline / 30)} months`,
+        reasoning: `Based on your query "${query.substring(0, 40)}${query.length > 40 ? '...' : ''}", this ${recommendation.name} path is recommended with ${Math.round(recommendation.probability * 100)}% success probability.`,
+      };
+    }
 
-  const getIcon = () => {
-    if (node.id === 'root') return <Target className="w-5 h-5" />;
-    if (node.id.includes('aggressive') || node.id.includes('legal-formal')) return <Zap className="w-5 h-5" />;
-    if (node.id.includes('balanced') || node.id.includes('mediation')) return <TrendingUp className="w-5 h-5" />;
-    if (node.id.includes('conservative') || node.id.includes('improvement')) return <Shield className="w-5 h-5" />;
-    return <Brain className="w-5 h-5" />;
-  };
+    // Fallback to vibe mode based recommendations
+    const riskTolerance = riskSlider / 100;
+
+    if (vibeMode === 'conservative' || riskTolerance < 0.33) {
+      return {
+        strategy: 'Conservative Path',
+        steps: ['Focus on customer retention', 'Build 12+ months runway', 'Optimize profit margins', 'Organic growth only'],
+        expectedROI: '60-80%',
+        risk: 'Low (20/100)',
+        timeline: '12-18 months',
+        reasoning: 'Based on your conservative vibe mode and low risk tolerance, this path prioritizes stability over rapid growth.',
+      };
+    } else if (vibeMode === 'aggressive' || riskTolerance > 0.66) {
+      return {
+        strategy: 'Aggressive Scaling',
+        steps: ['Raise funding immediately', 'Hire aggressively (10+ roles)', 'Launch multi-city expansion', 'Heavy marketing spend'],
+        expectedROI: '150-200%',
+        risk: 'High (72/100)',
+        timeline: '3-6 months',
+        reasoning: 'Based on your aggressive vibe mode and high risk tolerance, this path maximizes growth potential.',
+      };
+    } else {
+      return {
+        strategy: 'Balanced Growth',
+        steps: ['Optimize current operations', 'Hire 3-5 key roles strategically', 'Phased market expansion', 'Focus on unit economics'],
+        expectedROI: '100-120%',
+        risk: 'Medium (45/100)',
+        timeline: '6-12 months',
+        reasoning: 'Based on your balanced vibe mode, this path offers sustainable growth with manageable risk.',
+      };
+    }
+  }, [vibeMode, riskSlider, currentResult, profile]);
+
+  // Calculate match score between user path and optimal path
+  const matchScore = useMemo(() => {
+    if (decisionHistory.length === 0) return 0;
+
+    const userPathLower = decisionHistory.map(d => d.toLowerCase()).join(' ');
+    const optimalLower = optimalPath.strategy.toLowerCase();
+
+    // Simple matching - check if user explored similar path
+    if (userPathLower.includes('conservative') || userPathLower.includes('safe')) {
+      if (optimalLower.includes('conservative')) return 95;
+      if (optimalLower.includes('balanced')) return 70;
+      return 45;
+    }
+    if (userPathLower.includes('aggressive') || userPathLower.includes('rapid') || userPathLower.includes('scaling')) {
+      if (optimalLower.includes('aggressive')) return 95;
+      if (optimalLower.includes('balanced')) return 65;
+      return 40;
+    }
+    if (userPathLower.includes('balanced') || userPathLower.includes('phased') || userPathLower.includes('organic')) {
+      if (optimalLower.includes('balanced')) return 95;
+      return 70;
+    }
+
+    return Math.min(85, 50 + decisionHistory.length * 10);
+  }, [decisionHistory, optimalPath]);
+
+  if (decisionHistory.length < 2) return null;
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: depth * 0.1 }}
-      className="relative"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed bottom-4 left-4 right-4 z-[60] max-w-4xl mx-auto"
     >
-      {/* Vertical connector line from parent */}
-      {depth > 0 && (
-        <div
-          className="absolute left-0 top-0 w-8 h-full"
-          style={{ marginLeft: `${(depth - 1) * 48}px` }}
-        >
-          {/* Vertical line */}
-          <div className={`absolute left-4 top-0 w-0.5 bg-amber-500/40 ${isLast ? 'h-8' : 'h-full'}`} />
-          {/* Horizontal connector */}
-          <div className="absolute left-4 top-8 w-8 h-0.5 bg-amber-500/40" />
-        </div>
-      )}
-
-      {/* Node card */}
-      <div
-        className="relative"
-        style={{ marginLeft: `${depth * 48}px` }}
-      >
-        <motion.div
-          className={`
-            relative p-4 rounded-xl border-2 cursor-pointer transition-all
-            bg-gradient-to-br ${getNodeColor()}
-            ${isSelected ? 'ring-2 ring-white shadow-xl scale-105' : 'hover:scale-102'}
-            ${isCompleted ? 'opacity-60' : ''}
-          `}
-          onClick={onSelect}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="flex items-start gap-3">
-            {/* Icon */}
-            <div className={`
-              p-2 rounded-lg bg-white/20 flex-shrink-0
-              ${isCompleted ? 'bg-green-500/40' : ''}
-            `}>
-              {isCompleted ? <CheckCircle className="w-5 h-5 text-green-300" /> : getIcon()}
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-white text-sm truncate">{node.name || node.title}</h3>
-                {node.timeline && (
-                  <span className="px-2 py-0.5 bg-black/30 rounded text-[10px] text-amber-200 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {node.timeline}d
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-white/70 mt-1 line-clamp-2">{node.description}</p>
-
-              {/* Metrics row */}
-              {(node.probability || node.riskScore) && (
-                <div className="flex gap-3 mt-2">
-                  {node.probability && (
-                    <div className="flex items-center gap-1 text-[10px] text-green-300">
-                      <CheckCircle className="w-3 h-3" />
-                      {Math.round(node.probability * 100)}% success
-                    </div>
-                  )}
-                  {node.riskScore && (
-                    <div className="flex items-center gap-1 text-[10px] text-orange-300">
-                      <AlertTriangle className="w-3 h-3" />
-                      Risk: {node.riskScore}/100
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Expand button */}
-            {(hasChildren || hasSteps) && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onToggle(); }}
-                className="p-1 hover:bg-white/20 rounded transition-colors"
-              >
-                {isExpanded ? (
-                  <ChevronDown className="w-5 h-5 text-white" />
-                ) : (
-                  <ChevronRight className="w-5 h-5 text-white" />
-                )}
-              </button>
-            )}
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-amber-500/50 rounded-2xl p-6 shadow-2xl">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h3 className="text-xl font-black text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 text-amber-400" />
+              Decision Summary
+            </h3>
+            <p className="text-sm text-gray-400 mt-1">Your exploration path vs AI-recommended optimal strategy</p>
           </div>
-        </motion.div>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-white/10 rounded-lg"
+          >
+            <X className="w-5 h-5 text-gray-400" />
+          </button>
+        </div>
 
-        {/* Expanded content: Steps */}
-        <AnimatePresence>
-          {isExpanded && hasSteps && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-2 ml-8"
-            >
-              <div className="relative p-4 bg-slate-800/80 rounded-lg border border-amber-500/30">
-                <h4 className="text-xs font-bold text-amber-300 mb-3 flex items-center gap-2">
-                  <Flag className="w-4 h-4" />
-                  Implementation Steps
-                </h4>
-                <div className="space-y-2">
-                  {node.steps.map((step: string, idx: number) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      {/* Step connector */}
-                      <div className="relative flex flex-col items-center">
-                        <div className={`
-                          w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
-                          ${idx === 0 ? 'bg-green-500 text-white' : 'bg-amber-500/30 text-amber-300'}
-                        `}>
-                          {idx + 1}
-                        </div>
-                        {idx < node.steps.length - 1 && (
-                          <div className="w-0.5 h-4 bg-amber-500/30 mt-1" />
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-300 pt-1 flex-1">{step}</p>
-                    </div>
-                  ))}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          {/* User's Path */}
+          <div className="p-4 bg-blue-900/30 rounded-xl border border-blue-500/30">
+            <h4 className="font-bold text-blue-400 text-sm mb-2 flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Your Explored Path
+            </h4>
+            <div className="space-y-2">
+              {decisionHistory.map((step, idx) => (
+                <div key={idx} className="flex items-center gap-2 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-blue-500/30 text-blue-300 flex items-center justify-center text-xs font-bold">
+                    {idx + 1}
+                  </span>
+                  <span className="text-white">{step}</span>
                 </div>
+              ))}
+            </div>
+          </div>
 
-                {/* Risks */}
-                {node.risks && node.risks.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-amber-500/20">
-                    <h5 className="text-[10px] font-bold text-red-400 mb-2 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" />
-                      Key Risks
-                    </h5>
-                    <div className="space-y-1">
-                      {node.risks.slice(0, 3).map((risk: string, idx: number) => (
-                        <p key={idx} className="text-[10px] text-red-300/70">• {risk}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
+          {/* Optimal Path */}
+          <div className="p-4 bg-green-900/30 rounded-xl border border-green-500/30">
+            <h4 className="font-bold text-green-400 text-sm mb-2 flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              AI Optimal Path: {optimalPath.strategy}
+            </h4>
+            <div className="space-y-2">
+              {optimalPath.steps.map((step, idx) => (
+                <div key={idx} className="flex items-center gap-2 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-green-500/30 text-green-300 flex items-center justify-center text-xs font-bold">
+                    {idx + 1}
+                  </span>
+                  <span className="text-white">{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-                {/* Costs */}
-                {node.costs && (
-                  <div className="mt-3 flex gap-4 text-[10px]">
-                    <div className="flex items-center gap-1 text-amber-300">
-                      <DollarSign className="w-3 h-3" />
-                      Upfront: ₹{(node.costs.immediate / 1000).toFixed(0)}K
-                    </div>
-                    {node.costs.monthly > 0 && (
-                      <div className="flex items-center gap-1 text-amber-300">
-                        Monthly: ₹{(node.costs.monthly / 1000).toFixed(0)}K
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Match Score & Metrics */}
+        <div className="grid grid-cols-4 gap-3 mb-4">
+          <div className="p-3 bg-black/30 rounded-lg text-center">
+            <div className="text-2xl font-black text-amber-400">{matchScore}%</div>
+            <div className="text-[10px] text-gray-400">Path Match</div>
+          </div>
+          <div className="p-3 bg-black/30 rounded-lg text-center">
+            <div className="text-lg font-bold text-green-400">{optimalPath.expectedROI}</div>
+            <div className="text-[10px] text-gray-400">Expected ROI</div>
+          </div>
+          <div className="p-3 bg-black/30 rounded-lg text-center">
+            <div className="text-lg font-bold text-orange-400">{optimalPath.risk}</div>
+            <div className="text-[10px] text-gray-400">Risk Level</div>
+          </div>
+          <div className="p-3 bg-black/30 rounded-lg text-center">
+            <div className="text-lg font-bold text-blue-400">{optimalPath.timeline}</div>
+            <div className="text-[10px] text-gray-400">Timeline</div>
+          </div>
+        </div>
+
+        {/* AI Reasoning */}
+        <div className="p-3 bg-purple-900/20 rounded-lg border border-purple-500/30 mb-4">
+          <div className="flex items-start gap-2">
+            <Brain className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <div className="text-xs font-bold text-purple-400 mb-1">AI Reasoning</div>
+              <p className="text-xs text-gray-300">{optimalPath.reasoning}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Recommendation */}
+        <div className={`p-3 rounded-lg ${matchScore >= 80 ? 'bg-green-900/30 border border-green-500/30' : matchScore >= 60 ? 'bg-amber-900/30 border border-amber-500/30' : 'bg-red-900/30 border border-red-500/30'}`}>
+          <div className="flex items-center gap-2">
+            {matchScore >= 80 ? (
+              <CheckCircle className="w-5 h-5 text-green-400" />
+            ) : (
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
+            )}
+            <span className="text-sm font-bold text-white">
+              {matchScore >= 80
+                ? 'Excellent! Your path aligns well with AI recommendations.'
+                : matchScore >= 60
+                ? 'Good exploration! Consider the optimal path elements for better results.'
+                : 'Your path diverges from optimal. Review AI recommendations for higher success probability.'}
+            </span>
+          </div>
+        </div>
+
+        {/* Export Button */}
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={onExportPDF}
+            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-pink-500 text-black font-bold rounded-lg text-sm flex items-center gap-2 hover:scale-105 transition-transform"
+          >
+            <FileText className="w-4 h-4" />
+            Export to PDF Report
+          </button>
+        </div>
       </div>
     </motion.div>
   );
 });
 
-RoadmapNode.displayName = 'RoadmapNode';
+RoadmapSummary.displayName = 'RoadmapSummary';
 
-// Timeline visualization
-const TimelineView = memo(({ paths, selectedPath, onSelectPath }: {
-  paths: any[];
-  selectedPath: string | null;
-  onSelectPath: (id: string) => void;
-}) => {
-  if (!paths.length) return null;
+interface RoadmapNode {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  level: 1 | 2 | 3;
+  children: string[];
+  metrics: { label: string; value: number }[];
+  actions: { label: string; action: () => void }[];
+}
 
-  const maxTimeline = Math.max(...paths.map(p => p.timeline || 90));
-
-  return (
-    <div className="bg-slate-800/50 rounded-xl p-4 border border-amber-500/20">
-      <h3 className="text-sm font-bold text-amber-300 mb-4 flex items-center gap-2">
-        <Clock className="w-4 h-4" />
-        Timeline Comparison
-      </h3>
-      <div className="space-y-3">
-        {paths.map((path, idx) => {
-          const widthPercent = ((path.timeline || 90) / maxTimeline) * 100;
-          const isSelected = selectedPath === path.id;
-
-          return (
-            <div
-              key={path.id}
-              className={`cursor-pointer transition-all ${isSelected ? 'scale-102' : 'hover:scale-101'}`}
-              onClick={() => onSelectPath(path.id)}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-gray-400'}`}>
-                  {path.name}
-                </span>
-                <span className="text-xs text-amber-300">{path.timeline || 90} days</span>
-              </div>
-              <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${widthPercent}%` }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className={`h-full rounded-full ${
-                    idx === 0 ? 'bg-gradient-to-r from-red-500 to-red-600' :
-                    idx === 1 ? 'bg-gradient-to-r from-amber-500 to-amber-600' :
-                    'bg-gradient-to-r from-green-500 to-green-600'
-                  } ${isSelected ? 'ring-2 ring-white' : ''}`}
-                />
-              </div>
-            </div>
-          );
-        })}
+// Memoized node component for better performance
+const RoadmapNodeCard = memo(({ node, isSelected, onClick, getNodeColor }: {
+  node: RoadmapNode;
+  isSelected: boolean;
+  onClick: () => void;
+  getNodeColor: (level: 1 | 2 | 3) => string;
+}) => (
+  <motion.button
+    onClick={onClick}
+    className={`
+      relative p-4 rounded-xl border-2 transition-all cursor-pointer
+      ${isSelected
+        ? 'border-amber-400 bg-gradient-to-br ' + getNodeColor(node.level) + ' shadow-lg scale-110'
+        : 'border-amber-500/30 bg-gradient-to-br ' + getNodeColor(node.level) + ' hover:border-amber-400 shadow'
+      }
+    `}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+  >
+    <div className="text-white flex gap-3 items-start min-w-[180px]">
+      <div className="mt-1">{node.icon}</div>
+      <div className="text-left">
+        <h4 className="font-bold text-sm">{node.title}</h4>
+        <p className="text-xs opacity-80 line-clamp-2">{node.description}</p>
       </div>
     </div>
-  );
-});
+  </motion.button>
+));
 
-TimelineView.displayName = 'TimelineView';
+RoadmapNodeCard.displayName = 'RoadmapNodeCard';
 
-// Main Roadmap Component
+// Memoized execution option card
+const ExecutionOptionCard = memo(({ child, onExplore }: {
+  child: any;
+  onExplore: () => void;
+}) => (
+  <div className="w-72 p-4 rounded-lg bg-black/40 border border-amber-400/20 hover:border-amber-400/50 transition-all">
+    <div className="flex items-start gap-3">
+      <div className="w-10 h-10 rounded bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center flex-shrink-0">
+        {child.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-amber-200 text-sm">{child.title}</div>
+        <div className="text-xs text-amber-300/60 mt-1 line-clamp-2">{child.description}</div>
+      </div>
+    </div>
+
+    {child.category && (
+      <div className="mt-2">
+        <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${
+          child.category === 'marketing' ? 'bg-pink-500/20 text-pink-300' :
+          child.category === 'operations' ? 'bg-blue-500/20 text-blue-300' :
+          child.category === 'growth' ? 'bg-green-500/20 text-green-300' :
+          child.category === 'partnerships' ? 'bg-purple-500/20 text-purple-300' :
+          child.category === 'technology' ? 'bg-cyan-500/20 text-cyan-300' :
+          'bg-gray-500/20 text-gray-300'
+        }`}>
+          {child.category}
+        </span>
+      </div>
+    )}
+
+    <div className="mt-3 grid grid-cols-3 gap-1">
+      {child.metrics.map((m: any) => (
+        <div key={m.label} className="text-center p-1.5 bg-black/40 rounded">
+          <div className="text-[10px] text-amber-300/50">{m.label.replace('Projected ', '').replace(' Delta', '')}</div>
+          <div className={`text-xs font-bold ${
+            m.label.includes('Revenue') ? 'text-green-400' :
+            m.label.includes('Risk') ? 'text-orange-400' :
+            m.label.includes('Burnout') ? (m.value < 0 ? 'text-green-400' : 'text-red-400') :
+            'text-amber-300'
+          }`}>
+            {m.label.includes('Burnout') && m.value > 0 ? '+' : ''}{m.value}{m.label.includes('Revenue') ? '%' : ''}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {(child.cost || child.timelineDays) && (
+      <div className="mt-2 flex justify-between text-[10px] text-amber-300/50">
+        {child.cost && <span>Est. Cost: ₹{(child.cost / 1000).toFixed(0)}K</span>}
+        {child.timelineDays && <span>{child.timelineDays} days</span>}
+      </div>
+    )}
+
+    <div className="mt-3">
+      <button
+        onClick={onExplore}
+        className="w-full px-3 py-2 bg-gradient-to-r from-amber-600/40 to-amber-700/40 hover:from-amber-600 hover:to-amber-700 rounded text-amber-100 text-xs font-semibold transition-all"
+      >
+        Explore Strategy →
+      </button>
+    </div>
+  </div>
+));
+
+ExecutionOptionCard.displayName = 'ExecutionOptionCard';
+
 const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { currentResult, profile } = useNeoBIStore();
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['root']));
+  const { currentResult, setCascadingLevel, setBreadcrumbPath, decisionHistory, pushDecision, popDecision, resetDecisionHistory, profile } = useNeoBIStore();
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
-  const query = currentResult?.query || '';
-  const paths = currentResult?.paths || [];
+  // Auto-show summary when user has explored 3+ decisions
+  const shouldShowSummaryButton = (decisionHistory || []).length >= 2;
 
-  // Determine query context
+  const handleExportPDF = useCallback(() => {
+    // Store roadmap data in localStorage for the report page
+    if (typeof window !== 'undefined') {
+      const roadmapData = {
+        decisionHistory: decisionHistory || [],
+        profile,
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem('neobi_roadmap_export', JSON.stringify(roadmapData));
+      // Open the share report modal or trigger PDF generation
+      window.print();
+    }
+  }, [decisionHistory, profile]);
+
+  const industryPaths = useMemo(() => {
+    return getIndustryPaths(profile?.industry || 'generic');
+  }, [profile?.industry]);
+
+  // Determine roadmap context based on user query
   const queryContext = useMemo(() => {
+    const query = currentResult?.query || '';
     const queryLower = query.toLowerCase();
 
-    if (queryLower.includes('sue') || queryLower.includes('legal') || queryLower.includes('staff') ||
-        queryLower.includes('terminate') || queryLower.includes('employee') || queryLower.includes('fire')) {
-      return { type: 'compliance', title: 'Legal & HR Strategy', color: 'from-purple-600 to-purple-800' };
+    if (queryLower.includes('legal') || queryLower.includes('compliance') || queryLower.includes('staff') ||
+        queryLower.includes('hr') || queryLower.includes('sue') || queryLower.includes('lawsuit') ||
+        queryLower.includes('terminate') || queryLower.includes('fire') || queryLower.includes('dismiss') ||
+        queryLower.includes('employee') || queryLower.includes('labor') || queryLower.includes('labour') ||
+        queryLower.includes('grievance') || queryLower.includes('misconduct') || queryLower.includes('dispute')) {
+      return { type: 'compliance', title: 'Compliance & Legal Strategy', icon: <Shield className="w-8 h-8" /> };
     }
-    if (queryLower.includes('fund') || queryLower.includes('money') || queryLower.includes('invest')) {
-      return { type: 'funding', title: 'Funding Strategy', color: 'from-green-600 to-green-800' };
+    if (queryLower.includes('fund') || queryLower.includes('money') || queryLower.includes('cash') || queryLower.includes('runway')) {
+      return { type: 'funding', title: 'Funding & Financial Strategy', icon: <TrendingUp className="w-8 h-8" /> };
     }
-    if (queryLower.includes('hire') || queryLower.includes('team') || queryLower.includes('recruit')) {
-      return { type: 'hiring', title: 'Team Building Strategy', color: 'from-blue-600 to-blue-800' };
+    if (queryLower.includes('hir') || queryLower.includes('team') || queryLower.includes('recruit')) {
+      return { type: 'hiring', title: 'Hiring & Team Strategy', icon: <Users className="w-8 h-8" /> };
     }
-    if (queryLower.includes('market') || queryLower.includes('expand') || queryLower.includes('grow')) {
-      return { type: 'growth', title: 'Growth Strategy', color: 'from-amber-600 to-amber-800' };
+    if (queryLower.includes('market') || queryLower.includes('expand') || queryLower.includes('growth')) {
+      return { type: 'growth', title: 'Market Expansion Strategy', icon: <Target className="w-8 h-8" /> };
     }
-    return { type: 'general', title: 'Business Strategy', color: 'from-slate-600 to-slate-800' };
-  }, [query]);
+    if (queryLower.includes('operation') || queryLower.includes('efficien') || queryLower.includes('process')) {
+      return { type: 'operations', title: 'Operations Optimization', icon: <Zap className="w-8 h-8" /> };
+    }
+    if (queryLower.includes('pivot') || queryLower.includes('change') || queryLower.includes('new direction')) {
+      return { type: 'pivot', title: 'Business Pivot Strategy', icon: <Lightbulb className="w-8 h-8" /> };
+    }
+    return { type: 'growth', title: `${profile?.industry || 'Business'} Growth Strategy`, icon: <Target className="w-8 h-8" /> };
+  }, [currentResult?.query, profile?.industry]);
 
-  // Build roadmap tree
-  const roadmapTree = useMemo(() => {
-    const root = {
-      id: 'root',
-      name: queryContext.title,
-      description: query ? `Strategy for: "${query}"` : 'Your strategic decision roadmap',
-      children: paths.map(path => ({
-        ...path,
-        children: [], // Can add sub-options later
-      })),
+  const nodes: Record<string, RoadmapNode> = useMemo(() => {
+    const businessName = profile?.name || 'Your Business';
+    const industry = profile?.industry || 'Business';
+    const location = profile?.location || 'India';
+    const paths = currentResult?.paths || [];
+
+    // Build dynamic child IDs from actual paths
+    const pathIds = paths.map(p => p.id);
+
+    // Base nodes with dynamic context
+    const baseNodes: Record<string, RoadmapNode> = {
+      root: {
+        id: 'root',
+        title: queryContext.title,
+        description: currentResult?.query
+          ? `Strategy for: "${currentResult.query.substring(0, 50)}${currentResult.query.length > 50 ? '...' : ''}"`
+          : `Strategic decision tree for ${businessName} in ${location}`,
+        icon: queryContext.icon,
+        level: 1,
+        children: pathIds.length > 0 ? pathIds : ['conservative', 'balanced', 'aggressive'],
+        metrics: [
+          { label: 'Risk Score', value: profile?.riskTolerance === 'high' ? 70 : profile?.riskTolerance === 'low' ? 30 : 50 },
+          { label: 'Growth Target', value: profile?.growthTarget || 30 },
+          { label: 'Confidence', value: currentResult?.confidence || 85 },
+        ],
+        actions: [],
+      },
     };
-    return root;
-  }, [paths, query, queryContext]);
 
-  const toggleNode = useCallback((nodeId: string) => {
-    setExpandedNodes(prev => {
-      const next = new Set(prev);
-      if (next.has(nodeId)) {
-        next.delete(nodeId);
-      } else {
-        next.add(nodeId);
+    // Add dynamic nodes from currentResult.paths
+    paths.forEach((path, idx) => {
+      const iconMap: Record<string, React.ReactNode> = {
+        aggressive: <Zap className="w-6 h-6" />,
+        balanced: <TrendingUp className="w-6 h-6" />,
+        conservative: <Shield className="w-6 h-6" />,
+      };
+      const defaultIcon = idx === 0 ? <Target className="w-6 h-6" /> : idx === 1 ? <Brain className="w-6 h-6" /> : <Lightbulb className="w-6 h-6" />;
+
+      baseNodes[path.id] = {
+        id: path.id,
+        title: path.name,
+        description: path.description,
+        icon: iconMap[path.id] || defaultIcon,
+        level: 2,
+        children: [],
+        metrics: [
+          { label: 'Success Prob', value: Math.round(path.probability * 100) },
+          { label: 'Risk Score', value: path.riskScore },
+          { label: 'Timeline', value: Math.min(100, Math.round(path.timeline / 3)) },
+        ],
+        actions: [],
+      };
+    });
+
+    // Fallback nodes if no paths from currentResult
+    if (paths.length === 0) {
+      baseNodes.conservative = {
+        id: 'conservative',
+        title: industryPaths.conservative,
+        description: 'Low-risk, steady growth approach',
+        icon: <Shield className="w-6 h-6" />,
+        level: 2,
+        children: ['partnership', 'organic', 'optimization'],
+        metrics: [{ label: 'Risk', value: 20 }, { label: 'Timeline', value: 120 }, { label: 'ROI', value: 60 }],
+        actions: [],
+      };
+      baseNodes.balanced = {
+        id: 'balanced',
+        title: industryPaths.balanced,
+        description: 'Balanced growth with sustainability',
+        icon: <TrendingUp className="w-6 h-6" />,
+        level: 2,
+        children: ['market-expansion', 'team-scaling', 'product-launch'],
+        metrics: [{ label: 'Risk', value: 50 }, { label: 'Timeline', value: 150 }, { label: 'ROI', value: 120 }],
+        actions: [],
+      };
+      baseNodes.aggressive = {
+        id: 'aggressive',
+        title: industryPaths.aggressive,
+        description: 'High-growth market capture',
+        icon: <Zap className="w-6 h-6" />,
+        level: 2,
+        children: ['vc-funding', 'market-takeover', 'international'],
+        metrics: [{ label: 'Risk', value: 75 }, { label: 'Timeline', value: 200 }, { label: 'ROI', value: 200 }],
+        actions: [],
+      };
+      // Level 3 fallback nodes
+      baseNodes.partnership = { id: 'partnership', title: 'Strategic Partnerships', description: `Partner with ${industry} businesses`, icon: <Users className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Cost', value: 30 }, { label: 'Speed', value: 85 }, { label: 'Sustainability', value: 80 }], actions: [] };
+      baseNodes.organic = { id: 'organic', title: 'Organic Growth', description: 'Bootstrap with existing profits', icon: <Brain className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Cost', value: 20 }, { label: 'Speed', value: 40 }, { label: 'Independence', value: 95 }], actions: [] };
+      baseNodes.optimization = { id: 'optimization', title: 'Process Optimization', description: 'Improve efficiency', icon: <TrendingUp className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Impact', value: 70 }, { label: 'Implementation', value: 60 }, { label: 'Payback', value: 50 }], actions: [] };
+      baseNodes['market-expansion'] = { id: 'market-expansion', title: 'Market Expansion', description: 'Expand to new markets', icon: <Zap className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Market Size', value: 90 }, { label: 'Competition', value: 65 }, { label: 'Entry Cost', value: 75 }], actions: [] };
+      baseNodes['team-scaling'] = { id: 'team-scaling', title: 'Team Scaling', description: `Grow from ${profile?.teamSize || 5}`, icon: <Users className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Hiring Needs', value: 55 }, { label: 'Training', value: 45 }, { label: 'Retention', value: 70 }], actions: [] };
+      baseNodes['product-launch'] = { id: 'product-launch', title: 'New Product', description: 'Launch new offerings', icon: <Package className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Development', value: 60 }, { label: 'Market Fit', value: 50 }, { label: 'Revenue', value: 85 }], actions: [] };
+      baseNodes['vc-funding'] = { id: 'vc-funding', title: 'Funding Round', description: 'Raise capital', icon: <Zap className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Capital', value: 95 }, { label: 'Dilution', value: 40 }, { label: 'Timeline', value: 75 }], actions: [] };
+      baseNodes['market-takeover'] = { id: 'market-takeover', title: 'Market Leadership', description: 'Become market leader', icon: <Shield className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Market Share', value: 85 }, { label: 'Brand', value: 90 }, { label: 'Risk', value: 85 }], actions: [] };
+      baseNodes.international = { id: 'international', title: 'Geographic Expansion', description: 'Expand beyond current', icon: <Target className="w-6 h-6" />, level: 3, children: [], metrics: [{ label: 'Potential', value: 95 }, { label: 'Complexity', value: 80 }, { label: 'Investment', value: 90 }], actions: [] };
+    }
+
+    return baseNodes;
+  }, [profile, industryPaths, currentResult, queryContext]);
+
+  const getNodeColor = useCallback((level: 1 | 2 | 3) => {
+    const colors = { 1: 'from-amber-600 to-amber-700', 2: 'from-amber-500 to-amber-600', 3: 'from-amber-400 to-amber-500' };
+    return colors[level];
+  }, []);
+
+  const getCategoryIcon = useCallback((category: string) => {
+    switch (category) {
+      case 'marketing': return <TrendingUp className="w-6 h-6" />;
+      case 'operations': return <Shield className="w-6 h-6" />;
+      case 'growth': return <Zap className="w-6 h-6" />;
+      case 'partnerships': return <Users className="w-6 h-6" />;
+      case 'technology': return <Code2 className="w-6 h-6" />;
+      default: return <Lightbulb className="w-6 h-6" />;
+    }
+  }, []);
+
+  // Seeded random for consistent but varied shuffling
+  const seededRandom = useCallback((seed: string) => {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      const char = seed.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return () => {
+      hash = (hash * 1103515245 + 12345) & 0x7fffffff;
+      return hash / 0x7fffffff;
+    };
+  }, []);
+
+  const generateSubPaths = useCallback((rootLabel: string, nodeId: string) => {
+    const used = new Set(decisionHistory || []);
+    const historyLength = (decisionHistory || []).length;
+
+    // Create unique seeds for each node path to ensure variety
+    const nodeSeed = `${nodeId}-${rootLabel}`;
+    const industrySeed = profile?.industry || 'generic';
+
+    // Get strategies from multiple seed variations to build a diverse pool
+    const seedVariations = [
+      `${rootLabel}`,
+      `${rootLabel}-${nodeId}`,
+      `${nodeSeed}-growth`,
+      `${nodeSeed}-operations`,
+      `${nodeSeed}-marketing`,
+      `${rootLabel}-${industrySeed}-${historyLength}`,
+    ];
+
+    // Collect strategies from different seed variations
+    const allStrategies: ExecutionOption[] = [];
+    for (const seedVar of seedVariations) {
+      const options = generateExecutionOptions(profile, seedVar);
+      allStrategies.push(...options);
+    }
+
+    // Filter out already used strategies
+    let candidates = allStrategies.filter((opt) => !used.has(opt.title));
+
+    // Remove duplicates by title while preserving order
+    const uniqueMap = new Map<string, typeof candidates[0]>();
+    candidates.forEach(opt => {
+      if (!uniqueMap.has(opt.title)) {
+        uniqueMap.set(opt.title, opt);
       }
-      return next;
     });
-  }, []);
+    candidates = Array.from(uniqueMap.values());
 
-  const selectNode = useCallback((nodeId: string) => {
-    setSelectedNode(prev => prev === nodeId ? null : nodeId);
-    // Auto-expand when selected
-    setExpandedNodes(prev => {
-      const next = new Set(prev);
-      next.add(nodeId);
-      return next;
-    });
-  }, []);
+    // Create a unique seed combining node path and industry for shuffling
+    const shuffleSeed = `${nodeId}-${rootLabel}-${industrySeed}-${historyLength}`;
+    const rng = seededRandom(shuffleSeed);
 
-  const renderTree = useCallback((node: any, depth: number = 0, isLast: boolean = true) => {
-    const isExpanded = expandedNodes.has(node.id);
-    const isSelected = selectedNode === node.id;
-    const isCompleted = completedSteps.has(node.id);
-    const children = node.children || [];
+    // Fisher-Yates shuffle with seeded random
+    const shuffled = [...candidates];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Pick top 5 unique strategies
+    const picks = shuffled.slice(0, 5);
+
+    return picks.map((option, idx) => ({
+      id: `${option.id}-${nodeSeed}-${idx}`,
+      title: option.title,
+      description: option.description,
+      icon: getCategoryIcon(option.category),
+      level: 3 as 1 | 2 | 3,
+      metrics: [
+        { label: 'Projected Revenue', value: option.projectedRevenue },
+        { label: 'Risk Delta', value: option.riskDelta },
+        { label: 'Burnout Delta', value: option.burnoutDelta },
+      ],
+      cost: option.cost,
+      timelineDays: option.timelineDays,
+      category: option.category,
+    }));
+  }, [profile, decisionHistory, getCategoryIcon, seededRandom]);
+
+  const handleExplore = useCallback((child: any) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      pushDecision(child.title);
+      setSelectedNode(child.id);
+      setCascadingLevel(child.level);
+      setBreadcrumbPath([...(decisionHistory || []), child.title]);
+      setIsLoading(false);
+    }, 100);
+  }, [pushDecision, setCascadingLevel, setBreadcrumbPath, decisionHistory]);
+
+  const renderNode = useCallback((nodeId: string, depth: number = 0) => {
+    const node = nodes[nodeId];
+    if (!node) return null;
+
+    const isSelected = selectedNode === nodeId;
+    const hasChildren = node.children.length > 0;
+    const rootLabel = decisionHistory?.length ? decisionHistory[decisionHistory.length - 1] : node.title;
+    const dynamicChildren = !hasChildren && node.level === 3 ? generateSubPaths(rootLabel, nodeId) : [];
 
     return (
-      <div key={node.id} className="mb-3">
-        <RoadmapNode
+      <motion.div
+        key={nodeId}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center gap-4"
+      >
+        <RoadmapNodeCard
           node={node}
-          isExpanded={isExpanded}
           isSelected={isSelected}
-          isCompleted={isCompleted}
-          onToggle={() => toggleNode(node.id)}
-          onSelect={() => selectNode(node.id)}
-          depth={depth}
-          isLast={isLast}
+          onClick={() => setSelectedNode(isSelected ? null : nodeId)}
+          getNodeColor={getNodeColor}
         />
 
-        {/* Children */}
         <AnimatePresence>
-          {isExpanded && children.length > 0 && (
+          {isSelected && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-3"
+              className="w-full max-w-sm bg-black/40 border border-amber-500/30 rounded-lg p-4"
             >
-              {children.map((child: any, idx: number) =>
-                renderTree(child, depth + 1, idx === children.length - 1)
-              )}
+              <h5 className="text-amber-300 font-bold mb-2 text-sm">Key Metrics</h5>
+              <div className="space-y-2">
+                {node.metrics.map((metric) => (
+                  <div key={metric.label} className="flex justify-between items-center text-xs">
+                    <span className="text-amber-200">{metric.label}</span>
+                    <div className="w-24 h-1.5 bg-amber-900/50 rounded-full overflow-hidden">
+                      <div style={{ width: `${metric.value}%` }} className="h-full bg-gradient-to-r from-amber-400 to-amber-300" />
+                    </div>
+                    <span className="w-8 text-right text-amber-300">{metric.value}%</span>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+
+        {hasChildren && (
+          <div className="flex gap-4 justify-center flex-wrap max-w-2xl">
+            {node.children.map((childId) => renderNode(childId, depth + 1))}
+          </div>
+        )}
+
+        {dynamicChildren.length > 0 && (
+          <div className="flex gap-4 justify-center flex-wrap max-w-4xl mt-4">
+            <div className="w-full text-center mb-2">
+              <span className="text-sm text-amber-300/80 font-semibold">Execution Options for {node.title}</span>
+            </div>
+            {dynamicChildren.map((child: any) => (
+              <ExecutionOptionCard key={child.id} child={child} onExplore={() => handleExplore(child)} />
+            ))}
+          </div>
+        )}
+      </motion.div>
     );
-  }, [expandedNodes, selectedNode, completedSteps, toggleNode, selectNode]);
+  }, [nodes, selectedNode, decisionHistory, generateSubPaths, getNodeColor, handleExplore]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 z-50 overflow-hidden"
+      className="fixed inset-0 bg-gradient-to-b from-slate-900/95 to-slate-900/98 backdrop-blur-sm z-50 flex flex-col"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-amber-500/20 bg-black/30">
-        <div className="flex items-center gap-4">
-          <div className={`p-2 rounded-lg bg-gradient-to-br ${queryContext.color}`}>
-            <Target className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">Strategic Roadmap</h1>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {query ? `Query: "${query.substring(0, 50)}${query.length > 50 ? '...' : ''}"` : 'Decision tree visualization'}
-            </p>
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+        </div>
+      )}
+
+      <div className="flex justify-between items-center p-4 border-b border-amber-500/20">
+        <div>
+          <h1 className="text-2xl font-bold text-amber-300">Strategic Roadmap</h1>
+          <div className="mt-1 text-xs text-amber-200/60 flex items-center gap-2">
+            <span>Path:</span>
+            {(decisionHistory || []).length === 0 ? (
+              <span>Root</span>
+            ) : (
+              (decisionHistory || []).map((p, i) => (
+                <span key={i} className="flex items-center gap-1">
+                  {i > 0 && <ChevronRight className="w-3 h-3" />}
+                  {p}
+                </span>
+              ))
+            )}
           </div>
         </div>
-
         <div className="flex items-center gap-2">
+          {shouldShowSummaryButton && (
+            <button
+              onClick={() => setShowSummary(!showSummary)}
+              className={`px-3 py-1 text-xs font-bold rounded flex items-center gap-1 ${
+                showSummary
+                  ? 'bg-green-500 text-black'
+                  : 'bg-green-600/30 hover:bg-green-600 text-green-100'
+              }`}
+            >
+              <CheckCircle className="w-3 h-3" />
+              {showSummary ? 'Hide Summary' : 'View Summary'}
+            </button>
+          )}
           <button
-            onClick={() => setExpandedNodes(new Set(['root', ...paths.map(p => p.id)]))}
-            className="px-3 py-1.5 text-xs bg-amber-600/30 hover:bg-amber-600 rounded-lg text-amber-100 transition-colors"
+            onClick={() => {
+              popDecision();
+              setBreadcrumbPath((decisionHistory || []).slice(0, -1));
+              setSelectedNode(null);
+            }}
+            className="px-3 py-1 text-xs bg-amber-600/30 hover:bg-amber-600 rounded text-amber-100"
           >
-            Expand All
+            ◀ Back
           </button>
           <button
-            onClick={() => setExpandedNodes(new Set(['root']))}
-            className="px-3 py-1.5 text-xs bg-slate-600/30 hover:bg-slate-600 rounded-lg text-slate-100 transition-colors"
+            onClick={() => {
+              resetDecisionHistory();
+              setBreadcrumbPath([]);
+              setSelectedNode(null);
+              setShowSummary(false);
+            }}
+            className="px-3 py-1 text-xs bg-amber-600/30 hover:bg-amber-600 rounded text-amber-100"
           >
-            Collapse All
+            Reset
           </button>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-          >
-            <X className="w-6 h-6 text-gray-400" />
+          <button onClick={onClose} className="p-2 hover:bg-amber-500/20 rounded-lg">
+            <X className="w-6 h-6 text-amber-300" />
           </button>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex h-[calc(100vh-73px)]">
-        {/* Left: Roadmap tree */}
-        <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-3xl mx-auto">
-            {/* Legend */}
-            <div className="mb-6 p-3 bg-slate-800/50 rounded-lg border border-amber-500/20">
-              <div className="flex items-center gap-4 text-xs">
-                <span className="text-gray-400">Path Types:</span>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-red-500" />
-                  <span className="text-gray-300">Aggressive</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-amber-500" />
-                  <span className="text-gray-300">Balanced</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-green-500" />
-                  <span className="text-gray-300">Conservative</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Start marker */}
-            <div className="flex items-center gap-3 mb-4 ml-2">
-              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-                <Play className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-sm text-green-400 font-medium">Start Here</span>
-              <ArrowRight className="w-4 h-4 text-green-400" />
-            </div>
-
-            {/* Roadmap tree */}
-            {renderTree(roadmapTree)}
-
-            {/* End marker */}
-            {paths.length > 0 && (
-              <div className="flex items-center gap-3 mt-6 ml-2">
-                <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
-                  <Flag className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-sm text-amber-400 font-medium">Click on any path to see implementation steps</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right: Timeline & Summary */}
-        <div className="w-80 border-l border-amber-500/20 bg-black/20 p-4 overflow-auto">
-          <div className="space-y-4">
-            {/* Timeline comparison */}
-            <TimelineView
-              paths={paths}
-              selectedPath={selectedNode}
-              onSelectPath={selectNode}
-            />
-
-            {/* Selected path details */}
-            {selectedNode && selectedNode !== 'root' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-slate-800/50 rounded-xl p-4 border border-amber-500/20"
-              >
-                <h3 className="text-sm font-bold text-amber-300 mb-3">Selected Path Details</h3>
-                {(() => {
-                  const path = paths.find(p => p.id === selectedNode);
-                  if (!path) return null;
-                  return (
-                    <div className="space-y-3">
-                      <div>
-                        <span className="text-xs text-gray-400">Expected Value</span>
-                        <p className="text-lg font-bold text-green-400">
-                          ₹{((path.expectedValue || 0) / 100000).toFixed(1)}L
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="p-2 bg-black/30 rounded">
-                          <span className="text-[10px] text-gray-400">Success Rate</span>
-                          <p className="text-sm font-bold text-green-400">
-                            {Math.round((path.probability || 0.8) * 100)}%
-                          </p>
-                        </div>
-                        <div className="p-2 bg-black/30 rounded">
-                          <span className="text-[10px] text-gray-400">Risk Score</span>
-                          <p className="text-sm font-bold text-orange-400">
-                            {path.riskScore || 50}/100
-                          </p>
-                        </div>
-                      </div>
-                      {path.benefits && (
-                        <div className="pt-2 border-t border-amber-500/20">
-                          <span className="text-xs text-gray-400">Key Benefits</span>
-                          <div className="mt-1 space-y-1">
-                            <p className="text-xs text-green-300">• Revenue: +{path.benefits.revenue ? Math.round(path.benefits.revenue / 1000) : 0}K</p>
-                            <p className="text-xs text-blue-300">• Efficiency: +{path.benefits.efficiency || 0}%</p>
-                            <p className="text-xs text-purple-300">• Risk Reduction: {path.benefits.riskReduction || 0}%</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-              </motion.div>
-            )}
-
-            {/* Help text */}
-            <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-              <h4 className="text-xs font-bold text-amber-300 mb-2">How to use</h4>
-              <ul className="text-[10px] text-gray-400 space-y-1">
-                <li>• Click nodes to select and see details</li>
-                <li>• Click arrows to expand/collapse steps</li>
-                <li>• Compare timelines in the panel</li>
-                <li>• Review risks before choosing a path</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+      <div className="flex gap-2 p-2 border-b border-amber-500/20">
+        <button onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.2))} className="px-2 py-1 text-xs bg-amber-600/50 rounded text-amber-100">−</button>
+        <span className="text-xs text-amber-200 px-2">{Math.round(zoomLevel * 100)}%</span>
+        <button onClick={() => setZoomLevel(Math.min(1.5, zoomLevel + 0.2))} className="px-2 py-1 text-xs bg-amber-600/50 rounded text-amber-100">+</button>
       </div>
+
+      <div className="flex-1 overflow-auto flex items-start justify-center p-8" style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center top' }}>
+        <div className="space-y-12">{renderNode('root')}</div>
+      </div>
+
+      {/* Roadmap Summary Panel */}
+      <AnimatePresence>
+        {showSummary && (
+          <RoadmapSummary
+            decisionHistory={decisionHistory || []}
+            profile={profile}
+            onClose={() => setShowSummary(false)}
+            onExportPDF={handleExportPDF}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
