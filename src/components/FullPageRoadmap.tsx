@@ -367,7 +367,11 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const query = currentResult?.query || '';
     const queryLower = query.toLowerCase();
 
-    if (queryLower.includes('legal') || queryLower.includes('compliance') || queryLower.includes('staff') || queryLower.includes('hr')) {
+    if (queryLower.includes('legal') || queryLower.includes('compliance') || queryLower.includes('staff') ||
+        queryLower.includes('hr') || queryLower.includes('sue') || queryLower.includes('lawsuit') ||
+        queryLower.includes('terminate') || queryLower.includes('fire') || queryLower.includes('dismiss') ||
+        queryLower.includes('employee') || queryLower.includes('labor') || queryLower.includes('labour') ||
+        queryLower.includes('grievance') || queryLower.includes('misconduct') || queryLower.includes('dispute')) {
       return { type: 'compliance', title: 'Compliance & Legal Strategy', icon: <Shield className="w-8 h-8" /> };
     }
     if (queryLower.includes('fund') || queryLower.includes('money') || queryLower.includes('cash') || queryLower.includes('runway')) {

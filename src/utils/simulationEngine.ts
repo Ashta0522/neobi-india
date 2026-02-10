@@ -118,8 +118,15 @@ export const detectQueryIntent = (query: string): QueryIntent => {
     return 'pivot';
   }
 
-  // Compliance
-  if (lowerQuery.includes('gst') || lowerQuery.includes('tax') || lowerQuery.includes('compli') || lowerQuery.includes('legal')) {
+  // Compliance & Legal (including HR/staff issues)
+  if (
+    lowerQuery.includes('gst') || lowerQuery.includes('tax') || lowerQuery.includes('compli') ||
+    lowerQuery.includes('legal') || lowerQuery.includes('sue') || lowerQuery.includes('lawsuit') ||
+    lowerQuery.includes('terminate') || lowerQuery.includes('dismiss') || lowerQuery.includes('fire') ||
+    lowerQuery.includes('action against') || lowerQuery.includes('labor') || lowerQuery.includes('labour') ||
+    lowerQuery.includes('contract') || lowerQuery.includes('dispute') || lowerQuery.includes('grievance') ||
+    lowerQuery.includes('warning letter') || lowerQuery.includes('notice') || lowerQuery.includes('severance')
+  ) {
     return 'compliance';
   }
 
@@ -324,16 +331,28 @@ const generateCompliancePaths = (
   // Detect if it's about staff/HR issues or tax/GST issues
   const isStaffRelated = lowerQuery.includes('staff') || lowerQuery.includes('employee') ||
                          lowerQuery.includes('hr') || lowerQuery.includes('terminate') ||
-                         lowerQuery.includes('fire') || lowerQuery.includes('action against');
+                         lowerQuery.includes('fire') || lowerQuery.includes('action against') ||
+                         lowerQuery.includes('sue') || lowerQuery.includes('lawsuit') ||
+                         lowerQuery.includes('dismiss') || lowerQuery.includes('worker') ||
+                         lowerQuery.includes('labor') || lowerQuery.includes('labour') ||
+                         lowerQuery.includes('grievance') || lowerQuery.includes('misconduct') ||
+                         lowerQuery.includes('insubordination') || lowerQuery.includes('theft') ||
+                         lowerQuery.includes('fraud') || lowerQuery.includes('discipline');
   const isTaxRelated = lowerQuery.includes('gst') || lowerQuery.includes('tds') ||
                        lowerQuery.includes('tax') || lowerQuery.includes('compliance');
+
+  // Check for specific legal action keywords
+  const wantsToSue = lowerQuery.includes('sue') || lowerQuery.includes('lawsuit') ||
+                     lowerQuery.includes('legal action') || lowerQuery.includes('take action');
 
   if (isStaffRelated) {
     return [
       {
         id: 'legal-formal-process',
-        name: 'Formal Legal Process',
-        description: 'Follow proper HR and legal procedures with documentation',
+        name: wantsToSue ? 'Legal Action with Documentation' : 'Formal Legal Process',
+        description: wantsToSue
+          ? 'Build strong legal case with proper documentation before court action'
+          : 'Follow proper HR and legal procedures with documentation',
         expectedValue: baseExpectedValue * 0.9,
         probability: 0.92,
         riskScore: 25,
@@ -347,14 +366,27 @@ const generateCompliancePaths = (
           efficiency: 20,
           riskReduction: 80,
         },
-        steps: [
+        steps: wantsToSue ? [
+          'Document all incidents with dates, witnesses, and evidence',
+          'Issue show cause notice and collect written response',
+          'Consult labor lawyer - assess if civil or labor court is appropriate',
+          'File case under appropriate act (Industrial Disputes Act / IPC for fraud)',
+          'Prepare for counter-claims and labor commissioner inquiry',
+          'Consider arbitration clause in employment contract',
+        ] : [
           'Document all incidents and performance issues thoroughly',
           'Issue formal warning letters as per employment terms',
           'Consult with labor lawyer on proper termination procedure',
           'Ensure compliance with Industrial Disputes Act / Shops & Establishments Act',
           'Prepare full & final settlement with proper documentation',
         ],
-        risks: [
+        risks: wantsToSue ? [
+          'Court cases typically take 2-5 years in India',
+          'Employee may file counter-claim for wrongful termination',
+          'Legal costs can escalate significantly (₹2-10L)',
+          'May damage company reputation',
+          'Burden of proof lies on employer',
+        ] : [
           'Process may take 60-90 days',
           'Employee may file counter-claim',
           'Need to maintain detailed documentation',
@@ -377,14 +409,16 @@ const generateCompliancePaths = (
       },
       {
         id: 'legal-mediation',
-        name: 'Mediation & Settlement',
-        description: 'Resolve through internal mediation or mutual settlement',
+        name: wantsToSue ? 'Out-of-Court Settlement' : 'Mediation & Settlement',
+        description: wantsToSue
+          ? 'Settle matter outside court through negotiation - faster and cheaper'
+          : 'Resolve through internal mediation or mutual settlement',
         expectedValue: baseExpectedValue * 0.85,
-        probability: 0.78,
-        riskScore: 35,
-        timeline: 30,
+        probability: wantsToSue ? 0.82 : 0.78,
+        riskScore: wantsToSue ? 30 : 35,
+        timeline: wantsToSue ? 45 : 30,
         costs: {
-          immediate: 100000, // Settlement amount
+          immediate: wantsToSue ? 150000 : 100000, // Higher settlement for legal context
           monthly: 0,
         },
         benefits: {
@@ -392,14 +426,26 @@ const generateCompliancePaths = (
           efficiency: 35,
           riskReduction: 60,
         },
-        steps: [
+        steps: wantsToSue ? [
+          'Send legal notice through lawyer outlining grievances',
+          'Propose out-of-court settlement meeting',
+          'Negotiate settlement amount covering damages',
+          'Draft settlement agreement with non-disclosure clause',
+          'Get release deed executed and notarized',
+          'Close matter with full and final settlement',
+        ] : [
           'Arrange mediation meeting with HR and neutral third party',
           'Discuss mutual separation terms',
           'Offer reasonable severance package',
           'Get signed release/no-claim letter',
           'Ensure confidentiality agreement in place',
         ],
-        risks: [
+        risks: wantsToSue ? [
+          'Settlement amount may be higher than expected',
+          'Employee may not agree to settle',
+          'May set precedent for other disputes',
+          'Need lawyer involvement throughout',
+        ] : [
           'Settlement costs may be higher',
           'May set precedent for other employees',
           'Negotiation may fail',
@@ -422,29 +468,44 @@ const generateCompliancePaths = (
       },
       {
         id: 'legal-performance-improvement',
-        name: 'Performance Improvement Plan',
-        description: 'Give employee chance to improve before action',
+        name: wantsToSue ? 'Build Case Through Due Process' : 'Performance Improvement Plan',
+        description: wantsToSue
+          ? 'Follow due process to build legally defensible case for termination'
+          : 'Give employee chance to improve before action',
         expectedValue: baseExpectedValue * 1.0,
-        probability: 0.65,
-        riskScore: 40,
-        timeline: 60,
+        probability: wantsToSue ? 0.88 : 0.65,
+        riskScore: wantsToSue ? 25 : 40,
+        timeline: wantsToSue ? 90 : 60,
         costs: {
-          immediate: 0,
-          monthly: 5000, // HR/monitoring costs
+          immediate: wantsToSue ? 20000 : 0,
+          monthly: wantsToSue ? 10000 : 5000, // HR/monitoring costs
         },
         benefits: {
           revenue: baseExpectedValue * 1.1,
-          efficiency: 15,
-          riskReduction: 45,
+          efficiency: wantsToSue ? 10 : 15,
+          riskReduction: wantsToSue ? 70 : 45,
         },
-        steps: [
+        steps: wantsToSue ? [
+          'Issue written warnings with acknowledgment receipt',
+          'Create formal PIP with clear, measurable objectives',
+          'Document every meeting, feedback, and deviation',
+          'Conduct domestic inquiry as per Standing Orders',
+          'Issue show cause notice before termination',
+          'Terminate with proper notice/pay as per law',
+          'Maintain file for potential legal defense',
+        ] : [
           'Create formal Performance Improvement Plan (PIP)',
           'Set clear, measurable goals with timeline',
           'Provide necessary training/support',
           'Document all progress meetings',
           'Take action based on PIP outcome',
         ],
-        risks: [
+        risks: wantsToSue ? [
+          'Process takes 60-90 days minimum',
+          'Employee may improve, defeating purpose',
+          'If not followed properly, case weakens',
+          'Employee may resign and claim harassment',
+        ] : [
           'Employee may not improve',
           'Extended period of uncertainty',
           'May affect team morale',
