@@ -113,8 +113,35 @@ export const detectQueryIntent = (query: string): QueryIntent => {
     return 'operations';
   }
 
-  // Pivot
-  if (lowerQuery.includes('pivot') || lowerQuery.includes('change') || lowerQuery.includes('transform')) {
+  // Pivot / Business Transformation / Adding New Services
+  // Recognize "should I add X", "add new service", "new offering", "diversify" etc.
+  if (
+    lowerQuery.includes('pivot') ||
+    lowerQuery.includes('transform') ||
+    lowerQuery.includes('diversify') ||
+    lowerQuery.includes('new service') ||
+    lowerQuery.includes('new offering') ||
+    lowerQuery.includes('new product line') ||
+    lowerQuery.includes('new business') ||
+    lowerQuery.includes('new line of') ||
+    lowerQuery.includes('branch out') ||
+    lowerQuery.includes('rebrand') ||
+    (lowerQuery.includes('add') && (
+      lowerQuery.includes('consulting') ||
+      lowerQuery.includes('service') ||
+      lowerQuery.includes('product') ||
+      lowerQuery.includes('offering') ||
+      lowerQuery.includes('vertical') ||
+      lowerQuery.includes('segment') ||
+      lowerQuery.includes('division') ||
+      lowerQuery.includes('line')
+    )) ||
+    (lowerQuery.includes('should') && lowerQuery.includes('start') && (
+      lowerQuery.includes('new') ||
+      lowerQuery.includes('another')
+    )) ||
+    (lowerQuery.includes('should') && lowerQuery.includes('add'))
+  ) {
     return 'pivot';
   }
 

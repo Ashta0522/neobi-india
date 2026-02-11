@@ -24,8 +24,9 @@ interface InventoryItem {
   expiryDays?: number;
 }
 
-// F&B specific menu templates
-const FB_MENU_TEMPLATES = {
+// Industry-specific inventory templates
+const INVENTORY_TEMPLATES: Record<string, Array<{ name: string; category: string; unit: string; reorderPoint: number; safetyStock: number; costPerUnit: number; expiryDays?: number }>> = {
+  // F&B Templates
   'North Indian': [
     { name: 'Basmati Rice', category: 'Grains', unit: 'kg', reorderPoint: 50, safetyStock: 20, costPerUnit: 120 },
     { name: 'Wheat Flour (Atta)', category: 'Grains', unit: 'kg', reorderPoint: 40, safetyStock: 15, costPerUnit: 45 },
@@ -62,14 +63,140 @@ const FB_MENU_TEMPLATES = {
     { name: 'Green Chutney', category: 'Condiments', unit: 'kg', reorderPoint: 5, safetyStock: 2, costPerUnit: 100, expiryDays: 3 },
     { name: 'Tamarind Chutney', category: 'Condiments', unit: 'kg', reorderPoint: 5, safetyStock: 2, costPerUnit: 80, expiryDays: 7 },
   ],
+
+  // Consulting & Services Templates
+  'Tech Consulting': [
+    { name: 'Laptop/MacBook', category: 'Equipment', unit: 'units', reorderPoint: 2, safetyStock: 1, costPerUnit: 80000 },
+    { name: 'Software Licenses (Annual)', category: 'Software Licenses', unit: 'units', reorderPoint: 10, safetyStock: 5, costPerUnit: 5000 },
+    { name: 'Cloud Credits (AWS/GCP)', category: 'Cloud Services', unit: 'units', reorderPoint: 5, safetyStock: 2, costPerUnit: 10000 },
+    { name: 'Training Materials', category: 'Training Materials', unit: 'sets', reorderPoint: 20, safetyStock: 10, costPerUnit: 500 },
+    { name: 'Business Cards', category: 'Marketing Collateral', unit: 'pcs', reorderPoint: 500, safetyStock: 200, costPerUnit: 5 },
+    { name: 'Presentation Templates', category: 'Client Materials', unit: 'sets', reorderPoint: 5, safetyStock: 2, costPerUnit: 2000 },
+  ],
+  'Consulting': [
+    { name: 'Presentation Materials', category: 'Client Materials', unit: 'sets', reorderPoint: 10, safetyStock: 5, costPerUnit: 1000 },
+    { name: 'Research Reports', category: 'Training Materials', unit: 'units', reorderPoint: 5, safetyStock: 2, costPerUnit: 5000 },
+    { name: 'Office Stationery', category: 'Office Supplies', unit: 'sets', reorderPoint: 20, safetyStock: 10, costPerUnit: 500 },
+    { name: 'Travel Budget', category: 'Travel & Events', unit: 'units', reorderPoint: 10, safetyStock: 5, costPerUnit: 15000 },
+    { name: 'Software Tools', category: 'Software Licenses', unit: 'units', reorderPoint: 5, safetyStock: 2, costPerUnit: 3000 },
+    { name: 'Marketing Brochures', category: 'Marketing Collateral', unit: 'pcs', reorderPoint: 100, safetyStock: 50, costPerUnit: 50 },
+  ],
+
+  // SaaS & Tech Templates
+  'SaaS': [
+    { name: 'AWS/Cloud Credits', category: 'Infrastructure', unit: 'units', reorderPoint: 5, safetyStock: 2, costPerUnit: 50000 },
+    { name: 'Development Tools (JetBrains, etc.)', category: 'Development Tools', unit: 'licenses', reorderPoint: 10, safetyStock: 5, costPerUnit: 15000 },
+    { name: 'Marketing Automation Tools', category: 'Marketing', unit: 'licenses', reorderPoint: 3, safetyStock: 1, costPerUnit: 20000 },
+    { name: 'Customer Support Tools', category: 'Software Licenses', unit: 'licenses', reorderPoint: 5, safetyStock: 2, costPerUnit: 10000 },
+    { name: 'Security & Compliance Tools', category: 'Software Licenses', unit: 'licenses', reorderPoint: 3, safetyStock: 1, costPerUnit: 25000 },
+    { name: 'Office Equipment', category: 'Office Supplies', unit: 'units', reorderPoint: 5, safetyStock: 2, costPerUnit: 30000 },
+  ],
+
+  // Retail Templates
+  'Retail': [
+    { name: 'Merchandise Stock', category: 'Merchandise', unit: 'units', reorderPoint: 100, safetyStock: 50, costPerUnit: 500 },
+    { name: 'Shopping Bags', category: 'Packaging', unit: 'pcs', reorderPoint: 500, safetyStock: 200, costPerUnit: 10 },
+    { name: 'Display Stands', category: 'Display Materials', unit: 'units', reorderPoint: 5, safetyStock: 2, costPerUnit: 5000 },
+    { name: 'Price Tags', category: 'POS Supplies', unit: 'pcs', reorderPoint: 1000, safetyStock: 500, costPerUnit: 2 },
+    { name: 'Receipt Rolls', category: 'POS Supplies', unit: 'rolls', reorderPoint: 50, safetyStock: 20, costPerUnit: 100 },
+    { name: 'Gift Boxes', category: 'Packaging', unit: 'pcs', reorderPoint: 200, safetyStock: 100, costPerUnit: 50 },
+  ],
+
+  // Manufacturing Templates
+  'Manufacturing': [
+    { name: 'Primary Raw Material', category: 'Raw Materials', unit: 'kg', reorderPoint: 500, safetyStock: 200, costPerUnit: 100 },
+    { name: 'Secondary Components', category: 'Components', unit: 'units', reorderPoint: 300, safetyStock: 100, costPerUnit: 50 },
+    { name: 'Packaging Material', category: 'Packaging', unit: 'units', reorderPoint: 1000, safetyStock: 500, costPerUnit: 20 },
+    { name: 'Maintenance Supplies', category: 'Maintenance Supplies', unit: 'sets', reorderPoint: 10, safetyStock: 5, costPerUnit: 5000 },
+    { name: 'Safety Equipment', category: 'Maintenance Supplies', unit: 'sets', reorderPoint: 20, safetyStock: 10, costPerUnit: 2000 },
+  ],
+
+  // Generic Template
   'General': [
-    { name: 'Raw Material A', category: 'Materials', unit: 'units', reorderPoint: 100, safetyStock: 50, costPerUnit: 500 },
-    { name: 'Packaging Material', category: 'Packaging', unit: 'pcs', reorderPoint: 120, safetyStock: 40, costPerUnit: 25 },
-    { name: 'Finished Product', category: 'Products', unit: 'units', reorderPoint: 80, safetyStock: 30, costPerUnit: 1200 },
+    { name: 'Office Supplies', category: 'Office Supplies', unit: 'sets', reorderPoint: 10, safetyStock: 5, costPerUnit: 500 },
+    { name: 'Marketing Materials', category: 'Marketing', unit: 'sets', reorderPoint: 20, safetyStock: 10, costPerUnit: 1000 },
+    { name: 'Equipment', category: 'Equipment', unit: 'units', reorderPoint: 3, safetyStock: 1, costPerUnit: 25000 },
   ],
 };
 
+// Backward compatibility alias
+const FB_MENU_TEMPLATES = INVENTORY_TEMPLATES;
+
+// Industry-specific inventory categories
+const INDUSTRY_CATEGORIES: Record<string, string[]> = {
+  // Food & Beverage
+  'Food & Beverage': ['General', 'Grains', 'Dairy', 'Produce', 'Protein', 'Spices', 'Oil', 'Beverages', 'Packaging'],
+  'Kirana/Grocery': ['General', 'Grains', 'Dairy', 'Produce', 'Protein', 'Spices', 'Oil', 'Beverages', 'Packaging'],
+  'Restaurant': ['General', 'Grains', 'Dairy', 'Produce', 'Protein', 'Spices', 'Oil', 'Beverages', 'Packaging'],
+
+  // Consulting & Services
+  'Consulting': ['Office Supplies', 'Software Licenses', 'Training Materials', 'Marketing Collateral', 'Equipment', 'Travel & Events'],
+  'Professional Services': ['Office Supplies', 'Software Licenses', 'Training Materials', 'Marketing Collateral', 'Equipment', 'Client Materials'],
+  'IT Services': ['Hardware', 'Software Licenses', 'Cloud Services', 'Network Equipment', 'Office Supplies', 'Training'],
+
+  // SaaS & Technology
+  'SaaS': ['Infrastructure', 'Software Licenses', 'Cloud Services', 'Development Tools', 'Marketing', 'Office Supplies'],
+  'SaaS B2B': ['Infrastructure', 'Software Licenses', 'Cloud Services', 'Development Tools', 'Marketing', 'Office Supplies'],
+  'Software': ['Infrastructure', 'Software Licenses', 'Hardware', 'Development Tools', 'Cloud Services', 'Office Supplies'],
+  'Fintech': ['Infrastructure', 'Compliance Tools', 'Security Services', 'Software Licenses', 'Cloud Services', 'Office Supplies'],
+  'Edtech': ['Content Materials', 'Software Licenses', 'Cloud Services', 'Marketing', 'Equipment', 'Office Supplies'],
+
+  // Retail & E-commerce
+  'Retail': ['Merchandise', 'Display Materials', 'Packaging', 'POS Supplies', 'Office Supplies', 'Marketing Materials'],
+  'E-commerce': ['Inventory', 'Packaging', 'Shipping Supplies', 'Marketing Materials', 'Software Tools', 'Office Supplies'],
+  'D2C': ['Products', 'Packaging', 'Shipping Supplies', 'Marketing Materials', 'Raw Materials', 'Office Supplies'],
+  'D2C Fashion': ['Fabrics', 'Accessories', 'Packaging', 'Labels & Tags', 'Marketing Materials', 'Office Supplies'],
+
+  // Manufacturing
+  'Manufacturing': ['Raw Materials', 'Components', 'Work in Progress', 'Finished Goods', 'Packaging', 'Maintenance Supplies'],
+
+  // Healthcare
+  'Healthcare': ['Medical Supplies', 'Pharmaceuticals', 'Equipment', 'PPE', 'Office Supplies', 'Cleaning Supplies'],
+  'Pharmacy': ['Medicines', 'OTC Products', 'Medical Devices', 'Cosmetics', 'Packaging', 'Office Supplies'],
+
+  // Education
+  'Education': ['Learning Materials', 'Stationery', 'Equipment', 'Books', 'Technology', 'Office Supplies'],
+  'Coaching': ['Study Materials', 'Test Papers', 'Books', 'Technology', 'Marketing Materials', 'Office Supplies'],
+
+  // Real Estate
+  'Real Estate': ['Marketing Materials', 'Signage', 'Office Supplies', 'Legal Documents', 'Client Gifts', 'Technology'],
+
+  // Fitness & Wellness
+  'Fitness': ['Equipment', 'Supplements', 'Merchandise', 'Cleaning Supplies', 'Marketing Materials', 'Office Supplies'],
+  'Gym': ['Equipment', 'Supplements', 'Merchandise', 'Cleaning Supplies', 'Maintenance', 'Office Supplies'],
+  'Wellness': ['Products', 'Equipment', 'Consumables', 'Marketing Materials', 'Packaging', 'Office Supplies'],
+
+  // Agency
+  'Agency': ['Software Tools', 'Marketing Assets', 'Office Supplies', 'Client Materials', 'Equipment', 'Training'],
+  'Marketing Agency': ['Software Tools', 'Marketing Assets', 'Office Supplies', 'Client Materials', 'Media Inventory', 'Equipment'],
+
+  // Logistics
+  'Logistics': ['Packaging', 'Fuel', 'Vehicle Parts', 'Safety Equipment', 'Office Supplies', 'Technology'],
+
+  // Default/Generic
+  'default': ['General', 'Materials', 'Products', 'Supplies', 'Equipment', 'Marketing', 'Office Supplies'],
+};
+
+// Get categories based on industry
+const getIndustryCategories = (industry: string | undefined): string[] => {
+  if (!industry) return INDUSTRY_CATEGORIES['default'];
+
+  // Check for exact match first
+  if (INDUSTRY_CATEGORIES[industry]) return INDUSTRY_CATEGORIES[industry];
+
+  // Check for partial match
+  const lowerIndustry = industry.toLowerCase();
+  for (const [key, categories] of Object.entries(INDUSTRY_CATEGORIES)) {
+    if (lowerIndustry.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerIndustry)) {
+      return categories;
+    }
+  }
+
+  return INDUSTRY_CATEGORIES['default'];
+};
+
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  // F&B categories
   'Grains': <Wheat size={14} className="text-amber-400" />,
   'Dairy': <Milk size={14} className="text-blue-300" />,
   'Produce': <Leaf size={14} className="text-green-400" />,
@@ -77,21 +204,92 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Spices': <Coffee size={14} className="text-orange-400" />,
   'Oil': <Coffee size={14} className="text-yellow-500" />,
   'Beverages': <Coffee size={14} className="text-brown-400" />,
+  // Tech/SaaS categories
+  'Infrastructure': <Building size={14} className="text-purple-400" />,
+  'Software Licenses': <Package size={14} className="text-blue-400" />,
+  'Cloud Services': <Package size={14} className="text-cyan-400" />,
+  'Hardware': <Package size={14} className="text-gray-400" />,
+  // Office/Services categories
+  'Office Supplies': <Package size={14} className="text-yellow-400" />,
+  'Training Materials': <Package size={14} className="text-green-400" />,
+  'Marketing Materials': <Package size={14} className="text-pink-400" />,
+  'Equipment': <Package size={14} className="text-slate-400" />,
+  // Default
   'default': <Package size={14} className="text-gray-400" />,
+};
+
+// Get appropriate template options based on industry
+const getTemplateOptions = (industry: string | undefined): { key: string; label: string }[] => {
+  const lowerIndustry = (industry || '').toLowerCase();
+
+  // F&B industries
+  if (lowerIndustry.includes('food') || lowerIndustry.includes('restaurant') || lowerIndustry.includes('kirana') || lowerIndustry.includes('cafe') || lowerIndustry.includes('bakery')) {
+    return [
+      { key: 'North Indian', label: 'North Indian Restaurant' },
+      { key: 'South Indian', label: 'South Indian Restaurant' },
+      { key: 'Cafe/Bakery', label: 'Cafe / Bakery' },
+      { key: 'Street Food', label: 'Street Food' },
+      { key: 'General', label: 'Custom / Other' },
+    ];
+  }
+
+  // Consulting & Services
+  if (lowerIndustry.includes('consult') || lowerIndustry.includes('professional') || lowerIndustry.includes('it service')) {
+    return [
+      { key: 'Tech Consulting', label: 'Tech Consulting' },
+      { key: 'Consulting', label: 'Business Consulting' },
+      { key: 'General', label: 'Custom / Other' },
+    ];
+  }
+
+  // SaaS & Tech
+  if (lowerIndustry.includes('saas') || lowerIndustry.includes('software') || lowerIndustry.includes('tech') || lowerIndustry.includes('fintech') || lowerIndustry.includes('edtech')) {
+    return [
+      { key: 'SaaS', label: 'SaaS Company' },
+      { key: 'Tech Consulting', label: 'Tech Services' },
+      { key: 'General', label: 'Custom / Other' },
+    ];
+  }
+
+  // Retail
+  if (lowerIndustry.includes('retail') || lowerIndustry.includes('ecommerce') || lowerIndustry.includes('d2c')) {
+    return [
+      { key: 'Retail', label: 'Retail Store' },
+      { key: 'General', label: 'Custom / Other' },
+    ];
+  }
+
+  // Manufacturing
+  if (lowerIndustry.includes('manufactur')) {
+    return [
+      { key: 'Manufacturing', label: 'Manufacturing Unit' },
+      { key: 'General', label: 'Custom / Other' },
+    ];
+  }
+
+  // Default
+  return [
+    { key: 'General', label: 'General Business' },
+    { key: 'Consulting', label: 'Services Business' },
+    { key: 'SaaS', label: 'Tech Company' },
+    { key: 'Retail', label: 'Retail Business' },
+  ];
 };
 
 export const InventoryControlPanel: React.FC = () => {
   const { profile } = useNeoBIStore();
   const isFnB = profile?.industry === 'Food & Beverage' || profile?.industry === 'Kirana/Grocery';
+  const templateOptions = getTemplateOptions(profile?.industry);
+  const defaultCategory = getIndustryCategories(profile?.industry)[0] || 'General';
 
   const [menuType, setMenuType] = useState<string>('');
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [newItem, setNewItem] = useState({ name: '', category: 'General', unit: 'units', reorderPoint: 100, safetyStock: 50, costPerUnit: 100 });
+  const [newItem, setNewItem] = useState({ name: '', category: defaultCategory, unit: 'units', reorderPoint: 100, safetyStock: 50, costPerUnit: 100 });
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showMenuSelector, setShowMenuSelector] = useState(isFnB && items.length === 0);
+  const [showMenuSelector, setShowMenuSelector] = useState(items.length === 0);
 
   const loadMenuTemplate = (type: string) => {
-    const template = FB_MENU_TEMPLATES[type as keyof typeof FB_MENU_TEMPLATES] || FB_MENU_TEMPLATES['General'];
+    const template = INVENTORY_TEMPLATES[type as keyof typeof INVENTORY_TEMPLATES] || INVENTORY_TEMPLATES['General'];
     const newItems: InventoryItem[] = template.map((t, idx) => ({
       id: `${type}-${idx}-${Date.now()}`,
       name: t.name,
@@ -143,36 +341,38 @@ export const InventoryControlPanel: React.FC = () => {
   const totalInventoryValue = items.reduce((sum, i) => sum + (i.currentStock * i.costPerUnit), 0);
   const expiringItems = items.filter(i => i.expiryDays && i.expiryDays <= 3);
 
-  // Menu selector for F&B
-  if (showMenuSelector && isFnB) {
+  // Template selector for all industries
+  if (showMenuSelector) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <UtensilsCrossed className="text-cyan-400" size={20} />
+          {isFnB ? <UtensilsCrossed className="text-cyan-400" size={20} /> : <Package className="text-cyan-400" size={20} />}
           <h3 className="font-bold text-lg text-white">Inventory Control</h3>
         </div>
-        <p className="text-sm text-gray-400">Select your menu type to get pre-configured inventory items</p>
+        <p className="text-sm text-gray-400">
+          Select a template for your {profile?.industry || 'business'} to get pre-configured inventory items
+        </p>
 
         <div className="grid grid-cols-2 gap-3">
-          {Object.keys(FB_MENU_TEMPLATES).filter(k => k !== 'General').map((type) => (
+          {templateOptions.filter(opt => opt.key !== 'General').map((option) => (
             <button
-              key={type}
-              onClick={() => loadMenuTemplate(type)}
+              key={option.key}
+              onClick={() => loadMenuTemplate(option.key)}
               className="p-4 bg-gradient-to-br from-cyan-900/30 to-cyan-800/20 rounded-xl border border-cyan-500/30 hover:border-cyan-400 transition-all text-left"
             >
-              <div className="font-bold text-cyan-200">{type}</div>
+              <div className="font-bold text-cyan-200">{option.label}</div>
               <div className="text-xs text-gray-400 mt-1">
-                {FB_MENU_TEMPLATES[type as keyof typeof FB_MENU_TEMPLATES].length} items
+                {INVENTORY_TEMPLATES[option.key as keyof typeof INVENTORY_TEMPLATES]?.length || 0} items
               </div>
             </button>
           ))}
         </div>
 
         <button
-          onClick={() => { setShowMenuSelector(false); loadMenuTemplate('General'); }}
+          onClick={() => { setShowMenuSelector(false); setItems([]); }}
           className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-gray-300 text-sm"
         >
-          Skip - Use General Template
+          Skip - Start Empty
         </button>
       </div>
     );
@@ -186,18 +386,16 @@ export const InventoryControlPanel: React.FC = () => {
           {isFnB ? <UtensilsCrossed className="text-cyan-400" size={20} /> : <Package className="text-cyan-400" size={20} />}
           <div>
             <h3 className="font-bold text-lg text-white">Inventory Control</h3>
-            {menuType && <span className="text-xs text-cyan-400">{menuType} Menu</span>}
+            {menuType && <span className="text-xs text-cyan-400">{menuType}</span>}
           </div>
         </div>
         <div className="flex gap-2">
-          {isFnB && (
-            <button
-              onClick={() => setShowMenuSelector(true)}
-              className="px-2 py-1.5 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 rounded-lg text-cyan-200 text-xs"
-            >
-              Change Menu
-            </button>
-          )}
+          <button
+            onClick={() => setShowMenuSelector(true)}
+            className="px-2 py-1.5 bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/30 rounded-lg text-cyan-200 text-xs"
+          >
+            Templates
+          </button>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
             className="px-3 py-1.5 bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-500/30 rounded-lg text-cyan-200 text-xs font-bold flex items-center gap-1"
@@ -257,7 +455,7 @@ export const InventoryControlPanel: React.FC = () => {
                 onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
                 className="px-3 py-2 bg-black/30 border border-cyan-500/30 rounded-lg text-white text-sm"
               >
-                {['General', 'Grains', 'Dairy', 'Produce', 'Protein', 'Spices', 'Oil', 'Beverages', 'Packaging'].map(cat => (
+                {getIndustryCategories(profile?.industry).map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>

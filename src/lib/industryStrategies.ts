@@ -1567,26 +1567,771 @@ function generateWellnessStrategies(profile: BusinessProfile, parentPath: string
 }
 
 /**
+ * Legal/HR-specific execution options for compliance queries
+ */
+function generateLegalStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {
+  const baseCost = profile.mrr * 0.1;
+
+  return [
+    {
+      id: `${parentPath}-legal-consultation`,
+      title: 'Consult Labor Lawyer',
+      description: 'Get professional legal advice on employment law and proper procedures',
+      projectedRevenue: 0,
+      riskDelta: -40,
+      burnoutDelta: -10,
+      timelineDays: 7,
+      cost: Math.round(baseCost * 0.5),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-documentation-audit`,
+      title: 'HR Documentation Audit',
+      description: 'Review and strengthen employment contracts, policies, and records',
+      projectedRevenue: 0,
+      riskDelta: -35,
+      burnoutDelta: 5,
+      timelineDays: 14,
+      cost: Math.round(baseCost * 0.3),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-domestic-inquiry`,
+      title: 'Conduct Domestic Inquiry',
+      description: 'Formal internal inquiry as per Standing Orders for serious misconduct',
+      projectedRevenue: 0,
+      riskDelta: -30,
+      burnoutDelta: 15,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.4),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-settlement-negotiation`,
+      title: 'Negotiate Settlement',
+      description: 'Work out mutual separation with severance package and NDA',
+      projectedRevenue: 0,
+      riskDelta: -25,
+      burnoutDelta: -5,
+      timelineDays: 21,
+      cost: Math.round(baseCost * 1.5),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-legal-notice`,
+      title: 'Issue Legal Notice',
+      description: 'Send formal legal notice through advocate outlining grievances',
+      projectedRevenue: 0,
+      riskDelta: 10,
+      burnoutDelta: 20,
+      timelineDays: 14,
+      cost: Math.round(baseCost * 0.2),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-labor-court-filing`,
+      title: 'File Labor Court Case',
+      description: 'Initiate formal proceedings in labor court or industrial tribunal',
+      projectedRevenue: 0,
+      riskDelta: 25,
+      burnoutDelta: 30,
+      timelineDays: 180,
+      cost: Math.round(baseCost * 2),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-mediation-process`,
+      title: 'Labor Commissioner Mediation',
+      description: 'Request mediation through labor commissioner office',
+      projectedRevenue: 0,
+      riskDelta: -15,
+      burnoutDelta: 10,
+      timelineDays: 45,
+      cost: Math.round(baseCost * 0.1),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-hr-policy-update`,
+      title: 'Update HR Policies',
+      description: 'Revise employee handbook, grievance procedures, and disciplinary policy',
+      projectedRevenue: 5,
+      riskDelta: -20,
+      burnoutDelta: 5,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.25),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-employee-training`,
+      title: 'Conduct Compliance Training',
+      description: 'Train managers on proper HR procedures and documentation',
+      projectedRevenue: 10,
+      riskDelta: -25,
+      burnoutDelta: -5,
+      timelineDays: 14,
+      cost: Math.round(baseCost * 0.15),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-third-party-hr`,
+      title: 'Engage HR Consultant',
+      description: 'Hire external HR consultant for unbiased employee management',
+      projectedRevenue: 15,
+      riskDelta: -30,
+      burnoutDelta: -15,
+      timelineDays: 7,
+      cost: Math.round(baseCost * 0.6),
+      category: 'partnerships',
+    },
+  ];
+}
+
+/**
+ * Funding-specific execution options for funding/money queries
+ */
+function generateFundingStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {
+  const baseCost = profile.mrr * 0.1;
+  const mrr = profile.mrr || 100000;
+
+  return [
+    {
+      id: `${parentPath}-angel-investors`,
+      title: 'Approach Angel Investors',
+      description: 'Connect with HNIs and angel networks like Indian Angel Network, Mumbai Angels',
+      projectedRevenue: 40,
+      riskDelta: 15,
+      burnoutDelta: 20,
+      timelineDays: 60,
+      cost: Math.round(baseCost * 0.5),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-vc-pitch`,
+      title: 'Prepare VC Pitch Deck',
+      description: 'Create compelling pitch deck with financials, traction, and growth story',
+      projectedRevenue: 0,
+      riskDelta: 5,
+      burnoutDelta: 15,
+      timelineDays: 14,
+      cost: Math.round(baseCost * 0.2),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-revenue-financing`,
+      title: 'Revenue-Based Financing',
+      description: 'Get non-dilutive funding from players like GetVantage, Velocity',
+      projectedRevenue: 25,
+      riskDelta: 10,
+      burnoutDelta: 5,
+      timelineDays: 21,
+      cost: Math.round(baseCost * 0.1),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-bank-loan`,
+      title: 'Apply for Business Loan',
+      description: 'MSME loans from SBI, HDFC with Mudra/CGTMSE guarantee',
+      projectedRevenue: 20,
+      riskDelta: 15,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.05),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-govt-grants`,
+      title: 'Apply for Government Grants',
+      description: 'Startup India, state innovation funds, SIDBI schemes',
+      projectedRevenue: 30,
+      riskDelta: -5,
+      burnoutDelta: 15,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 0.1),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-strategic-investor`,
+      title: 'Find Strategic Investor',
+      description: 'Corporate investor who can add value beyond capital',
+      projectedRevenue: 35,
+      riskDelta: 20,
+      burnoutDelta: 25,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 0.3),
+      category: 'partnerships',
+    },
+    {
+      id: `${parentPath}-bootstrap-optimize`,
+      title: 'Optimize for Profitability',
+      description: 'Cut costs, improve margins to reduce funding dependency',
+      projectedRevenue: 15,
+      riskDelta: -20,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: 0,
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-customer-prepay`,
+      title: 'Customer Pre-payment Model',
+      description: 'Offer discounts for annual/upfront payments to improve cash flow',
+      projectedRevenue: 20,
+      riskDelta: -10,
+      burnoutDelta: 5,
+      timelineDays: 14,
+      cost: 0,
+      category: 'marketing',
+    },
+    {
+      id: `${parentPath}-valuation-prep`,
+      title: 'Improve Valuation Metrics',
+      description: 'Focus on metrics VCs care about: growth rate, retention, LTV/CAC',
+      projectedRevenue: 10,
+      riskDelta: -5,
+      burnoutDelta: 15,
+      timelineDays: 60,
+      cost: Math.round(baseCost * 0.2),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-convertible-note`,
+      title: 'Raise via Convertible Note',
+      description: 'Quick funding without immediate valuation negotiation',
+      projectedRevenue: 30,
+      riskDelta: 10,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.15),
+      category: 'growth',
+    },
+  ];
+}
+
+/**
+ * Hiring-specific execution options for hiring/team queries
+ */
+function generateHiringStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {
+  const baseCost = profile.mrr * 0.1;
+  const teamSize = profile.teamSize || 5;
+
+  return [
+    {
+      id: `${parentPath}-job-portals`,
+      title: 'Post on Job Portals',
+      description: 'Use Naukri, LinkedIn, Indeed for wider reach',
+      projectedRevenue: 15,
+      riskDelta: 5,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.3),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-employee-referral`,
+      title: 'Launch Referral Program',
+      description: 'Incentivize team to refer quality candidates',
+      projectedRevenue: 20,
+      riskDelta: -10,
+      burnoutDelta: 5,
+      timelineDays: 14,
+      cost: Math.round(baseCost * 0.5),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-campus-hiring`,
+      title: 'Campus Recruitment Drive',
+      description: 'Hire fresh graduates from engineering/MBA colleges',
+      projectedRevenue: 10,
+      riskDelta: 15,
+      burnoutDelta: 20,
+      timelineDays: 60,
+      cost: Math.round(baseCost * 0.4),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-recruitment-agency`,
+      title: 'Engage Recruitment Agency',
+      description: 'Use specialized headhunters for senior/niche roles',
+      projectedRevenue: 25,
+      riskDelta: 5,
+      burnoutDelta: -10,
+      timelineDays: 45,
+      cost: Math.round(baseCost * 2),
+      category: 'partnerships',
+    },
+    {
+      id: `${parentPath}-internship-program`,
+      title: 'Start Internship Program',
+      description: 'Build pipeline through internships and convert top performers',
+      projectedRevenue: 10,
+      riskDelta: -5,
+      burnoutDelta: 15,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 0.2),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-remote-hiring`,
+      title: 'Hire Remote/Tier-2 Talent',
+      description: 'Access larger talent pool with lower salary expectations',
+      projectedRevenue: 20,
+      riskDelta: 10,
+      burnoutDelta: 5,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.1),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-employer-branding`,
+      title: 'Build Employer Brand',
+      description: 'Improve Glassdoor ratings, share culture on social media',
+      projectedRevenue: 15,
+      riskDelta: -10,
+      burnoutDelta: 10,
+      timelineDays: 60,
+      cost: Math.round(baseCost * 0.25),
+      category: 'marketing',
+    },
+    {
+      id: `${parentPath}-contract-hiring`,
+      title: 'Hire Contractors/Freelancers',
+      description: 'Use Upwork, Toptal for flexible workforce without commitment',
+      projectedRevenue: 15,
+      riskDelta: 5,
+      burnoutDelta: -5,
+      timelineDays: 7,
+      cost: Math.round(baseCost * 0.8),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-esop-structure`,
+      title: 'Implement ESOP Program',
+      description: 'Attract talent with equity compensation',
+      projectedRevenue: 25,
+      riskDelta: 10,
+      burnoutDelta: 5,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.15),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-skill-assessment`,
+      title: 'Improve Hiring Process',
+      description: 'Add skill tests, structured interviews to hire better',
+      projectedRevenue: 20,
+      riskDelta: -15,
+      burnoutDelta: 10,
+      timelineDays: 14,
+      cost: Math.round(baseCost * 0.1),
+      category: 'operations',
+    },
+  ];
+}
+
+/**
+ * Growth-specific execution options for market/expansion queries
+ */
+function generateGrowthStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {
+  const baseCost = profile.mrr * 0.1;
+  const location = profile.location || 'India';
+
+  return [
+    {
+      id: `${parentPath}-new-city`,
+      title: 'Expand to New City',
+      description: `Launch in Tier-1/2 city with pilot team`,
+      projectedRevenue: 45,
+      riskDelta: 25,
+      burnoutDelta: 20,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 3),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-digital-marketing`,
+      title: 'Scale Digital Marketing',
+      description: 'Increase spend on Google Ads, Meta, programmatic',
+      projectedRevenue: 35,
+      riskDelta: 15,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 2),
+      category: 'marketing',
+    },
+    {
+      id: `${parentPath}-channel-partners`,
+      title: 'Build Channel Partner Network',
+      description: 'Recruit resellers, distributors, affiliates',
+      projectedRevenue: 40,
+      riskDelta: 10,
+      burnoutDelta: 15,
+      timelineDays: 60,
+      cost: Math.round(baseCost * 0.5),
+      category: 'partnerships',
+    },
+    {
+      id: `${parentPath}-product-expansion`,
+      title: 'Launch New Product Line',
+      description: 'Expand offering to capture adjacent market',
+      projectedRevenue: 50,
+      riskDelta: 30,
+      burnoutDelta: 25,
+      timelineDays: 120,
+      cost: Math.round(baseCost * 4),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-enterprise-sales`,
+      title: 'Build Enterprise Sales Team',
+      description: 'Target larger customers with dedicated sales',
+      projectedRevenue: 55,
+      riskDelta: 20,
+      burnoutDelta: 15,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 2.5),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-content-marketing`,
+      title: 'Invest in Content Marketing',
+      description: 'SEO, blogs, videos for organic growth',
+      projectedRevenue: 25,
+      riskDelta: -5,
+      burnoutDelta: 10,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 0.8),
+      category: 'marketing',
+    },
+    {
+      id: `${parentPath}-strategic-acquisition`,
+      title: 'Acquire Smaller Competitor',
+      description: 'Buy market share and talent through acquisition',
+      projectedRevenue: 60,
+      riskDelta: 35,
+      burnoutDelta: 30,
+      timelineDays: 180,
+      cost: Math.round(baseCost * 20),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-franchise-model`,
+      title: 'Launch Franchise Model',
+      description: 'Scale through franchisees with lower capital',
+      projectedRevenue: 45,
+      riskDelta: 20,
+      burnoutDelta: 15,
+      timelineDays: 120,
+      cost: Math.round(baseCost * 1.5),
+      category: 'partnerships',
+    },
+    {
+      id: `${parentPath}-international`,
+      title: 'Explore International Markets',
+      description: 'Enter GCC, SEA, or US market',
+      projectedRevenue: 70,
+      riskDelta: 40,
+      burnoutDelta: 35,
+      timelineDays: 180,
+      cost: Math.round(baseCost * 5),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-customer-success`,
+      title: 'Build Customer Success Team',
+      description: 'Reduce churn and increase expansion revenue',
+      projectedRevenue: 30,
+      riskDelta: -15,
+      burnoutDelta: 10,
+      timelineDays: 45,
+      cost: Math.round(baseCost * 1.2),
+      category: 'operations',
+    },
+  ];
+}
+
+/**
+ * Operations-specific execution options for efficiency/process queries
+ */
+function generateOperationsStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {
+  const baseCost = profile.mrr * 0.1;
+
+  return [
+    {
+      id: `${parentPath}-automation`,
+      title: 'Automate Repetitive Tasks',
+      description: 'Use Zapier, Make, or custom scripts to reduce manual work',
+      projectedRevenue: 20,
+      riskDelta: -15,
+      burnoutDelta: -20,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.5),
+      category: 'technology',
+    },
+    {
+      id: `${parentPath}-erp-implementation`,
+      title: 'Implement ERP System',
+      description: 'Zoho, SAP Business One for integrated operations',
+      projectedRevenue: 15,
+      riskDelta: 10,
+      burnoutDelta: 15,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 2),
+      category: 'technology',
+    },
+    {
+      id: `${parentPath}-process-audit`,
+      title: 'Conduct Process Audit',
+      description: 'Map and optimize all business processes',
+      projectedRevenue: 10,
+      riskDelta: -20,
+      burnoutDelta: 5,
+      timelineDays: 21,
+      cost: Math.round(baseCost * 0.3),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-vendor-optimization`,
+      title: 'Renegotiate Vendor Contracts',
+      description: 'Review and optimize supplier agreements',
+      projectedRevenue: 15,
+      riskDelta: 5,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: 0,
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-lean-operations`,
+      title: 'Implement Lean Methodology',
+      description: 'Reduce waste, improve efficiency across operations',
+      projectedRevenue: 25,
+      riskDelta: -10,
+      burnoutDelta: 10,
+      timelineDays: 60,
+      cost: Math.round(baseCost * 0.4),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-outsourcing`,
+      title: 'Outsource Non-Core Functions',
+      description: 'Use BPO for accounting, HR, customer support',
+      projectedRevenue: 10,
+      riskDelta: 10,
+      burnoutDelta: -15,
+      timelineDays: 45,
+      cost: Math.round(baseCost * 0.8),
+      category: 'partnerships',
+    },
+    {
+      id: `${parentPath}-quality-control`,
+      title: 'Strengthen Quality Control',
+      description: 'Implement QC processes to reduce defects/complaints',
+      projectedRevenue: 15,
+      riskDelta: -25,
+      burnoutDelta: 10,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.3),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-inventory-optimization`,
+      title: 'Optimize Inventory Management',
+      description: 'Reduce working capital with JIT, better forecasting',
+      projectedRevenue: 20,
+      riskDelta: -10,
+      burnoutDelta: 5,
+      timelineDays: 45,
+      cost: Math.round(baseCost * 0.2),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-data-analytics`,
+      title: 'Build Analytics Dashboard',
+      description: 'Track KPIs in real-time for better decisions',
+      projectedRevenue: 15,
+      riskDelta: -15,
+      burnoutDelta: -5,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.6),
+      category: 'technology',
+    },
+    {
+      id: `${parentPath}-sop-documentation`,
+      title: 'Document All SOPs',
+      description: 'Create standard operating procedures for consistency',
+      projectedRevenue: 5,
+      riskDelta: -20,
+      burnoutDelta: 10,
+      timelineDays: 45,
+      cost: Math.round(baseCost * 0.1),
+      category: 'operations',
+    },
+  ];
+}
+
+/**
+ * Pivot-specific execution options for business transformation queries
+ */
+function generatePivotStrategies(profile: BusinessProfile, parentPath: string): ExecutionOption[] {
+  const baseCost = profile.mrr * 0.1;
+
+  return [
+    {
+      id: `${parentPath}-customer-discovery`,
+      title: 'Customer Discovery Interviews',
+      description: 'Talk to 50+ customers to find new opportunities',
+      projectedRevenue: 10,
+      riskDelta: -20,
+      burnoutDelta: 15,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.1),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-market-research`,
+      title: 'Conduct Market Research',
+      description: 'Analyze market size, competition, trends for new direction',
+      projectedRevenue: 5,
+      riskDelta: -15,
+      burnoutDelta: 10,
+      timelineDays: 21,
+      cost: Math.round(baseCost * 0.3),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-mvp-new-product`,
+      title: 'Build MVP for New Direction',
+      description: 'Quick prototype to test new business hypothesis',
+      projectedRevenue: 30,
+      riskDelta: 25,
+      burnoutDelta: 20,
+      timelineDays: 45,
+      cost: Math.round(baseCost * 1.5),
+      category: 'technology',
+    },
+    {
+      id: `${parentPath}-pilot-program`,
+      title: 'Run Pilot with Select Customers',
+      description: 'Test new offering with friendly customers first',
+      projectedRevenue: 25,
+      riskDelta: 10,
+      burnoutDelta: 15,
+      timelineDays: 60,
+      cost: Math.round(baseCost * 0.5),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-team-restructure`,
+      title: 'Restructure Team for Pivot',
+      description: 'Reallocate resources to new priority areas',
+      projectedRevenue: 15,
+      riskDelta: 20,
+      burnoutDelta: 25,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.8),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-sunset-old-product`,
+      title: 'Plan Product Sunset',
+      description: 'Gracefully wind down old product/service',
+      projectedRevenue: -10,
+      riskDelta: 15,
+      burnoutDelta: 20,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 0.3),
+      category: 'operations',
+    },
+    {
+      id: `${parentPath}-rebrand`,
+      title: 'Rebrand for New Market',
+      description: 'Update brand identity to reflect new direction',
+      projectedRevenue: 20,
+      riskDelta: 15,
+      burnoutDelta: 15,
+      timelineDays: 60,
+      cost: Math.round(baseCost * 1),
+      category: 'marketing',
+    },
+    {
+      id: `${parentPath}-strategic-partnership`,
+      title: 'Find Pivot Partner',
+      description: 'Partner with company in target market for faster entry',
+      projectedRevenue: 35,
+      riskDelta: 20,
+      burnoutDelta: 10,
+      timelineDays: 90,
+      cost: Math.round(baseCost * 0.5),
+      category: 'partnerships',
+    },
+    {
+      id: `${parentPath}-acquihire`,
+      title: 'Acquire Team/Product',
+      description: 'Buy small company with expertise in new direction',
+      projectedRevenue: 40,
+      riskDelta: 30,
+      burnoutDelta: 25,
+      timelineDays: 120,
+      cost: Math.round(baseCost * 10),
+      category: 'growth',
+    },
+    {
+      id: `${parentPath}-advisor-board`,
+      title: 'Build Advisory Board',
+      description: 'Get experts in new domain to guide pivot',
+      projectedRevenue: 15,
+      riskDelta: -10,
+      burnoutDelta: 5,
+      timelineDays: 30,
+      cost: Math.round(baseCost * 0.2),
+      category: 'partnerships',
+    },
+  ];
+}
+
+/**
  * Main function to generate industry-specific execution options
+ * @param queryContext - Optional context type ('compliance', 'funding', 'growth', etc.)
  */
 export function generateExecutionOptions(
   profile: BusinessProfile | null,
-  parentPath: string
+  parentPath: string,
+  queryContext?: string
 ): ExecutionOption[] {
+  const defaultProfile: BusinessProfile = {
+    id: 'default',
+    name: 'Default Business',
+    industry: 'generic',
+    mrr: 100000,
+    customers: 50,
+    location: 'India',
+    teamSize: 5,
+    foundedDate: new Date(),
+    growthTarget: 30,
+    riskTolerance: 'medium',
+    vibeMode: 'balanced'
+  };
+
+  const effectiveProfile = profile || defaultProfile;
+
+  // Use context-aware strategies based on query type
+  switch (queryContext) {
+    case 'compliance':
+      return generateLegalStrategies(effectiveProfile, parentPath);
+    case 'funding':
+      return generateFundingStrategies(effectiveProfile, parentPath);
+    case 'hiring':
+      return generateHiringStrategies(effectiveProfile, parentPath);
+    case 'growth':
+      return generateGrowthStrategies(effectiveProfile, parentPath);
+    case 'operations':
+      return generateOperationsStrategies(effectiveProfile, parentPath);
+    case 'pivot':
+      return generatePivotStrategies(effectiveProfile, parentPath);
+  }
+
   if (!profile) {
-    return generateGenericStrategies({
-      id: 'default',
-      name: 'Default Business',
-      industry: 'generic',
-      mrr: 100000,
-      customers: 50,
-      location: 'India',
-      teamSize: 5,
-      foundedDate: new Date(),
-      growthTarget: 30,
-      riskTolerance: 'medium',
-      vibeMode: 'balanced'
-    }, parentPath);
+    return generateGenericStrategies(defaultProfile, parentPath);
   }
 
   const industry = profile.industry.toLowerCase().trim();

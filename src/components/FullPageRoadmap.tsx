@@ -96,7 +96,7 @@ const RoadmapSummary = memo(({ decisionHistory, profile, onClose, onExportPDF }:
     return Math.min(85, 50 + decisionHistory.length * 10);
   }, [decisionHistory, optimalPath]);
 
-  if (decisionHistory.length < 2) return null;
+  if (decisionHistory.length < 1) return null;
 
   return (
     <motion.div
@@ -234,6 +234,8 @@ interface RoadmapNode {
   children: string[];
   metrics: { label: string; value: number }[];
   actions: { label: string; action: () => void }[];
+  steps?: string[]; // Implementation steps from the decision path
+  isRecommended?: boolean; // Whether this is the AI recommended path
 }
 
 // Memoized node component for better performance
@@ -247,6 +249,10 @@ const RoadmapNodeCard = memo(({ node, isSelected, onClick, getNodeColor }: {
     onClick={onClick}
     className={`
       relative p-4 rounded-xl border-2 transition-all cursor-pointer
+      ${node.isRecommended
+        ? 'ring-2 ring-green-400/50 ring-offset-2 ring-offset-transparent'
+        : ''
+      }
       ${isSelected
         ? 'border-amber-400 bg-gradient-to-br ' + getNodeColor(node.level) + ' shadow-lg scale-110'
         : 'border-amber-500/30 bg-gradient-to-br ' + getNodeColor(node.level) + ' hover:border-amber-400 shadow'
@@ -255,6 +261,11 @@ const RoadmapNodeCard = memo(({ node, isSelected, onClick, getNodeColor }: {
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
   >
+    {node.isRecommended && (
+      <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-green-500 text-black text-[9px] font-black rounded-full shadow-lg">
+        RECOMMENDED
+      </div>
+    )}
     <div className="text-white flex gap-3 items-start min-w-[180px]">
       <div className="mt-1">{node.icon}</div>
       <div className="text-left">
@@ -341,8 +352,8 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
 
-  // Auto-show summary when user has explored 3+ decisions
-  const shouldShowSummaryButton = (decisionHistory || []).length >= 2;
+  // Show summary button when user has explored 1+ decisions
+  const shouldShowSummaryButton = (decisionHistory || []).length >= 1;
 
   const handleExportPDF = useCallback(() => {
     // Store roadmap data in localStorage for the report page
@@ -386,8 +397,36 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (queryLower.includes('operation') || queryLower.includes('efficien') || queryLower.includes('process')) {
       return { type: 'operations', title: 'Operations Optimization', icon: <Zap className="w-8 h-8" /> };
     }
-    if (queryLower.includes('pivot') || queryLower.includes('change') || queryLower.includes('new direction')) {
-      return { type: 'pivot', title: 'Business Pivot Strategy', icon: <Lightbulb className="w-8 h-8" /> };
+    // Pivot / Business Transformation / Adding New Services
+    if (
+      queryLower.includes('pivot') ||
+      queryLower.includes('transform') ||
+      queryLower.includes('diversify') ||
+      queryLower.includes('new service') ||
+      queryLower.includes('new offering') ||
+      queryLower.includes('new product line') ||
+      queryLower.includes('new business') ||
+      queryLower.includes('new line of') ||
+      queryLower.includes('branch out') ||
+      queryLower.includes('rebrand') ||
+      queryLower.includes('new direction') ||
+      (queryLower.includes('add') && (
+        queryLower.includes('consulting') ||
+        queryLower.includes('service') ||
+        queryLower.includes('product') ||
+        queryLower.includes('offering') ||
+        queryLower.includes('vertical') ||
+        queryLower.includes('segment') ||
+        queryLower.includes('division') ||
+        queryLower.includes('line')
+      )) ||
+      (queryLower.includes('should') && queryLower.includes('start') && (
+        queryLower.includes('new') ||
+        queryLower.includes('another')
+      )) ||
+      (queryLower.includes('should') && queryLower.includes('add'))
+    ) {
+      return { type: 'pivot', title: 'Business Transformation Strategy', icon: <Lightbulb className="w-8 h-8" /> };
     }
     return { type: 'growth', title: `${profile?.industry || 'Business'} Growth Strategy`, icon: <Target className="w-8 h-8" /> };
   }, [currentResult?.query, profile?.industry]);
@@ -422,11 +461,15 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     };
 
     // Add dynamic nodes from currentResult.paths
+    const recommendedPathId = currentResult?.recommendation?.id;
     paths.forEach((path, idx) => {
       const iconMap: Record<string, React.ReactNode> = {
         aggressive: <Zap className="w-6 h-6" />,
         balanced: <TrendingUp className="w-6 h-6" />,
         conservative: <Shield className="w-6 h-6" />,
+        'pivot-full': <Lightbulb className="w-6 h-6" />,
+        'pivot-adjacent': <Target className="w-6 h-6" />,
+        'pivot-optimize': <TrendingUp className="w-6 h-6" />,
       };
       const defaultIcon = idx === 0 ? <Target className="w-6 h-6" /> : idx === 1 ? <Brain className="w-6 h-6" /> : <Lightbulb className="w-6 h-6" />;
 
@@ -443,6 +486,8 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           { label: 'Timeline', value: Math.min(100, Math.round(path.timeline / 3)) },
         ],
         actions: [],
+        steps: path.steps, // Include implementation steps from the path
+        isRecommended: path.id === recommendedPathId,
       };
     });
 
@@ -542,9 +587,10 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     ];
 
     // Collect strategies from different seed variations
+    // Pass queryContext.type to get context-aware strategies (legal for compliance queries)
     const allStrategies: ExecutionOption[] = [];
     for (const seedVar of seedVariations) {
-      const options = generateExecutionOptions(profile, seedVar);
+      const options = generateExecutionOptions(profile, seedVar, queryContext.type);
       allStrategies.push(...options);
     }
 
@@ -589,7 +635,7 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       timelineDays: option.timelineDays,
       category: option.category,
     }));
-  }, [profile, decisionHistory, getCategoryIcon, seededRandom]);
+  }, [profile, decisionHistory, getCategoryIcon, seededRandom, queryContext.type]);
 
   const handleExplore = useCallback((child: any) => {
     setIsLoading(true);
@@ -632,10 +678,20 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="w-full max-w-sm bg-black/40 border border-amber-500/30 rounded-lg p-4"
+              className="w-full max-w-md bg-black/40 border border-amber-500/30 rounded-lg p-4"
             >
+              {/* Recommended badge */}
+              {node.isRecommended && (
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="px-2 py-1 bg-green-500/20 border border-green-500/50 rounded text-green-400 text-xs font-bold">
+                    ✓ AI RECOMMENDED
+                  </span>
+                </div>
+              )}
+
+              {/* Key Metrics */}
               <h5 className="text-amber-300 font-bold mb-2 text-sm">Key Metrics</h5>
-              <div className="space-y-2">
+              <div className="space-y-2 mb-4">
                 {node.metrics.map((metric) => (
                   <div key={metric.label} className="flex justify-between items-center text-xs">
                     <span className="text-amber-200">{metric.label}</span>
@@ -646,6 +702,26 @@ const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </div>
                 ))}
               </div>
+
+              {/* Implementation Steps from the path */}
+              {node.steps && node.steps.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-amber-500/20">
+                  <h5 className="text-green-400 font-bold mb-2 text-sm flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Implementation Steps
+                  </h5>
+                  <div className="space-y-2">
+                    {node.steps.map((step, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs">
+                        <span className="w-5 h-5 rounded-full bg-green-500/20 text-green-300 flex items-center justify-center flex-shrink-0 text-[10px] font-bold mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <span className="text-gray-300">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
