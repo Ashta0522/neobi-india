@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import { useNeoBIStore } from '@/lib/store';
 import { Agent } from '@/types';
-import { ChevronDown, Zap, Brain, Cpu, Target, Users, Lightbulb, TrendingUp, GraduationCap, Heart } from 'lucide-react';
+import { ChevronDown, Zap, Brain, Cpu, Target, Users, Lightbulb, TrendingUp, GraduationCap, Heart, CheckCircle, Clock, Loader2, AlertCircle, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AgentActivityTreeProps {}
@@ -32,6 +32,27 @@ const AGENT_COLORS: Record<string, string> = {
   learning_adaptation: '#84CC16',
 };
 
+// Plain language status descriptions
+const STATUS_LABELS: Record<string, { label: string; icon: React.ReactNode; description: string }> = {
+  idle: { label: 'Ready', icon: <Clock size={10} />, description: 'Waiting for tasks' },
+  thinking: { label: 'Analyzing', icon: <Loader2 size={10} className="animate-spin" />, description: 'Processing your query' },
+  executing: { label: 'Working', icon: <Zap size={10} />, description: 'Executing recommendations' },
+  complete: { label: 'Done', icon: <CheckCircle size={10} />, description: 'Task completed' },
+  error: { label: 'Issue', icon: <AlertCircle size={10} />, description: 'Encountered a problem' },
+};
+
+// Plain language descriptions for what each agent does
+const AGENT_PLAIN_DESCRIPTIONS: Record<string, string> = {
+  orchestrator: 'Routes your question to the right experts',
+  simulation_cluster: 'Forecasts market trends and demand patterns',
+  decision_intelligence: 'Calculates best options with success probabilities',
+  operations_optimizer: 'Finds ways to improve hiring, inventory & suppliers',
+  personal_coach: 'Monitors your wellbeing and suggests breaks',
+  innovation_advisor: 'Generates creative solutions and pivot ideas',
+  growth_strategist: 'Plans marketing and customer acquisition',
+  learning_adaptation: 'Learns from outcomes to improve future advice',
+};
+
 export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
   const { agents, selectedPath } = useNeoBIStore();
   const [expandedLevel, setExpandedLevel] = useState<string | null>('L1');
@@ -48,13 +69,15 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
     const isActive = agent.status === 'thinking' || agent.status === 'executing';
     const isComplete = agent.status === 'complete';
     const agentColor = AGENT_COLORS[agent.id] || agent.color;
+    const statusInfo = STATUS_LABELS[agent.status] || STATUS_LABELS.idle;
+    const plainDescription = AGENT_PLAIN_DESCRIPTIONS[agent.id] || agent.description;
 
     return (
       <motion.div
         key={agent.id}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="pl-4 py-3 border-l-2 transition-all relative"
+        className="pl-4 py-3 border-l-2 transition-all relative group"
         style={{
           borderLeftColor: agentColor,
           backgroundColor: isActive ? `${agentColor}15` : `${agentColor}05`,
@@ -104,41 +127,49 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
             />
           </motion.div>
 
-          {/* Agent Name */}
-          <div className="flex-1">
-            <span
-              className="text-sm font-bold"
-              style={{ color: isActive ? agentColor : isComplete ? agentColor : '#fff' }}
-            >
-              {agent.name}
-            </span>
-            {isActive && (
-              <motion.span
-                className="ml-2 text-xs"
-                style={{ color: agentColor }}
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
+          {/* Agent Name & Status */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span
+                className="text-sm font-bold truncate"
+                style={{ color: isActive ? agentColor : isComplete ? agentColor : '#fff' }}
               >
-                Processing...
+                {agent.name}
+              </span>
+              {/* Clear Status Badge */}
+              <motion.span
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap"
+                style={{
+                  backgroundColor: isActive ? `${agentColor}30` : isComplete ? '#22C55E20' : 'rgba(255,255,255,0.1)',
+                  color: isActive ? agentColor : isComplete ? '#22C55E' : '#9CA3AF',
+                }}
+                animate={isActive ? { opacity: [1, 0.7, 1] } : {}}
+                transition={{ duration: 1, repeat: isActive ? Infinity : 0 }}
+              >
+                {statusInfo.icon}
+                {statusInfo.label}
               </motion.span>
-            )}
+            </div>
+            {/* Plain Language Description */}
+            <p className="text-[11px] text-gray-400 mt-0.5 truncate">{plainDescription}</p>
           </div>
 
-          {/* Contribution Badge */}
-          <motion.div
-            className="text-xs font-mono px-2 py-1 rounded"
-            style={{
-              backgroundColor: isActive || isComplete ? `${agentColor}20` : 'rgba(255,255,255,0.05)',
-              color: agentColor,
-            }}
-            animate={isActive ? { scale: [1, 1.05, 1] } : {}}
-            transition={{ duration: 0.5, repeat: isActive ? Infinity : 0 }}
-          >
-            {agentContrib.toFixed(0)}%
-          </motion.div>
+          {/* Contribution Badge with Tooltip */}
+          <div className="relative">
+            <motion.div
+              className="text-xs font-mono px-2 py-1 rounded cursor-help"
+              style={{
+                backgroundColor: isActive || isComplete ? `${agentColor}20` : 'rgba(255,255,255,0.05)',
+                color: agentColor,
+              }}
+              animate={isActive ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 0.5, repeat: isActive ? Infinity : 0 }}
+              title={`This agent contributed ${agentContrib.toFixed(0)}% to the current analysis`}
+            >
+              {agentContrib.toFixed(0)}%
+            </motion.div>
+          </div>
         </div>
-
-        <p className="text-xs text-gray-500 ml-11">{agent.description}</p>
 
         {/* Status bar - always visible with subtle glow */}
         <motion.div
@@ -162,6 +193,18 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
             }}
           />
         </motion.div>
+
+        {/* Hover tooltip with more details */}
+        <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block pointer-events-none">
+          <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-xl w-48">
+            <div className="text-xs font-bold text-white mb-1">{agent.name}</div>
+            <p className="text-[10px] text-gray-300 mb-2">{agent.description}</p>
+            <div className="flex items-center gap-1 text-[10px]">
+              <span style={{ color: agentColor }}>{statusInfo.icon}</span>
+              <span className="text-gray-400">{statusInfo.description}</span>
+            </div>
+          </div>
+        </div>
       </motion.div>
     );
   };
@@ -172,6 +215,15 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
     L3: '#14B8A6',
     L4: '#84CC16',
   };
+
+  // Calculate summary stats
+  const agentStats = useMemo(() => {
+    const allAgents = Object.values(agents);
+    const active = allAgents.filter(a => a.status === 'thinking' || a.status === 'executing').length;
+    const complete = allAgents.filter(a => a.status === 'complete').length;
+    const idle = allAgents.filter(a => a.status === 'idle').length;
+    return { active, complete, idle, total: allAgents.length };
+  }, [agents]);
 
   return (
     <div className="h-full flex flex-col">
@@ -186,21 +238,51 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
           </motion.div>
           Agent Activity Tree
         </h3>
-        <p className="text-xs text-gray-400 mt-1">Live status & contributions</p>
+        <p className="text-xs text-gray-400 mt-1">8 AI experts working on your query</p>
       </div>
 
-      {/* Agent Activity Summary - All agents glow */}
-      <div className="px-4 py-2 border-b border-white/10 flex gap-2">
+      {/* Status Summary Bar - Clear counts */}
+      <div className="px-4 py-2 border-b border-white/10 bg-black/20">
+        <div className="flex items-center justify-between text-[10px]">
+          <div className="flex items-center gap-3">
+            {agentStats.active > 0 && (
+              <span className="flex items-center gap-1 text-amber-400">
+                <Loader2 size={10} className="animate-spin" />
+                {agentStats.active} working
+              </span>
+            )}
+            {agentStats.complete > 0 && (
+              <span className="flex items-center gap-1 text-green-400">
+                <CheckCircle size={10} />
+                {agentStats.complete} done
+              </span>
+            )}
+            {agentStats.idle > 0 && agentStats.active === 0 && (
+              <span className="flex items-center gap-1 text-gray-400">
+                <Clock size={10} />
+                {agentStats.idle} ready
+              </span>
+            )}
+          </div>
+          <span className="text-gray-500">{agentStats.total} agents</span>
+        </div>
+      </div>
+
+      {/* Agent Activity Dots - All agents glow */}
+      <div className="px-4 py-2 border-b border-white/10 flex gap-2 items-center">
+        <span className="text-[10px] text-gray-500 mr-1">Status:</span>
         {Object.entries(AGENT_COLORS).map(([id, color]) => {
           const agent = agents[id as keyof typeof agents];
           const isActive = agent?.status === 'thinking' || agent?.status === 'executing';
+          const isComplete = agent?.status === 'complete';
           return (
             <motion.div
               key={id}
-              className="w-3 h-3 rounded-full"
+              className="w-3 h-3 rounded-full relative cursor-help"
               style={{
                 backgroundColor: color,
                 boxShadow: `0 0 ${isActive ? '10' : '5'}px ${color}`,
+                border: isComplete ? '2px solid #22C55E' : 'none',
               }}
               animate={{
                 scale: isActive ? [1, 1.5, 1] : [1, 1.15, 1],
@@ -209,6 +291,7 @@ export const AgentActivityTree: React.FC<AgentActivityTreeProps> = () => {
                   : [`0 0 3px ${color}`, `0 0 6px ${color}`, `0 0 3px ${color}`],
               }}
               transition={{ duration: isActive ? 0.8 : 2, repeat: Infinity }}
+              title={`${agent?.name}: ${STATUS_LABELS[agent?.status || 'idle']?.label}`}
             />
           );
         })}

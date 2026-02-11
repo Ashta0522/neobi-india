@@ -51,6 +51,20 @@ export { DelayedPaymentPredictor } from './DelayedPaymentPredictor';
 // Operational Tools
 export { InventoryControlPanel, StaffHiringPanel, SupplierFinderPanel } from './OperationalTools';
 
+// Loading & Animation Components
+export {
+  Skeleton,
+  CardSkeleton,
+  ChartSkeleton,
+  AgentSkeleton,
+  DecisionPathSkeleton,
+  MetricsSkeleton,
+  PageLoadingOverlay,
+  InlineSpinner,
+  SuccessCheckmark,
+  PulseDot,
+} from './LoadingSkeletons';
+
 // Component Bundles
 export * as AdvancedGraphs from './AdvancedGraphs';
 export * as Graphs from './Graphs';
