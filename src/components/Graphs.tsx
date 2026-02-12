@@ -31,7 +31,7 @@ export const MARLConvergenceCurve: React.FC = () => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={sampledData} margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
+      <LineChart data={sampledData} margin={{ top: 10, right: 20, left: 5, bottom: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
         <XAxis
           dataKey="episode"
@@ -40,7 +40,7 @@ export const MARLConvergenceCurve: React.FC = () => {
           tickLine={false}
           interval="preserveStartEnd"
         />
-        <YAxis stroke="#666" tick={{ fontSize: 10 }} tickLine={false} width={35} />
+        <YAxis stroke="#666" tick={{ fontSize: 10 }} tickLine={false} width={40} />
         <Tooltip
           contentStyle={{ background: 'rgba(15,15,23,0.95)', border: '1px solid rgba(255,255,255,0.1)', fontSize: 11 }}
         />
@@ -98,7 +98,7 @@ export const CashFlowProjectionChart: React.FC = () => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data} margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
+      <LineChart data={data} margin={{ top: 10, right: 20, left: 5, bottom: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
         <XAxis
           dataKey="month"
@@ -110,8 +110,8 @@ export const CashFlowProjectionChart: React.FC = () => {
           stroke="#666"
           tick={{ fontSize: 10 }}
           tickLine={false}
-          width={45}
-          tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+          width={50}
+          tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
         />
         <Tooltip
           contentStyle={{ background: 'rgba(15,15,23,0.95)', border: '1px solid rgba(255,255,255,0.1)', fontSize: 11 }}

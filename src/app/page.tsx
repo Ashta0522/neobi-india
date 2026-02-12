@@ -34,7 +34,7 @@ import CompetitorBenchmark from '@/components/CompetitorBenchmark';
 import ExcelExport from '@/components/ExcelExport';
 import VoiceInput from '@/components/VoiceInput';
 import WhatsAppShare from '@/components/WhatsAppShare';
-import LanguageSelector from '@/components/LanguageSelector';
+import LanguageSelector, { useLanguage } from '@/components/LanguageSelector';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, ChevronLeft, ChevronRight, Map, Search, ArrowRight, Check, AlertTriangle, TrendingUp, Shield, Calculator, BarChart3, Users, Target, Lightbulb, Brain, Info, Maximize2, X } from 'lucide-react';
 
@@ -139,25 +139,111 @@ const FALLBACK_FUNDING_DATA = {
   recommendations: ['Hire VP Sales in next quarter', 'Improve gross margins to 70%+', 'Document customer success stories'],
 };
 
-const FALLBACK_SUPPLIER_DATA = {
-  suppliers: [
-    { id: '1', name: 'Tata Steel', location: 'Jamshedpur', state: 'Jharkhand', riskScore: 15, reliabilityScore: 92, leadTime: 7, costIndex: 85, category: 'Raw Materials', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
-    { id: '2', name: 'Reliance Logistics', location: 'Mumbai', state: 'Maharashtra', riskScore: 25, reliabilityScore: 88, leadTime: 3, costIndex: 90, category: 'Logistics', dependencies: 5, lastDeliveryStatus: 'on-time' as const, alerts: [] },
-    { id: '3', name: 'Local Vendor A', location: 'Pune', state: 'Maharashtra', riskScore: 65, reliabilityScore: 55, leadTime: 14, costIndex: 60, category: 'Components', dependencies: 2, lastDeliveryStatus: 'delayed' as const, alerts: ['Payment terms dispute', 'Quality issues reported'] },
-    { id: '4', name: 'China Import Co', location: 'Shenzhen', state: 'International', riskScore: 75, reliabilityScore: 70, leadTime: 45, costIndex: 40, category: 'Electronics', dependencies: 4, lastDeliveryStatus: 'delayed' as const, alerts: ['Shipping delays due to port congestion', 'Currency fluctuation risk'] },
-  ],
-  overallRiskScore: 38,
-  highRiskCount: 2,
-  avgLeadTime: 17,
-  topRisks: [
-    { risk: 'Single-source dependency for electronics', impact: 'Production halt if supplier fails', mitigation: 'Identify alternate suppliers in Taiwan/Vietnam' },
-    { risk: 'International shipping delays', impact: '20-30 day lead time variance', mitigation: 'Increase safety stock by 2 weeks' },
-  ],
-  alternativeSuppliers: [
-    { name: 'Vedanta Ltd', state: 'Rajasthan', riskScore: 20 },
-    { name: 'Blue Dart', state: 'Karnataka', riskScore: 18 },
-  ],
-};
+// Industry-specific supplier generator
+function getIndustrySuppliers(industry: string) {
+  const industryKey = (industry || '').toLowerCase().replace(/[^a-z]/g, '');
+  const configs: Record<string, { suppliers: any[]; topRisks: any[]; alts: any[] }> = {
+    realestate: {
+      suppliers: [
+        { id: '1', name: 'UltraTech Cement', location: 'Mumbai', state: 'Maharashtra', riskScore: 12, reliabilityScore: 94, leadTime: 5, costIndex: 80, category: 'Cement & Concrete', dependencies: 4, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '2', name: 'ACC Readymix', location: 'Hyderabad', state: 'Telangana', riskScore: 18, reliabilityScore: 90, leadTime: 3, costIndex: 85, category: 'Concrete Supply', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '3', name: 'Jindal Steel', location: 'Raigarh', state: 'Chhattisgarh', riskScore: 22, reliabilityScore: 88, leadTime: 10, costIndex: 78, category: 'Steel & TMT Bars', dependencies: 5, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '4', name: 'Local Sand Supplier', location: 'Pune', state: 'Maharashtra', riskScore: 60, reliabilityScore: 58, leadTime: 2, costIndex: 45, category: 'Sand & Aggregates', dependencies: 2, lastDeliveryStatus: 'delayed' as const, alerts: ['Mining ban risk in monsoon', 'Quality inconsistency reported'] },
+      ],
+      topRisks: [
+        { risk: 'Sand & aggregate supply disruption during monsoon', impact: 'Construction halt for 2-4 weeks', mitigation: 'Pre-stock materials before monsoon season' },
+        { risk: 'Steel price volatility', impact: '10-15% cost overrun on structural work', mitigation: 'Lock in quarterly price contracts with suppliers' },
+      ],
+      alts: [{ name: 'Ambuja Cement', state: 'Gujarat', riskScore: 15 }, { name: 'SAIL Steel', state: 'Jharkhand', riskScore: 20 }],
+    },
+    saas: {
+      suppliers: [
+        { id: '1', name: 'AWS India', location: 'Mumbai', state: 'Maharashtra', riskScore: 8, reliabilityScore: 99, leadTime: 0, costIndex: 75, category: 'Cloud Infrastructure', dependencies: 6, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '2', name: 'Razorpay', location: 'Bangalore', state: 'Karnataka', riskScore: 12, reliabilityScore: 96, leadTime: 1, costIndex: 65, category: 'Payment Gateway', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '3', name: 'SendGrid/Postmark', location: 'Remote', state: 'International', riskScore: 15, reliabilityScore: 95, leadTime: 0, costIndex: 50, category: 'Email & Comms', dependencies: 2, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '4', name: 'Freelance Dev Pool', location: 'Pune', state: 'Maharashtra', riskScore: 55, reliabilityScore: 65, leadTime: 7, costIndex: 40, category: 'Contract Development', dependencies: 2, lastDeliveryStatus: 'delayed' as const, alerts: ['Talent retention risk', 'Quality variance across contractors'] },
+      ],
+      topRisks: [
+        { risk: 'Cloud vendor lock-in with single provider', impact: 'Migration costs if pricing changes', mitigation: 'Adopt multi-cloud strategy or containerize workloads' },
+        { risk: 'Third-party API deprecation', impact: 'Feature breakage for end users', mitigation: 'Build abstraction layers over external APIs' },
+      ],
+      alts: [{ name: 'Google Cloud India', state: 'Maharashtra', riskScore: 10 }, { name: 'Cashfree Payments', state: 'Karnataka', riskScore: 14 }],
+    },
+    ecommerce: {
+      suppliers: [
+        { id: '1', name: 'Delhivery', location: 'Gurgaon', state: 'Haryana', riskScore: 18, reliabilityScore: 88, leadTime: 3, costIndex: 70, category: 'Logistics & Shipping', dependencies: 5, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '2', name: 'Packaging Solutions India', location: 'Noida', state: 'UP', riskScore: 25, reliabilityScore: 82, leadTime: 5, costIndex: 55, category: 'Packaging Materials', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '3', name: 'Shiprocket', location: 'Delhi', state: 'Delhi', riskScore: 20, reliabilityScore: 85, leadTime: 2, costIndex: 60, category: 'Multi-Courier Aggregator', dependencies: 4, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '4', name: 'Local Warehouse Operator', location: 'Mumbai', state: 'Maharashtra', riskScore: 50, reliabilityScore: 68, leadTime: 1, costIndex: 45, category: 'Warehousing', dependencies: 2, lastDeliveryStatus: 'delayed' as const, alerts: ['Space constraints during festival season', 'Inventory mismatch reported'] },
+      ],
+      topRisks: [
+        { risk: 'Last-mile delivery failures during peak demand', impact: '15-20% order returns', mitigation: 'Partner with multiple courier services for redundancy' },
+        { risk: 'Inventory stockout during festival season', impact: 'Lost sales of 25-30%', mitigation: 'Implement demand forecasting and pre-stock 6 weeks ahead' },
+      ],
+      alts: [{ name: 'Blue Dart', state: 'Maharashtra', riskScore: 15 }, { name: 'Ekart Logistics', state: 'Karnataka', riskScore: 18 }],
+    },
+    healthcare: {
+      suppliers: [
+        { id: '1', name: 'Medline India', location: 'Chennai', state: 'Tamil Nadu', riskScore: 15, reliabilityScore: 91, leadTime: 5, costIndex: 80, category: 'Medical Supplies', dependencies: 4, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '2', name: 'Cipla Pharma', location: 'Mumbai', state: 'Maharashtra', riskScore: 10, reliabilityScore: 95, leadTime: 7, costIndex: 85, category: 'Pharmaceuticals', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '3', name: 'BPL Medical', location: 'Bangalore', state: 'Karnataka', riskScore: 20, reliabilityScore: 88, leadTime: 14, costIndex: 90, category: 'Medical Equipment', dependencies: 2, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '4', name: 'Local Lab Reagent Supplier', location: 'Hyderabad', state: 'Telangana', riskScore: 55, reliabilityScore: 60, leadTime: 10, costIndex: 50, category: 'Lab Consumables', dependencies: 2, lastDeliveryStatus: 'delayed' as const, alerts: ['Expiry date management issues', 'Cold chain compliance gaps'] },
+      ],
+      topRisks: [
+        { risk: 'Cold chain disruption for temperature-sensitive supplies', impact: 'Spoilage and regulatory non-compliance', mitigation: 'Install IoT monitoring on cold storage units' },
+        { risk: 'Drug regulatory changes (CDSCO)', impact: 'Supply delays for 4-8 weeks', mitigation: 'Maintain buffer stock of critical medications' },
+      ],
+      alts: [{ name: 'Stryker India', state: 'Maharashtra', riskScore: 12 }, { name: 'Sutures India', state: 'Karnataka', riskScore: 18 }],
+    },
+    foodbeverage: {
+      suppliers: [
+        { id: '1', name: 'ITC Agri Business', location: 'Kolkata', state: 'West Bengal', riskScore: 12, reliabilityScore: 93, leadTime: 3, costIndex: 75, category: 'Raw Ingredients', dependencies: 4, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '2', name: 'Amul Dairy', location: 'Anand', state: 'Gujarat', riskScore: 10, reliabilityScore: 96, leadTime: 2, costIndex: 70, category: 'Dairy & Milk Products', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '3', name: 'Zomato Hyperpure', location: 'Gurgaon', state: 'Haryana', riskScore: 22, reliabilityScore: 84, leadTime: 1, costIndex: 65, category: 'Kitchen Supplies', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '4', name: 'Local Vegetable Mandi', location: 'Local', state: 'Local', riskScore: 45, reliabilityScore: 70, leadTime: 0, costIndex: 35, category: 'Fresh Produce', dependencies: 2, lastDeliveryStatus: 'delayed' as const, alerts: ['Seasonal price spikes', 'Quality varies by season'] },
+      ],
+      topRisks: [
+        { risk: 'Seasonal price volatility for fresh produce', impact: '20-40% cost increase during off-season', mitigation: 'Contract farming or fixed-price agreements with farmers' },
+        { risk: 'FSSAI compliance and food safety audit failures', impact: 'License suspension risk', mitigation: 'Regular internal audits and staff FSSAI training' },
+      ],
+      alts: [{ name: 'BigBasket B2B', state: 'Karnataka', riskScore: 18 }, { name: 'Udaan', state: 'Karnataka', riskScore: 22 }],
+    },
+    kiranagrocery: {
+      suppliers: [
+        { id: '1', name: 'Udaan Wholesale', location: 'Bangalore', state: 'Karnataka', riskScore: 15, reliabilityScore: 88, leadTime: 1, costIndex: 60, category: 'FMCG & Staples', dependencies: 4, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '2', name: 'Metro Cash & Carry', location: 'Hyderabad', state: 'Telangana', riskScore: 12, reliabilityScore: 92, leadTime: 0, costIndex: 65, category: 'Wholesale Groceries', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '3', name: 'JioMart B2B', location: 'Mumbai', state: 'Maharashtra', riskScore: 18, reliabilityScore: 85, leadTime: 1, costIndex: 58, category: 'Digital Wholesale', dependencies: 3, lastDeliveryStatus: 'on-time' as const, alerts: [] },
+        { id: '4', name: 'Local APMC Vendor', location: 'Local', state: 'Local', riskScore: 40, reliabilityScore: 72, leadTime: 0, costIndex: 40, category: 'Fresh & Perishables', dependencies: 2, lastDeliveryStatus: 'on-time' as const, alerts: ['Price fluctuation risk'] },
+      ],
+      topRisks: [
+        { risk: 'FMCG stock expiry management', impact: 'Dead stock loss of 3-5% revenue', mitigation: 'FIFO inventory system and near-expiry discounting' },
+        { risk: 'Competition from quick-commerce (Blinkit, Zepto)', impact: 'Customer attrition', mitigation: 'Add home delivery, loyalty programs, and exclusive local products' },
+      ],
+      alts: [{ name: 'Walmart/Flipkart B2B', state: 'Karnataka', riskScore: 15 }, { name: 'Reliance Market', state: 'Maharashtra', riskScore: 14 }],
+    },
+  };
+  // Map alternative industry names
+  const keyMap: Record<string, string> = {
+    'realestate': 'realestate', 'real estate': 'realestate',
+    'saas': 'saas', 'fintech': 'saas', 'edtech': 'saas',
+    'ecommerce': 'ecommerce', 'e-commerce': 'ecommerce', 'd2cfashion': 'ecommerce', 'd2c fashion': 'ecommerce', 'retail': 'ecommerce',
+    'healthcare': 'healthcare', 'beautywellness': 'healthcare', 'beauty & wellness': 'healthcare',
+    'foodbeverage': 'foodbeverage', 'food & beverage': 'foodbeverage',
+    'kiranagrocery': 'kiranagrocery', 'kirana/grocery': 'kiranagrocery',
+    'manufacturing': 'realestate', 'logistics': 'ecommerce', 'consulting': 'saas',
+  };
+  const key = keyMap[industryKey] || keyMap[industry?.toLowerCase()] || 'saas';
+  const config = configs[key] || configs.saas;
+  const s = config.suppliers;
+  return {
+    suppliers: s,
+    overallRiskScore: Math.round(s.reduce((a, b) => a + b.riskScore, 0) / s.length),
+    highRiskCount: s.filter(x => x.riskScore >= 50).length,
+    avgLeadTime: Math.round(s.reduce((a, b) => a + b.leadTime, 0) / s.length),
+    topRisks: config.topRisks,
+    alternativeSuppliers: config.alts,
+  };
+}
 
 const FALLBACK_MARKET_ENTRY = {
   targetState: {
@@ -187,39 +273,62 @@ const FALLBACK_MARKET_ENTRY = {
   recommendations: ['Start with Bangalore IT corridor', 'Build local partnerships first', 'Allocate 20% budget for marketing'],
 };
 
-const FALLBACK_CASHFLOW = {
-  currentBalance: 2500000,
-  projectedBalance30: 2200000,
-  projectedBalance60: 1850000,
-  projectedBalance90: 1600000,
-  burnRate: 650000,
-  runway: 4,
-  cashFlowHistory: [
-    { period: 'Oct 2025', inflow: 800000, outflow: 720000, netFlow: 80000, balance: 2800000, predicted: false },
-    { period: 'Nov 2025', inflow: 850000, outflow: 750000, netFlow: 100000, balance: 2900000, predicted: false },
-    { period: 'Dec 2025', inflow: 700000, outflow: 800000, netFlow: -100000, balance: 2800000, predicted: false },
-    { period: 'Jan 2026', inflow: 600000, outflow: 900000, netFlow: -300000, balance: 2500000, predicted: false },
-    { period: 'Feb 2026', inflow: 750000, outflow: 800000, netFlow: -50000, balance: 2200000, predicted: true },
-    { period: 'Mar 2026', inflow: 700000, outflow: 650000, netFlow: 50000, balance: 1850000, predicted: true },
-    { period: 'Apr 2026', inflow: 800000, outflow: 600000, netFlow: 200000, balance: 1600000, predicted: true },
-  ],
-  inflowCategories: [
-    { category: 'Product Sales', amount: 450000, percentage: 60, trend: 'up' as const },
-    { category: 'Services', amount: 180000, percentage: 24, trend: 'stable' as const },
-    { category: 'Other', amount: 120000, percentage: 16, trend: 'down' as const },
-  ],
-  outflowCategories: [
-    { category: 'Salaries', amount: 380000, percentage: 48, trend: 'up' as const },
-    { category: 'Operations', amount: 200000, percentage: 25, trend: 'stable' as const },
-    { category: 'Marketing', amount: 120000, percentage: 15, trend: 'down' as const },
-    { category: 'Others', amount: 100000, percentage: 12, trend: 'stable' as const },
-  ],
-  alerts: [
-    { type: 'warning' as const, message: 'Runway below 6 months - consider fundraising', date: 'Feb 2026' },
-    { type: 'info' as const, message: 'Q4 typically sees 20% higher collections', date: 'Mar 2026' },
-  ],
-  recommendations: ['Accelerate receivables collection', 'Negotiate 60-day terms with vendors', 'Consider invoice factoring for immediate cash'],
-};
+// Cash flow derived from user's MRR and team size
+function getCashFlowFromProfile(mrr: number, teamSize: number, industry: string) {
+  const monthlyInflow = mrr;
+  const avgSalary = 50000; // avg monthly salary per team member
+  const salaryBurn = teamSize * avgSalary;
+  const opsBurn = Math.round(mrr * 0.15);
+  const marketingBurn = Math.round(mrr * 0.10);
+  const otherBurn = Math.round(mrr * 0.05);
+  const totalBurn = salaryBurn + opsBurn + marketingBurn + otherBurn;
+  const netMonthly = monthlyInflow - totalBurn;
+  const currentBalance = Math.round(mrr * 3); // estimated 3 months of MRR as working capital
+  const runway = totalBurn > 0 ? Math.max(1, Math.round(currentBalance / totalBurn)) : 12;
+  const months = ['Oct 2025', 'Nov 2025', 'Dec 2025', 'Jan 2026', 'Feb 2026', 'Mar 2026', 'Apr 2026'];
+  let bal = Math.round(currentBalance + mrr * 0.5); // start slightly higher
+  const history = months.map((period, i) => {
+    const growthFactor = 1 + (i < 3 ? -0.02 + i * 0.01 : 0.02 * (i - 2));
+    const inflow = Math.round(monthlyInflow * growthFactor);
+    const outflow = Math.round(totalBurn * (1 + (i > 3 ? 0.02 : 0)));
+    const nf = inflow - outflow;
+    bal = Math.round(bal + nf);
+    return { period, inflow, outflow, netFlow: nf, balance: bal, predicted: i >= 3 };
+  });
+  const proj30 = history[4]?.balance || currentBalance;
+  const proj60 = history[5]?.balance || currentBalance;
+  const proj90 = history[6]?.balance || currentBalance;
+  const alerts: Array<{ type: 'warning' | 'danger' | 'info'; message: string; date?: string }> = [];
+  if (runway < 6) alerts.push({ type: 'warning', message: `Runway is ${runway} months - consider fundraising or reducing burn`, date: 'Feb 2026' });
+  if (netMonthly < 0) alerts.push({ type: 'danger', message: `Monthly burn exceeds revenue by ₹${Math.abs(netMonthly).toLocaleString('en-IN')}`, date: 'Immediate' });
+  alerts.push({ type: 'info', message: 'Festival seasons typically see 20% higher collections', date: 'Q4 2026' });
+  return {
+    currentBalance,
+    projectedBalance30: proj30,
+    projectedBalance60: proj60,
+    projectedBalance90: proj90,
+    burnRate: totalBurn,
+    runway,
+    cashFlowHistory: history,
+    inflowCategories: [
+      { category: 'Primary Revenue', amount: Math.round(mrr * 0.65), percentage: 65, trend: 'up' as const },
+      { category: 'Services', amount: Math.round(mrr * 0.25), percentage: 25, trend: 'stable' as const },
+      { category: 'Other', amount: Math.round(mrr * 0.10), percentage: 10, trend: 'stable' as const },
+    ],
+    outflowCategories: [
+      { category: 'Salaries', amount: salaryBurn, percentage: Math.round((salaryBurn / totalBurn) * 100), trend: 'up' as const },
+      { category: 'Operations', amount: opsBurn, percentage: Math.round((opsBurn / totalBurn) * 100), trend: 'stable' as const },
+      { category: 'Marketing', amount: marketingBurn, percentage: Math.round((marketingBurn / totalBurn) * 100), trend: 'stable' as const },
+      { category: 'Others', amount: otherBurn, percentage: Math.round((otherBurn / totalBurn) * 100), trend: 'stable' as const },
+    ],
+    alerts,
+    recommendations: [
+      'Accelerate receivables collection',
+      runway < 6 ? 'Urgently reduce burn rate or raise capital' : 'Negotiate better payment terms with vendors',
+      'Consider invoice factoring for immediate cash',
+    ],
+  };
+}
 
 const FALLBACK_WORKFORCE = {
   currentHeadcount: 24,
@@ -294,13 +403,13 @@ function GraphCard({ title, conclusion, children }: { title: string; conclusion:
             <Maximize2 size={16} />
           </button>
         </div>
-        <div className="p-6 h-72">
+        <div className="p-3 sm:p-6 h-64 sm:h-72">
           {children}
         </div>
-        <div className="px-4 py-3 bg-gradient-to-r from-green-900/20 to-blue-900/20 border-t border-white/5">
+        <div className="px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-green-900/20 to-blue-900/20 border-t border-white/5">
           <div className="flex items-start gap-2">
             <Info size={14} className="text-blue-400 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-gray-300">{conclusion}</p>
+            <p className="text-[10px] sm:text-xs text-gray-300">{conclusion}</p>
           </div>
         </div>
       </div>
@@ -432,7 +541,9 @@ export default function Home() {
   } = useNeoBIStore();
 
   const router = useRouter();
+  const { t } = useLanguage();
   const [showFullRoadmap, setShowFullRoadmap] = useState(false);
+  const [roadmapInitialPathId, setRoadmapInitialPathId] = useState<string | undefined>(undefined);
   const [decisionType, setDecisionType] = useState('');
   const [decisionQuery, setDecisionQuery] = useState('');
   const [showDecisionInput, setShowDecisionInput] = useState(false);
@@ -690,13 +801,13 @@ export default function Home() {
               <div className="max-w-5xl mx-auto space-y-6">
                 {/* Query */}
                 <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                  <div className="text-xs text-gray-400">Your Query</div>
+                  <div className="text-xs text-gray-400">{t('common', 'search')}</div>
                   <div className="font-bold">{currentResult.query}</div>
                 </div>
 
                 {/* Decision Paths */}
                 <div>
-                  <h3 className="font-bold text-lg mb-3">Decision Paths <span className="text-xs text-gray-400 font-normal ml-2">Click to see details</span></h3>
+                  <h3 className="font-bold text-lg mb-3">{t('roadmap', 'decisions')} <span className="text-xs text-gray-400 font-normal ml-2">{t('common', 'expand')}</span></h3>
                   <div className="space-y-3">
                     {currentResult.paths.map((path, idx) => {
                       const colors = getPathColors(path);
@@ -731,9 +842,9 @@ export default function Home() {
                 {/* Tabs */}
                 <div className="flex gap-2 border-b border-white/10 pb-2">
                   {[
-                    { id: 'analytics', label: '📊 Analytics' },
-                    { id: 'calculators', label: '🧮 Calculators' },
-                    { id: 'advanced', label: '🔬 Advanced' },
+                    { id: 'analytics', label: `📊 ${t('common', 'reports')}` },
+                    { id: 'calculators', label: `🧮 ${t('gst', 'title')}` },
+                    { id: 'advanced', label: `🔬 ${t('nav', 'advanced')}` },
                   ].map((tab) => (
                     <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
                       className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === tab.id ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'text-gray-400 hover:text-white'}`}>
@@ -745,7 +856,7 @@ export default function Home() {
                 {/* Tab Content */}
                 {activeTab === 'analytics' && (
                   <div className="space-y-4">
-                    <MRRHealthPulse currentMRR={profile.mrr} previousWeekMRR={profile.mrr * 0.95} cashOnHand={profile.mrr * 6} monthlyBurn={profile.mrr * 0.4} />
+                    <MRRHealthPulse currentMRR={profile.mrr} previousWeekMRR={profile.mrr * 0.95} cashOnHand={profile.mrr * 3} monthlyBurn={profile.teamSize * 50000 + profile.mrr * 0.3} />
 
                     <GraphCard title="MARL Convergence Curve" conclusion="System converged to optimal reward of 850 after 10 episodes. Multi-agent coordination is effective.">
                       <MARLConvergenceCurve />
@@ -877,7 +988,7 @@ export default function Home() {
 
                       {/* Supplier Risk Map */}
                       <div className="bg-gradient-to-br from-orange-900/20 to-red-900/10 rounded-xl p-4 border border-orange-500/30">
-                        <SupplierRiskMap data={FALLBACK_SUPPLIER_DATA} />
+                        <SupplierRiskMap data={getIndustrySuppliers(profile?.industry || 'SaaS')} />
                       </div>
 
                       {/* Market Entry Simulator */}
@@ -887,7 +998,7 @@ export default function Home() {
 
                       {/* Cash Flow Predictor */}
                       <div className="bg-gradient-to-br from-sky-900/20 to-indigo-900/10 rounded-xl p-4 border border-sky-500/30">
-                        <CashFlowPredictor data={FALLBACK_CASHFLOW} />
+                        <CashFlowPredictor data={getCashFlowFromProfile(profile?.mrr || 500000, profile?.teamSize || 5, profile?.industry || 'SaaS')} />
                       </div>
 
                       {/* Seasonal Workforce Planner */}
@@ -980,14 +1091,14 @@ export default function Home() {
                   </div>
                 )}
 
-                {showFullRoadmap && <FullPageRoadmap onClose={() => setShowFullRoadmap(false)} />}
+                {showFullRoadmap && <FullPageRoadmap onClose={() => { setShowFullRoadmap(false); setRoadmapInitialPathId(undefined); }} initialPathId={roadmapInitialPathId} />}
 
                 <AnimatePresence>
                   {selectedDecisionPath && (
                     <DecisionPopup
                       path={selectedDecisionPath}
                       onClose={() => setSelectedDecisionPath(null)}
-                      onExplorePath={() => { setExploredPaths([...exploredPaths, selectedDecisionPath.name]); setSelectedDecisionPath(null); setShowFullRoadmap(true); }}
+                      onExplorePath={() => { setExploredPaths([...exploredPaths, selectedDecisionPath.name]); setRoadmapInitialPathId(selectedDecisionPath.id); setSelectedDecisionPath(null); setShowFullRoadmap(true); }}
                       isRecommended={selectedDecisionPath.id === [...currentResult.paths].sort((a, b) => a.riskScore - b.riskScore)[0]?.id}
                       isRisky={selectedDecisionPath.id === [...currentResult.paths].sort((a, b) => a.riskScore - b.riskScore)[currentResult.paths.length - 1]?.id}
                     />

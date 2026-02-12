@@ -345,9 +345,9 @@ const ExecutionOptionCard = memo(({ child, onExplore }: {
 
 ExecutionOptionCard.displayName = 'ExecutionOptionCard';
 
-const FullPageRoadmap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+const FullPageRoadmap: React.FC<{ onClose: () => void; initialPathId?: string }> = ({ onClose, initialPathId }) => {
   const { currentResult, setCascadingLevel, setBreadcrumbPath, decisionHistory, pushDecision, popDecision, resetDecisionHistory, profile } = useNeoBIStore();
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [selectedNode, setSelectedNode] = useState<string | null>(initialPathId || null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [showSummary, setShowSummary] = useState(false);

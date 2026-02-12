@@ -7,7 +7,7 @@ interface VoiceInputProps {
   onTranscript: (text: string) => void;
   onCommand?: (command: string) => void;
   placeholder?: string;
-  language?: 'en-IN' | 'hi-IN' | 'ta-IN' | 'mr-IN' | 'bn-IN';
+  language?: 'en-IN' | 'hi-IN' | 'ta-IN' | 'mr-IN' | 'bn-IN' | 'te-IN';
 }
 
 // Voice commands mapping for Indian business context
@@ -40,6 +40,7 @@ const SUPPORTED_LANGUAGES = [
   { code: 'ta-IN', name: 'தமிழ்', flag: '🇮🇳' },
   { code: 'mr-IN', name: 'मराठी', flag: '🇮🇳' },
   { code: 'bn-IN', name: 'বাংলা', flag: '🇮🇳' },
+  { code: 'te-IN', name: 'తెలుగు', flag: '🇮🇳' },
 ];
 
 const VoiceInput: React.FC<VoiceInputProps> = ({
@@ -118,11 +119,20 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
       if (event.error === 'not-allowed') {
-        setError('Microphone access denied. Please allow microphone access.');
+        setError('Microphone access denied. Please allow microphone access in your browser settings.');
       } else if (event.error === 'no-speech') {
         setError('No speech detected. Please try again.');
+      } else if (event.error === 'network') {
+        setError('Speech recognition requires an internet connection. Please check your network and try again.');
+      } else if (event.error === 'audio-capture') {
+        setError('No microphone found. Please connect a microphone and try again.');
+      } else if (event.error === 'aborted') {
+        // Silently handle aborted - user stopped or recognition restarted
+        setIsListening(false);
+        stopAudioVisualization();
+        return;
       } else {
-        setError(`Error: ${event.error}`);
+        setError(`Speech recognition error: ${event.error}. Please try again.`);
       }
       setIsListening(false);
       stopAudioVisualization();

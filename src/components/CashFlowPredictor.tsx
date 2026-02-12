@@ -86,8 +86,8 @@ const CashFlowPredictor: React.FC<CashFlowProps> = ({ data, onRefresh }) => {
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-        <XAxis dataKey="displayPeriod" stroke="#94A3B8" tick={{ fontSize: expanded ? 12 : 10 }} />
-        <YAxis stroke="#94A3B8" tick={{ fontSize: expanded ? 12 : 10 }} tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} />
+        <XAxis dataKey="displayPeriod" stroke="#94A3B8" tick={{ fontSize: expanded ? 12 : 9 }} />
+        <YAxis stroke="#94A3B8" tick={{ fontSize: expanded ? 12 : 9 }} width={expanded ? 60 : 50} tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} />
         <Tooltip
           contentStyle={{
             backgroundColor: '#0F172A',
@@ -115,8 +115,8 @@ const CashFlowPredictor: React.FC<CashFlowProps> = ({ data, onRefresh }) => {
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-        <XAxis dataKey="displayPeriod" stroke="#94A3B8" tick={{ fontSize: expanded ? 12 : 10 }} />
-        <YAxis stroke="#94A3B8" tick={{ fontSize: expanded ? 12 : 10 }} tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} />
+        <XAxis dataKey="displayPeriod" stroke="#94A3B8" tick={{ fontSize: expanded ? 12 : 9 }} />
+        <YAxis stroke="#94A3B8" tick={{ fontSize: expanded ? 12 : 9 }} width={expanded ? 60 : 50} tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} />
         <Tooltip
           contentStyle={{
             backgroundColor: '#0F172A',

@@ -75,7 +75,8 @@ const SupplierRiskMap: React.FC<SupplierRiskProps> = ({ data, onSelectSupplier }
           name="Reliability"
           domain={[0, 100]}
           stroke="#94A3B8"
-          label={expanded ? { value: 'Reliability Score %', position: 'bottom', fill: '#94A3B8' } : undefined}
+          tick={{ fontSize: expanded ? 12 : 9 }}
+          label={expanded ? { value: 'Reliability Score %', position: 'bottom', fill: '#94A3B8', fontSize: 12 } : undefined}
         />
         <YAxis
           type="number"
@@ -83,7 +84,9 @@ const SupplierRiskMap: React.FC<SupplierRiskProps> = ({ data, onSelectSupplier }
           name="Risk"
           domain={[0, 100]}
           stroke="#94A3B8"
-          label={expanded ? { value: 'Risk Score %', angle: -90, position: 'insideLeft', fill: '#94A3B8' } : undefined}
+          tick={{ fontSize: expanded ? 12 : 9 }}
+          width={expanded ? 45 : 35}
+          label={expanded ? { value: 'Risk Score %', angle: -90, position: 'insideLeft', fill: '#94A3B8', fontSize: 12 } : undefined}
         />
         <ZAxis type="number" dataKey="z" range={[50, 400]} name="Dependencies" />
         <Tooltip
