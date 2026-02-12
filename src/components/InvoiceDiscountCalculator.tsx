@@ -12,8 +12,9 @@ interface DiscountResult {
 }
 
 export const InvoiceDiscountCalculator: React.FC = () => {
-  const [amount, setAmount] = useState(500000);
-  const [tenor, setTenor] = useState(30);
+  const [amount, setAmount] = useState(1000000);
+  const [tenor, setTenor] = useState(90);
+  const [annualRate, setAnnualRate] = useState(12);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DiscountResult | null>(null);
 
@@ -23,25 +24,29 @@ export const InvoiceDiscountCalculator: React.FC = () => {
       const res = await fetch('/api/enhanced', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'invoice-discount', payload: { amount, tenorDays: tenor } })
+        body: JSON.stringify({ action: 'invoice-discount', payload: { amount, tenorDays: tenor, annualRate: annualRate / 100 } })
       });
       const j = await res.json();
-      setResult({
-        netProceeds: j.data?.netProceeds || Math.round(amount * 0.99),
-        discountFee: j.data?.discountFee || Math.round(amount * 0.01),
-        effectiveRate: j.data?.effectiveRate || 12,
-        savings: j.data?.savings || Math.round(amount * 0.005),
-      });
+      if (j.success && j.data) {
+        setResult({
+          netProceeds: j.data.netProceeds,
+          discountFee: j.data.discountFee,
+          effectiveRate: j.data.effectiveRate,
+          savings: 0,
+        });
+      } else {
+        throw new Error('API failed');
+      }
     } catch (error) {
       console.error('Invoice calculation failed:', error);
-      // Provide fallback calculation
-      const discountRate = 0.01 + (tenor / 365) * 0.12;
-      const discountFee = Math.round(amount * discountRate);
+      // Proper fallback: Discount = Principal × Annual Rate × (Days/365)
+      const discountFee = Math.round(amount * (annualRate / 100) * (tenor / 365));
+      const effectiveRate = Math.round((discountFee / amount) * 100 * 100) / 100;
       setResult({
         netProceeds: amount - discountFee,
         discountFee,
-        effectiveRate: Math.round(discountRate * 100 * 100) / 100,
-        savings: Math.round(discountFee * 0.1),
+        effectiveRate,
+        savings: 0,
       });
     } finally {
       setLoading(false);
@@ -75,19 +80,37 @@ export const InvoiceDiscountCalculator: React.FC = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">Tenor (Days)</label>
-          <div className="relative">
-            <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input
-              type="number"
-              value={tenor}
-              onChange={(e) => setTenor(Number(e.target.value))}
-              className="w-full pl-8 pr-3 py-2 bg-black/40 border border-blue-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-blue-400"
-              disabled={loading}
-              min={7}
-              max={180}
-            />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Tenor (Days)</label>
+            <div className="relative">
+              <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type="number"
+                value={tenor}
+                onChange={(e) => setTenor(Number(e.target.value))}
+                className="w-full pl-8 pr-3 py-2 bg-black/40 border border-blue-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-blue-400"
+                disabled={loading}
+                min={7}
+                max={365}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Annual Rate (%)</label>
+            <div className="relative">
+              <TrendingDown size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type="number"
+                value={annualRate}
+                onChange={(e) => setAnnualRate(Number(e.target.value))}
+                className="w-full pl-8 pr-3 py-2 bg-black/40 border border-blue-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-blue-400"
+                disabled={loading}
+                min={1}
+                max={36}
+                step={0.5}
+              />
+            </div>
           </div>
         </div>
 

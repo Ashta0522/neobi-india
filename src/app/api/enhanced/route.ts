@@ -42,8 +42,19 @@ export async function POST(request: Request) {
       case 'invoice-discount': {
         const amt = payload?.amount || 0;
         const tenorDays = payload?.tenorDays || 30;
-        const factor = tenorDays <= 30 ? 0.01 : tenorDays <= 90 ? 0.03 : 0.06;
-        return Response.json({ success: true, data: { amount: amt, tenorDays, discountFee: Math.round(amt * factor), netProceeds: Math.round(amt - amt * factor) } });
+        const annualRate = payload?.annualRate || 0.12; // 12% default annual rate
+        // Proper discount calculation: Discount = Principal × Annual Rate × (Days / 365)
+        const discountFee = Math.round(amt * annualRate * (tenorDays / 365));
+        const effectiveRate = Math.round((discountFee / amt) * 100 * 100) / 100; // % for tenor period
+        return Response.json({ success: true, data: {
+          amount: amt,
+          tenorDays,
+          annualRate: annualRate * 100,
+          discountFee,
+          effectiveRate,
+          netProceeds: amt - discountFee,
+          daysFactor: `${tenorDays}/365 = ${(tenorDays / 365).toFixed(4)}`,
+        } });
       }
 
       case 'angel-esop-sim': {

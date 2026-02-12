@@ -985,24 +985,49 @@ const generateFundingPaths = (
   ];
 };
 
+// Industry-aware hiring context helper
+const getHiringContext = (industry: string) => {
+  const key = normalizeIndustry(industry);
+  const contexts: Record<string, { roles: string; keyHires: string; outsource: string }> = {
+    saas: { roles: 'engineers, product managers, and customer success managers', keyHires: 'VP Engineering, Product Lead, Customer Success Manager', outsource: 'UI/UX design, QA testing, content writing' },
+    ecommerce: { roles: 'warehouse staff, logistics coordinators, and customer support', keyHires: 'Operations Manager, Category Manager, Logistics Head', outsource: 'photography, customer support L1, delivery operations' },
+    healthcare: { roles: 'specialist doctors, nurses, and clinical staff', keyHires: 'Specialist Doctor, Head Nurse, Lab Technician', outsource: 'billing, housekeeping, non-clinical admin' },
+    fintech: { roles: 'engineers, compliance officers, and risk analysts', keyHires: 'Compliance Officer, Risk Analyst, Backend Architect', outsource: 'KYC processing, customer support, testing' },
+    edtech: { roles: 'content creators, tutors, and tech team', keyHires: 'Content Head, Curriculum Designer, Product Manager', outsource: 'video production, graphic design, student support' },
+    food: { roles: 'chefs, kitchen staff, and delivery executives', keyHires: 'Head Chef, Kitchen Manager, Operations Manager', outsource: 'delivery via aggregators, accounting, marketing' },
+    manufacturing: { roles: 'skilled operators, quality inspectors, and supervisors', keyHires: 'Plant Manager, Quality Head, Supply Chain Manager', outsource: 'packaging, logistics, maintenance' },
+    logistics: { roles: 'delivery executives, fleet managers, and dispatchers', keyHires: 'Fleet Manager, Route Planner, Operations Head', outsource: 'last-mile delivery, customer support, vehicle maintenance' },
+    retail: { roles: 'store managers, sales associates, and visual merchandisers', keyHires: 'Store Manager, Visual Merchandiser, Procurement Head', outsource: 'security, housekeeping, delivery' },
+    kirana: { roles: 'shop assistants and delivery personnel', keyHires: 'Experienced Shopkeeper, Delivery Coordinator', outsource: 'accounting, delivery' },
+    d2c: { roles: 'designers, marketing specialists, and supply chain team', keyHires: 'Creative Director, Growth Marketer, Supply Chain Manager', outsource: 'manufacturing, photography, customer support' },
+    realestate: { roles: 'sales executives, site engineers, and project managers', keyHires: 'Project Manager, Sales Head, Site Engineer', outsource: 'legal, architecture, construction labor' },
+    consulting: { roles: 'senior consultants, analysts, and practice leads', keyHires: 'Practice Lead, Senior Consultant, Business Development Manager', outsource: 'research, graphic design, admin support' },
+    beauty: { roles: 'beauticians, therapists, and salon managers', keyHires: 'Salon Manager, Senior Stylist, Training Head', outsource: 'accounting, social media management, maintenance' },
+  };
+  return contexts[key] || { roles: 'team members across key functions', keyHires: 'Operations Lead, Sales Manager, Technical Lead', outsource: 'accounting, admin, support functions' };
+};
+
 // Generate Hiring specific paths
 const generateHiringPaths = (
   profile: BusinessProfile,
   baseExpectedValue: number,
   query?: string
 ): DecisionPath[] => {
+  const industryName = profile.industry || 'business';
+  const ctx = getHiringContext(profile.industry);
+
   return [
     {
       id: 'hiring-aggressive',
       name: 'Rapid Team Scaling',
-      description: 'Hire aggressively to capture market opportunity',
+      description: `Hire ${ctx.roles} aggressively to capture market opportunity`,
       expectedValue: baseExpectedValue * 1.6,
       probability: 0.55,
       riskScore: 65,
       timeline: 60,
       costs: {
-        immediate: profile.mrr * 3, // Recruitment, onboarding
-        monthly: profile.mrr * 0.8, // New salaries
+        immediate: profile.mrr * 3,
+        monthly: profile.mrr * 0.8,
       },
       benefits: {
         revenue: baseExpectedValue * 2.0,
@@ -1010,7 +1035,7 @@ const generateHiringPaths = (
         riskReduction: 20,
       },
       steps: [
-        'Define 8-12 priority roles immediately',
+        `Define priority roles: ${ctx.keyHires}`,
         'Engage 2-3 recruitment agencies',
         'Run employee referral program with ₹50K+ bonus',
         'Hire experienced leads who can build teams',
@@ -1040,7 +1065,7 @@ const generateHiringPaths = (
     {
       id: 'hiring-strategic',
       name: 'Strategic Key Hires',
-      description: 'Focus on 3-5 critical hires that unlock growth',
+      description: `Focus on critical ${industryName} hires: ${ctx.keyHires}`,
       expectedValue: baseExpectedValue * 1.3,
       probability: 0.80,
       riskScore: 35,
@@ -1085,7 +1110,7 @@ const generateHiringPaths = (
     {
       id: 'hiring-outsource',
       name: 'Outsource & Contract',
-      description: 'Use contractors, agencies, and outsourced teams',
+      description: `Outsource ${ctx.outsource} while keeping core ${industryName} roles in-house`,
       expectedValue: baseExpectedValue * 1.1,
       probability: 0.85,
       riskScore: 30,
@@ -1420,6 +1445,536 @@ const generateMarketingPaths = (
   ];
 };
 
+// ============================================================================
+// INDUSTRY-SPECIFIC GROWTH PATH GENERATORS
+// ============================================================================
+
+const normalizeIndustry = (industry: string): string => {
+  const lower = (industry || '').toLowerCase().trim();
+  const map: Record<string, string> = {
+    'saas': 'saas', 'software': 'saas', 'saas b2b': 'saas',
+    'e-commerce': 'ecommerce', 'ecommerce': 'ecommerce',
+    'healthcare': 'healthcare', 'medical': 'healthcare', 'clinic': 'healthcare',
+    'fintech': 'fintech', 'financial': 'fintech',
+    'edtech': 'edtech', 'education': 'edtech', 'coaching': 'edtech',
+    'food & beverage': 'food', 'food': 'food', 'restaurant': 'food', 'cloud kitchen': 'food', 'cafe': 'food',
+    'manufacturing': 'manufacturing',
+    'logistics': 'logistics', 'supply chain': 'logistics',
+    'retail': 'retail',
+    'kirana/grocery': 'kirana', 'kirana': 'kirana', 'grocery': 'kirana',
+    'd2c fashion': 'd2c', 'd2c': 'd2c', 'd2c clothing': 'd2c',
+    'real estate': 'realestate', 'property': 'realestate',
+    'consulting': 'consulting', 'professional services': 'consulting', 'agency': 'consulting',
+    'beauty & wellness': 'beauty', 'beauty': 'beauty', 'salon': 'beauty', 'spa': 'beauty', 'wellness': 'beauty',
+    'fitness': 'beauty', 'gym': 'beauty',
+  };
+  return map[lower] || 'general';
+};
+
+const generateGrowthPaths = (
+  profile: BusinessProfile,
+  baseExpectedValue: number,
+  query?: string
+): DecisionPath[] => {
+  const industry = normalizeIndustry(profile.industry);
+  const mrr = profile.mrr;
+
+  const industryGrowthConfigs: Record<string, { paths: Array<{ name: string; desc: string; ev: number; prob: number; risk: number; timeline: number; costMult: number; monthlyCostMult: number; revMult: number; eff: number; riskRed: number; steps: string[]; risks: string[]; shapFeatures: Record<string, number> }> }> = {
+    saas: {
+      paths: [
+        {
+          name: 'Product-Led Growth',
+          desc: 'Scale through self-serve product adoption, freemium funnel, and viral loops',
+          ev: 1.8, prob: 0.70, risk: 50, timeline: 120, costMult: 3, monthlyCostMult: 0.3, revMult: 2.0, eff: 45, riskRed: 25,
+          steps: ['Launch freemium tier with viral sharing features', 'Build in-app onboarding that converts free→paid', 'Implement product analytics (Mixpanel/Amplitude)', 'Create self-serve upgrade flow with annual plans', 'Target PLG benchmark: <₹5K CAC'],
+          risks: ['Free users may not convert', 'Support costs for free tier', 'Requires strong product-market fit'],
+          shapFeatures: { product_adoption: 45, viral_coefficient: 30, conversion_rate: 25 },
+        },
+        {
+          name: 'Enterprise Sales Motion',
+          desc: 'Build dedicated enterprise sales team for large contracts',
+          ev: 2.2, prob: 0.55, risk: 65, timeline: 180, costMult: 5, monthlyCostMult: 0.5, revMult: 2.8, eff: 30, riskRed: 20,
+          steps: ['Hire 2-3 enterprise AEs with rolodex', 'Build SOC2/ISO compliance for enterprise deals', 'Create case studies and enterprise pricing', 'Develop custom integration capabilities', 'Target ACV ₹10L+ with 12-month contracts'],
+          risks: ['Long sales cycles (3-6 months)', 'High cost of enterprise sales team', 'Need compliance certifications'],
+          shapFeatures: { deal_size: 45, sales_capacity: 30, product_readiness: 25 },
+        },
+        {
+          name: 'Expansion Revenue Focus',
+          desc: 'Grow MRR through upsells, cross-sells, and net revenue retention',
+          ev: 1.4, prob: 0.85, risk: 25, timeline: 90, costMult: 1, monthlyCostMult: 0.1, revMult: 1.5, eff: 50, riskRed: 55,
+          steps: ['Implement usage-based pricing tiers', 'Launch add-on modules and premium features', 'Build customer success team for proactive upselling', 'Target 120%+ net revenue retention', 'Create expansion playbook by customer segment'],
+          risks: ['May upset existing customers with pricing changes', 'Requires deep product analytics', 'Cross-sell may cannibalize existing revenue'],
+          shapFeatures: { net_retention: 50, customer_health: 30, feature_adoption: 20 },
+        },
+      ],
+    },
+    ecommerce: {
+      paths: [
+        {
+          name: 'Multi-Channel Expansion',
+          desc: 'Expand to multiple sales channels: own website, marketplaces, social commerce',
+          ev: 1.9, prob: 0.70, risk: 55, timeline: 90, costMult: 4, monthlyCostMult: 0.4, revMult: 2.2, eff: 35, riskRed: 20,
+          steps: ['List on Amazon, Flipkart, Meesho simultaneously', 'Build D2C website with Shopify/custom stack', 'Launch Instagram & WhatsApp commerce channels', 'Implement unified inventory management', 'Optimize for each platform\'s algorithm'],
+          risks: ['Inventory management across channels', 'Platform dependency and commission costs', 'Brand dilution across marketplaces'],
+          shapFeatures: { channel_reach: 45, inventory_efficiency: 30, brand_visibility: 25 },
+        },
+        {
+          name: 'Category Extension',
+          desc: 'Add complementary product categories to increase basket size',
+          ev: 1.5, prob: 0.75, risk: 40, timeline: 120, costMult: 3, monthlyCostMult: 0.3, revMult: 1.8, eff: 40, riskRed: 35,
+          steps: ['Analyze top customers\' purchase patterns', 'Source 3-5 complementary product categories', 'Test with small batch before full launch', 'Bundle products for higher AOV', 'Build private label for top-selling categories'],
+          risks: ['Capital tied up in new inventory', 'Quality control for new categories', 'May distract from core category'],
+          shapFeatures: { basket_size: 40, category_fit: 35, supplier_reliability: 25 },
+        },
+        {
+          name: 'Geographic Expansion',
+          desc: 'Expand delivery network to new cities and tier-2/3 markets',
+          ev: 1.6, prob: 0.65, risk: 50, timeline: 150, costMult: 5, monthlyCostMult: 0.35, revMult: 2.0, eff: 25, riskRed: 30,
+          steps: ['Identify top 5 tier-2 cities with demand data', 'Set up dark stores or 3PL partnerships', 'Launch with hyperlocal marketing campaigns', 'Optimize last-mile delivery costs', 'Build local customer support teams'],
+          risks: ['Logistics costs in new cities', 'Lower demand density in tier-2/3', 'Different customer preferences by region'],
+          shapFeatures: { market_potential: 45, logistics_cost: 30, local_demand: 25 },
+        },
+      ],
+    },
+    healthcare: {
+      paths: [
+        {
+          name: 'Multi-Location Expansion',
+          desc: 'Open new clinic/hospital locations in high-demand areas',
+          ev: 2.0, prob: 0.65, risk: 60, timeline: 180, costMult: 8, monthlyCostMult: 0.5, revMult: 2.5, eff: 30, riskRed: 20,
+          steps: ['Survey demand in target localities (1km radius analysis)', 'Secure NABH-ready premises with required sq.ft.', 'Recruit specialist doctors and nursing staff', 'Obtain Clinical Establishment Act registrations', 'Launch with health camps and doctor referral programs'],
+          risks: ['High capex for medical equipment', 'Doctor retention challenges', 'Regulatory approvals take 3-6 months'],
+          shapFeatures: { location_demand: 45, doctor_availability: 30, regulatory_readiness: 25 },
+        },
+        {
+          name: 'Specialist Network',
+          desc: 'Build visiting specialist model with revenue-sharing doctors',
+          ev: 1.5, prob: 0.80, risk: 35, timeline: 90, costMult: 2, monthlyCostMult: 0.2, revMult: 1.8, eff: 45, riskRed: 50,
+          steps: ['Onboard 10-15 visiting specialists (60:40 revenue share)', 'Create scheduling system for specialist slots', 'Market specialist availability to referring GPs', 'Build diagnostic partnerships for tests/imaging', 'Implement patient follow-up and review system'],
+          risks: ['Specialist availability conflicts', 'Revenue share negotiations', 'Quality consistency across doctors'],
+          shapFeatures: { specialist_network: 40, patient_flow: 35, referral_strength: 25 },
+        },
+        {
+          name: 'Telemedicine Platform',
+          desc: 'Launch digital consultation platform for remote patients',
+          ev: 1.3, prob: 0.75, risk: 30, timeline: 60, costMult: 1.5, monthlyCostMult: 0.15, revMult: 1.5, eff: 55, riskRed: 60,
+          steps: ['Build/integrate telemedicine platform (Practo/custom)', 'Train doctors on virtual consultation protocols', 'Set up e-prescription and pharmacy delivery', 'Target tier-2/3 patients with limited specialist access', 'Integrate with existing EMR system'],
+          risks: ['Lower consultation fees vs in-person', 'Technology adoption by older patients', 'Regulatory framework still evolving'],
+          shapFeatures: { digital_reach: 45, patient_accessibility: 35, operational_efficiency: 20 },
+        },
+      ],
+    },
+    fintech: {
+      paths: [
+        {
+          name: 'New Payment Methods',
+          desc: 'Add BNPL, EMI, and cross-border payment capabilities',
+          ev: 2.0, prob: 0.60, risk: 65, timeline: 120, costMult: 5, monthlyCostMult: 0.4, revMult: 2.5, eff: 35, riskRed: 20,
+          steps: ['Integrate BNPL with lending partners (Capital Float, ZestMoney)', 'Launch EMI options on partner merchant platforms', 'Build UPI autopay for subscription businesses', 'Add cross-border payments via RBI sandbox', 'Implement real-time fraud detection for new channels'],
+          risks: ['RBI regulatory changes', 'Credit risk in BNPL', 'Integration complexity with banking partners'],
+          shapFeatures: { transaction_volume: 45, regulatory_compliance: 30, partner_integration: 25 },
+        },
+        {
+          name: 'B2B Expansion',
+          desc: 'Target businesses with payment, lending, and treasury solutions',
+          ev: 2.2, prob: 0.55, risk: 55, timeline: 150, costMult: 4, monthlyCostMult: 0.35, revMult: 2.8, eff: 30, riskRed: 25,
+          steps: ['Build API-first B2B payment gateway', 'Launch invoice factoring for SME customers', 'Offer treasury management for cash-rich businesses', 'Create bulk payout solution for enterprises', 'Get NBFC/PA license for expanded offerings'],
+          risks: ['Long B2B sales cycles', 'Need for compliance certifications', 'High integration costs per client'],
+          shapFeatures: { b2b_market_size: 40, api_readiness: 35, compliance_level: 25 },
+        },
+        {
+          name: 'API Platform',
+          desc: 'Productize your payment stack as developer APIs',
+          ev: 1.6, prob: 0.70, risk: 40, timeline: 90, costMult: 2, monthlyCostMult: 0.2, revMult: 2.0, eff: 50, riskRed: 40,
+          steps: ['Document and productize core payment APIs', 'Build developer portal with sandbox environment', 'Create SDK for popular languages (Node, Python, Java)', 'Launch developer community and hackathons', 'Implement usage-based pricing model'],
+          risks: ['Developer adoption takes time', 'Support costs for integration help', 'Competition from Razorpay/Cashfree'],
+          shapFeatures: { developer_experience: 45, api_reliability: 30, ecosystem_growth: 25 },
+        },
+      ],
+    },
+    edtech: {
+      paths: [
+        {
+          name: 'B2C Digital Marketing',
+          desc: 'Scale student enrollment through performance marketing and influencers',
+          ev: 1.8, prob: 0.65, risk: 55, timeline: 90, costMult: 4, monthlyCostMult: 0.5, revMult: 2.2, eff: 35, riskRed: 20,
+          steps: ['Launch YouTube and Instagram ad campaigns targeting students', 'Build free content funnel (webinars, free courses)', 'Create student ambassador program across colleges', 'Optimize landing pages for ₹500-2000 CAC', 'Implement demo class → enrollment conversion flow'],
+          risks: ['High CAC in competitive edtech market', 'Seasonal enrollment patterns', 'Student refund/dropout rates'],
+          shapFeatures: { student_acquisition: 45, content_quality: 30, conversion_rate: 25 },
+        },
+        {
+          name: 'B2B School Partnerships',
+          desc: 'Partner with schools and institutions for bulk enrollments',
+          ev: 1.6, prob: 0.75, risk: 35, timeline: 120, costMult: 2, monthlyCostMult: 0.2, revMult: 2.0, eff: 45, riskRed: 45,
+          steps: ['Identify 50+ schools in target cities', 'Create school-specific curriculum aligned to boards (CBSE/ICSE)', 'Offer teacher training and admin dashboard', 'Negotiate annual contracts with volume discounts', 'Build school referral network'],
+          risks: ['Long decision cycles in schools', 'Need for board-specific content', 'Price sensitivity in education'],
+          shapFeatures: { school_partnerships: 40, curriculum_alignment: 35, institutional_trust: 25 },
+        },
+        {
+          name: 'Hybrid Model',
+          desc: 'Combine online with offline centers in tier-2/3 cities',
+          ev: 1.4, prob: 0.80, risk: 30, timeline: 150, costMult: 3, monthlyCostMult: 0.25, revMult: 1.6, eff: 40, riskRed: 50,
+          steps: ['Open 3-5 learning centers in tier-2 cities', 'Use online content with offline mentoring support', 'Hire local tutors for doubt-clearing sessions', 'Build community events and workshops', 'Create certification programs with placement support'],
+          risks: ['Higher operational costs vs pure-online', 'Location selection critical', 'Local competition from coaching centers'],
+          shapFeatures: { offline_demand: 40, hybrid_efficiency: 35, local_brand: 25 },
+        },
+      ],
+    },
+    food: {
+      paths: [
+        {
+          name: 'Multi-Location Expansion',
+          desc: 'Open new outlets in high-footfall areas with proven menu',
+          ev: 1.8, prob: 0.60, risk: 60, timeline: 120, costMult: 6, monthlyCostMult: 0.4, revMult: 2.2, eff: 30, riskRed: 20,
+          steps: ['Identify 3-5 high-footfall locations (malls, office areas)', 'Standardize recipes and kitchen processes for scale', 'Set up central kitchen for consistency and cost savings', 'Recruit and train kitchen staff with SOPs', 'Launch with Swiggy/Zomato integration from day 1'],
+          risks: ['High capex per location (₹15-50L)', 'Quality consistency across outlets', 'Rent and fixed cost burden'],
+          shapFeatures: { location_quality: 45, recipe_scalability: 30, brand_strength: 25 },
+        },
+        {
+          name: 'Virtual Brands',
+          desc: 'Launch multiple cloud kitchen brands from same kitchen',
+          ev: 1.5, prob: 0.75, risk: 35, timeline: 60, costMult: 1.5, monthlyCostMult: 0.2, revMult: 1.8, eff: 50, riskRed: 45,
+          steps: ['Identify 2-3 trending cuisines for virtual brands', 'Create distinct brand identities and menus', 'List all brands on aggregator platforms', 'Optimize kitchen workflow for multi-brand production', 'A/B test pricing and menu combinations'],
+          risks: ['Aggregator commission eats into margins', 'Brand differentiation challenges', 'Kitchen capacity constraints'],
+          shapFeatures: { cuisine_demand: 40, kitchen_efficiency: 35, aggregator_ranking: 25 },
+        },
+        {
+          name: 'Franchise Model',
+          desc: 'Scale through franchising with standardized operations',
+          ev: 2.0, prob: 0.55, risk: 50, timeline: 180, costMult: 2, monthlyCostMult: 0.15, revMult: 2.5, eff: 40, riskRed: 35,
+          steps: ['Document franchise operations manual', 'Set up franchise fee structure (₹5-15L + 5% royalty)', 'Create FSSAI and legal compliance package', 'Launch franchise portal and start selling', 'Build franchise support and audit team'],
+          risks: ['Quality control with franchisees', 'Brand reputation risk', 'Legal complexity of franchise agreements'],
+          shapFeatures: { brand_value: 45, operational_documentation: 30, franchisee_quality: 25 },
+        },
+      ],
+    },
+    manufacturing: {
+      paths: [
+        {
+          name: 'New Plant Setup',
+          desc: 'Build additional manufacturing facility for increased capacity',
+          ev: 2.2, prob: 0.55, risk: 70, timeline: 365, costMult: 10, monthlyCostMult: 0.3, revMult: 3.0, eff: 30, riskRed: 15,
+          steps: ['Identify land in industrial area (MIDC/SEZ benefits)', 'Apply for Udyam/MSME registration and subsidies', 'Procure machinery with SIDBI/equipment financing', 'Hire skilled operators and setup training program', 'Obtain factory license, pollution control, BIS certifications'],
+          risks: ['High capital investment (₹1Cr+)', 'Regulatory approvals take 6-12 months', 'Demand may not justify capacity'],
+          shapFeatures: { capacity_gap: 45, capital_availability: 30, regulatory_readiness: 25 },
+        },
+        {
+          name: 'Third Shift Operations',
+          desc: 'Maximize existing plant utilization with additional shift',
+          ev: 1.5, prob: 0.80, risk: 30, timeline: 45, costMult: 1, monthlyCostMult: 0.3, revMult: 1.5, eff: 55, riskRed: 50,
+          steps: ['Assess machine capacity for 24/7 operation', 'Recruit night-shift workers (20% premium wages)', 'Set up shift supervision and quality checks', 'Optimize maintenance schedule for minimal downtime', 'Negotiate better raw material rates with higher volumes'],
+          risks: ['Worker fatigue and safety concerns', 'Machine wear increases', 'Quality issues during night shift'],
+          shapFeatures: { plant_utilization: 50, labor_availability: 30, maintenance_readiness: 20 },
+        },
+        {
+          name: 'Contract Manufacturing',
+          desc: 'Outsource production to third-party manufacturers for quick scaling',
+          ev: 1.3, prob: 0.85, risk: 25, timeline: 60, costMult: 0.5, monthlyCostMult: 0.4, revMult: 1.4, eff: 45, riskRed: 55,
+          steps: ['Identify 3-5 contract manufacturers with spare capacity', 'Share specifications and quality standards', 'Set up quality inspection at contractor facility', 'Negotiate per-unit pricing with volume commitments', 'Maintain IP protection with NDAs'],
+          risks: ['Quality control challenges', 'IP leakage risk', 'Supplier dependency'],
+          shapFeatures: { supplier_capacity: 40, quality_control: 35, cost_efficiency: 25 },
+        },
+      ],
+    },
+    logistics: {
+      paths: [
+        {
+          name: 'Own Fleet Expansion',
+          desc: 'Scale delivery capacity with owned/leased vehicles',
+          ev: 1.8, prob: 0.60, risk: 60, timeline: 120, costMult: 6, monthlyCostMult: 0.4, revMult: 2.2, eff: 35, riskRed: 20,
+          steps: ['Procure 15-20 delivery vehicles (lease vs buy analysis)', 'Hire and train delivery executives', 'Implement GPS tracking and route optimization', 'Set up hub-and-spoke model in new areas', 'Build maintenance team and fuel management system'],
+          risks: ['High capex for vehicles', 'Driver retention challenges', 'Fuel cost volatility'],
+          shapFeatures: { delivery_capacity: 45, route_efficiency: 30, fleet_management: 25 },
+        },
+        {
+          name: 'Gig Worker Network',
+          desc: 'Build flexible delivery network with gig/freelance riders',
+          ev: 1.5, prob: 0.75, risk: 35, timeline: 60, costMult: 1.5, monthlyCostMult: 0.3, revMult: 1.8, eff: 50, riskRed: 40,
+          steps: ['Launch rider app with onboarding flow', 'Set competitive per-delivery payout structure', 'Create incentive system for peak-hour availability', 'Build rider support and grievance system', 'Implement rider insurance and safety training'],
+          risks: ['Rider availability during peaks', 'Service quality inconsistency', 'Labor law compliance for gig workers'],
+          shapFeatures: { rider_availability: 40, cost_per_delivery: 35, service_quality: 25 },
+        },
+        {
+          name: '3PL Partnership',
+          desc: 'Partner with third-party logistics providers for network coverage',
+          ev: 1.3, prob: 0.85, risk: 20, timeline: 30, costMult: 0.5, monthlyCostMult: 0.2, revMult: 1.5, eff: 55, riskRed: 60,
+          steps: ['Evaluate 3PL providers (Delhivery, Ecom Express, DTDC)', 'Negotiate volume-based pricing and SLAs', 'Integrate tracking APIs with your platform', 'Set up escalation matrix for delivery failures', 'Monitor performance metrics weekly'],
+          risks: ['Less control over delivery experience', 'Margin compression from 3PL costs', 'SLA enforcement challenges'],
+          shapFeatures: { network_coverage: 45, cost_optimization: 30, service_reliability: 25 },
+        },
+      ],
+    },
+    retail: {
+      paths: [
+        {
+          name: 'Company-Owned Expansion',
+          desc: 'Open new company-owned retail outlets',
+          ev: 1.8, prob: 0.60, risk: 60, timeline: 150, costMult: 7, monthlyCostMult: 0.4, revMult: 2.2, eff: 30, riskRed: 20,
+          steps: ['Identify high-footfall locations with ₹50K+ monthly footfall', 'Negotiate lease terms (3+3 year lock-in)', 'Standardize store design and visual merchandising', 'Hire and train store managers and sales staff', 'Launch with grand opening promotions and local marketing'],
+          risks: ['High rental and fit-out costs', 'Location selection is critical', 'Working capital for inventory'],
+          shapFeatures: { location_quality: 45, brand_recall: 30, inventory_management: 25 },
+        },
+        {
+          name: 'Franchise Network',
+          desc: 'Scale through franchise partners who invest and operate stores',
+          ev: 2.0, prob: 0.55, risk: 45, timeline: 120, costMult: 2, monthlyCostMult: 0.15, revMult: 2.5, eff: 45, riskRed: 40,
+          steps: ['Create franchise documentation and training program', 'Set franchise fee (₹10-25L) and royalty (4-6%)', 'Launch franchise sales campaign', 'Build field support team for franchisee management', 'Implement POS and inventory system for all stores'],
+          risks: ['Quality control across franchisees', 'Franchisee relationship management', 'Brand consistency challenges'],
+          shapFeatures: { brand_strength: 40, franchise_economics: 35, operational_manual: 25 },
+        },
+        {
+          name: 'Shop-in-Shop Model',
+          desc: 'Place branded sections inside existing retail stores',
+          ev: 1.3, prob: 0.80, risk: 25, timeline: 45, costMult: 1, monthlyCostMult: 0.1, revMult: 1.5, eff: 50, riskRed: 55,
+          steps: ['Partner with complementary retail chains', 'Design compact branded display units', 'Train host store staff on your products', 'Set up revenue-sharing model (20-30% to host)', 'Scale to 20+ locations rapidly with low investment'],
+          risks: ['Limited control over customer experience', 'Host store traffic dependency', 'Revenue sharing reduces margins'],
+          shapFeatures: { distribution_reach: 45, cost_efficiency: 35, brand_visibility: 20 },
+        },
+      ],
+    },
+    kirana: {
+      paths: [
+        {
+          name: 'Inventory Expansion',
+          desc: 'Add new product categories and brands to increase basket size',
+          ev: 1.4, prob: 0.80, risk: 25, timeline: 30, costMult: 1, monthlyCostMult: 0.15, revMult: 1.5, eff: 45, riskRed: 55,
+          steps: ['Analyze top-selling items and gaps in inventory', 'Add FMCG, personal care, and daily essentials brands', 'Negotiate direct from company (bypass wholesaler)', 'Use JioMart/Udaan for better wholesale pricing', 'Implement FIFO for perishables to reduce wastage'],
+          risks: ['Capital locked in inventory', 'Wastage for perishable items', 'Storage space constraints'],
+          shapFeatures: { product_range: 40, wastage_control: 35, supplier_pricing: 25 },
+        },
+        {
+          name: 'Home Delivery Service',
+          desc: 'Launch home delivery to compete with quick commerce',
+          ev: 1.5, prob: 0.70, risk: 35, timeline: 45, costMult: 0.5, monthlyCostMult: 0.2, revMult: 1.8, eff: 40, riskRed: 40,
+          steps: ['Hire 2-3 delivery boys for 2km radius', 'Set up WhatsApp ordering system for regular customers', 'Offer free delivery above ₹500 order value', 'Create monthly subscription packs for staples', 'Build loyalty program with credit facility'],
+          risks: ['Delivery cost vs order value', 'Competition from Blinkit/Zepto', 'Managing credit risk with customers'],
+          shapFeatures: { delivery_demand: 40, order_value: 35, customer_retention: 25 },
+        },
+        {
+          name: 'Kirana Franchise',
+          desc: 'Open additional outlets in nearby localities',
+          ev: 1.6, prob: 0.60, risk: 45, timeline: 90, costMult: 3, monthlyCostMult: 0.3, revMult: 2.0, eff: 30, riskRed: 30,
+          steps: ['Identify underserved localities within 5km', 'Set up 200-400 sq.ft. outlet with essential inventory', 'Hire local shopkeeper to manage operations', 'Centralize procurement for cost savings', 'Apply for Mudra Loan for ₹5-10L setup cost'],
+          risks: ['High rent in good locations', 'Staff management challenges', 'Cannibalization of existing store sales'],
+          shapFeatures: { locality_demand: 45, rent_economics: 30, staff_reliability: 25 },
+        },
+      ],
+    },
+    d2c: {
+      paths: [
+        {
+          name: 'Performance Marketing Scale',
+          desc: 'Aggressively scale paid acquisition channels',
+          ev: 1.8, prob: 0.60, risk: 60, timeline: 90, costMult: 4, monthlyCostMult: 0.5, revMult: 2.2, eff: 30, riskRed: 20,
+          steps: ['Set up Meta, Google, and Instagram ad accounts', 'Test 20+ creative variations across audiences', 'Optimize for ROAS > 3x within 30 days', 'Scale winning ads by 20% weekly', 'Build retargeting funnels for cart abandonment'],
+          risks: ['High CAC may not be sustainable', 'Platform algorithm changes', 'Creative fatigue requires constant refresh'],
+          shapFeatures: { ad_efficiency: 45, creative_quality: 30, customer_ltv: 25 },
+        },
+        {
+          name: 'Influencer & Community Push',
+          desc: 'Build brand through micro-influencers and community marketing',
+          ev: 1.5, prob: 0.70, risk: 40, timeline: 120, costMult: 2, monthlyCostMult: 0.25, revMult: 1.8, eff: 40, riskRed: 40,
+          steps: ['Identify 50+ micro-influencers (10K-100K followers)', 'Create affiliate/commission program for influencers', 'Launch user-generated content campaigns', 'Build brand community on Instagram/Discord', 'Organize pop-up events in metro cities'],
+          risks: ['Influencer reliability and ROI tracking', 'Brand message control', 'Community building takes time'],
+          shapFeatures: { influencer_reach: 40, brand_authenticity: 35, community_engagement: 25 },
+        },
+        {
+          name: 'Marketplace Expansion',
+          desc: 'Expand to Amazon, Myntra, Ajio and other fashion marketplaces',
+          ev: 1.6, prob: 0.75, risk: 35, timeline: 60, costMult: 1.5, monthlyCostMult: 0.2, revMult: 2.0, eff: 45, riskRed: 45,
+          steps: ['List top 20 SKUs on Amazon Fashion and Myntra', 'Optimize listings with professional photography', 'Participate in marketplace sale events (BBD, EOSS)', 'Use FBA/Fulfillment by marketplace for faster delivery', 'Monitor marketplace metrics: BSR, reviews, returns'],
+          risks: ['Marketplace commissions (15-30%)', 'Price competition pressure', 'Limited customer data ownership'],
+          shapFeatures: { marketplace_visibility: 45, product_competitiveness: 30, fulfillment_speed: 25 },
+        },
+      ],
+    },
+    realestate: {
+      paths: [
+        {
+          name: 'New Project Launch',
+          desc: 'Launch new residential/commercial project in high-demand area',
+          ev: 2.5, prob: 0.50, risk: 75, timeline: 365, costMult: 12, monthlyCostMult: 0.3, revMult: 3.5, eff: 25, riskRed: 15,
+          steps: ['Acquire land bank in high-growth corridor', 'Obtain necessary approvals (RERA, environmental, building)', 'Hire architect and begin project design', 'Launch pre-sales with early-bird pricing', 'Start construction with phased payment collection'],
+          risks: ['Capital intensive (₹5Cr+ investment)', 'Regulatory approval delays', 'Market demand fluctuation'],
+          shapFeatures: { land_value: 45, regulatory_clearance: 30, market_demand: 25 },
+        },
+        {
+          name: 'JV Development',
+          desc: 'Joint venture with landowners to develop projects without land purchase',
+          ev: 2.0, prob: 0.65, risk: 50, timeline: 270, costMult: 4, monthlyCostMult: 0.2, revMult: 2.5, eff: 40, riskRed: 35,
+          steps: ['Identify landowners open to JV (60:40 or 70:30 split)', 'Structure JV agreement with clear revenue sharing', 'Handle all approvals and construction', 'Launch marketing and sales from pre-launch stage', 'Deliver project and distribute proceeds per agreement'],
+          risks: ['JV partner disputes', 'Land title issues', 'Revenue sharing reduces margins'],
+          shapFeatures: { partner_reliability: 40, land_location: 35, agreement_clarity: 25 },
+        },
+        {
+          name: 'Asset Light Model',
+          desc: 'Focus on project management and marketing without owning land',
+          ev: 1.3, prob: 0.80, risk: 25, timeline: 120, costMult: 1, monthlyCostMult: 0.15, revMult: 1.5, eff: 55, riskRed: 60,
+          steps: ['Position as project management consultancy for builders', 'Offer end-to-end marketing and sales services', 'Take management fees (3-5% of project value)', 'Build strong channel partner network', 'Create tech platform for project tracking'],
+          risks: ['Lower margins per project', 'Dependency on builder clients', 'Limited brand building for end customers'],
+          shapFeatures: { project_management: 45, sales_expertise: 30, builder_network: 25 },
+        },
+      ],
+    },
+    consulting: {
+      paths: [
+        {
+          name: 'New Service Lines',
+          desc: 'Add adjacent consulting practices to grow revenue per client',
+          ev: 1.6, prob: 0.75, risk: 35, timeline: 90, costMult: 1.5, monthlyCostMult: 0.2, revMult: 1.8, eff: 45, riskRed: 45,
+          steps: ['Survey existing clients for unmet needs', 'Hire 2-3 domain experts for new practice areas', 'Create standardized frameworks and deliverables', 'Cross-sell to existing client base', 'Build case studies and thought leadership content'],
+          risks: ['Expertise gap in new areas', 'Client perception may limit expansion', 'Hiring senior consultants is expensive'],
+          shapFeatures: { client_needs: 40, expertise_depth: 35, cross_sell_potential: 25 },
+        },
+        {
+          name: 'Geographic Expansion',
+          desc: 'Open offices in new cities to serve regional clients',
+          ev: 1.8, prob: 0.60, risk: 55, timeline: 150, costMult: 3, monthlyCostMult: 0.3, revMult: 2.2, eff: 30, riskRed: 25,
+          steps: ['Identify top 3 cities with consulting demand', 'Open co-working space with 2-3 senior consultants', 'Build local networks through industry events', 'Partner with regional industry associations', 'Target ₹20L+ annual engagements per city'],
+          risks: ['High cost to establish local presence', 'Local competition from established firms', 'Travel and coordination overhead'],
+          shapFeatures: { market_potential: 45, local_network: 30, talent_availability: 25 },
+        },
+        {
+          name: 'Digital Products',
+          desc: 'Productize consulting IP into courses, tools, and subscriptions',
+          ev: 1.4, prob: 0.70, risk: 30, timeline: 120, costMult: 1, monthlyCostMult: 0.1, revMult: 1.6, eff: 55, riskRed: 55,
+          steps: ['Package top frameworks into online courses', 'Build assessment/diagnostic tools as SaaS', 'Create subscription-based research/insights service', 'Launch on platforms like Udemy, LinkedIn Learning', 'Set up recurring revenue from digital products'],
+          risks: ['Time investment to create quality content', 'Digital products commoditize expertise', 'Marketing digital products requires different skills'],
+          shapFeatures: { ip_value: 40, digital_scalability: 35, content_quality: 25 },
+        },
+      ],
+    },
+    beauty: {
+      paths: [
+        {
+          name: 'Own Outlet Expansion',
+          desc: 'Open new salons/studios in high-footfall residential or commercial areas',
+          ev: 1.7, prob: 0.65, risk: 55, timeline: 120, costMult: 5, monthlyCostMult: 0.4, revMult: 2.0, eff: 30, riskRed: 25,
+          steps: ['Survey demand in target localities', 'Set up 500-1000 sq.ft. outlet with branded interiors', 'Recruit and train beauticians and therapists', 'Obtain trade license, health license, GST registration', 'Launch with opening offers and local marketing'],
+          risks: ['High fit-out costs (₹10-25L)', 'Staff retention in beauty industry', 'Location dependency for footfall'],
+          shapFeatures: { location_quality: 45, staff_skill: 30, brand_appeal: 25 },
+        },
+        {
+          name: 'Franchise Model',
+          desc: 'Scale through beauty franchise partners',
+          ev: 1.9, prob: 0.55, risk: 45, timeline: 150, costMult: 2, monthlyCostMult: 0.15, revMult: 2.3, eff: 40, riskRed: 35,
+          steps: ['Standardize service menu and quality protocols', 'Create franchise package (₹8-15L investment)', 'Build training academy for franchisee staff', 'Set up centralized product procurement', 'Launch franchise sales with beauty industry events'],
+          risks: ['Quality consistency across franchisees', 'Training and retaining beauticians', 'Brand reputation risk from poor franchisees'],
+          shapFeatures: { brand_value: 40, training_system: 35, franchise_economics: 25 },
+        },
+        {
+          name: 'At-Home Services',
+          desc: 'Launch doorstep beauty and wellness services',
+          ev: 1.4, prob: 0.75, risk: 30, timeline: 60, costMult: 1, monthlyCostMult: 0.2, revMult: 1.6, eff: 50, riskRed: 50,
+          steps: ['Build booking app/WhatsApp ordering system', 'Recruit and train at-home service professionals', 'Create standardized service kits for home visits', 'Set premium pricing (20-30% above salon rates)', 'Focus on repeat bookings with membership plans'],
+          risks: ['Staff safety and insurance concerns', 'Inconsistent service quality at home', 'Competition from Urban Company/Yes Madam'],
+          shapFeatures: { convenience_demand: 45, service_quality: 30, pricing_premium: 25 },
+        },
+      ],
+    },
+  };
+
+  const config = industryGrowthConfigs[industry];
+  if (config) {
+    return config.paths.map((p, idx) => ({
+      id: `growth-${industry}-${idx + 1}`,
+      name: p.name,
+      description: p.desc,
+      expectedValue: baseExpectedValue * p.ev,
+      probability: p.prob,
+      riskScore: p.risk,
+      timeline: p.timeline,
+      costs: {
+        immediate: mrr * p.costMult,
+        monthly: mrr * p.monthlyCostMult,
+      },
+      benefits: {
+        revenue: baseExpectedValue * p.revMult,
+        efficiency: p.eff,
+        riskReduction: p.riskRed,
+      },
+      steps: p.steps,
+      risks: p.risks,
+      shapleySHAP: calculateSHAPValues(p.shapFeatures),
+      agentContributions: {
+        orchestrator: 10 + idx * 2,
+        simulation_cluster: 15 - idx,
+        decision_intelligence: 20 - idx * 2,
+        operations_optimizer: 18 + idx * 2,
+        personal_coach: 8 + idx * 3,
+        innovation_advisor: 7 + idx,
+        growth_strategist: 18 - idx * 3,
+        learning_adaptation: 4 + idx * 2,
+      },
+    }));
+  }
+
+  // Fallback: Generic growth paths with industry context in descriptions
+  const industryName = profile.industry || 'business';
+  return [
+    {
+      id: 'aggressive',
+      name: 'Aggressive Scaling',
+      description: `Aggressively scale your ${industryName} with heavy investment in team, marketing, and operations`,
+      expectedValue: baseExpectedValue * 1.8,
+      probability: 0.65,
+      riskScore: 72,
+      timeline: 90,
+      costs: { immediate: mrr * 6, monthly: mrr * 0.4 },
+      benefits: { revenue: baseExpectedValue * 2.0, efficiency: 35, riskReduction: 15 },
+      steps: [
+        `Raise funding to accelerate ${industryName} growth`,
+        'Hire 10+ team members across key functions',
+        'Launch aggressive marketing campaigns',
+        'Expand to 2-3 new markets simultaneously',
+      ],
+      risks: ['High burn rate requires external funding', 'Rapid hiring may affect culture', 'Market conditions may change'],
+      shapleySHAP: calculateSHAPValues({ team_capacity: 45, market_timing: 35, cash_buffer: 20 }),
+      agentContributions: { orchestrator: 10, simulation_cluster: 15, decision_intelligence: 18, operations_optimizer: 22, personal_coach: 4, innovation_advisor: 7, growth_strategist: 19, learning_adaptation: 5 },
+    },
+    {
+      id: 'balanced',
+      name: 'Balanced Growth',
+      description: `Sustainable ${industryName} growth through optimized operations and strategic hiring`,
+      expectedValue: baseExpectedValue,
+      probability: 0.85,
+      riskScore: 45,
+      timeline: 180,
+      costs: { immediate: mrr * 2, monthly: mrr * 0.15 },
+      benefits: { revenue: baseExpectedValue * 1.2, efficiency: 25, riskReduction: 40 },
+      steps: [
+        'Optimize current operations for efficiency',
+        'Hire 3-5 key roles strategically',
+        'Focus on organic and referral growth',
+        'Build sustainable unit economics',
+      ],
+      risks: ['Slower growth may miss market window', 'Competitors may scale faster', 'Limited resources for experimentation'],
+      shapleySHAP: calculateSHAPValues({ operational_efficiency: 40, market_stability: 35, cash_flow: 25 }),
+      agentContributions: { orchestrator: 13, simulation_cluster: 14, decision_intelligence: 16, operations_optimizer: 19, personal_coach: 11, innovation_advisor: 5, growth_strategist: 12, learning_adaptation: 10 },
+    },
+    {
+      id: 'conservative',
+      name: 'Conservative Path',
+      description: `Build ${industryName} cash reserves, improve margins, low risk approach`,
+      expectedValue: baseExpectedValue * 0.6,
+      probability: 0.95,
+      riskScore: 20,
+      timeline: 365,
+      costs: { immediate: mrr * 0.5, monthly: mrr * 0.05 },
+      benefits: { revenue: baseExpectedValue * 0.8, efficiency: 15, riskReduction: 75 },
+      steps: [
+        'Focus on existing customer retention',
+        'Build 12+ months runway',
+        'Improve profit margins by 20%',
+        'Minimal new hires, upskill existing team',
+      ],
+      risks: ['May miss growth opportunities', 'Team may get demotivated', 'Market share may decline'],
+      shapleySHAP: calculateSHAPValues({ cash_preservation: 50, risk_mitigation: 35, stability: 15 }),
+      agentContributions: { orchestrator: 9, simulation_cluster: 9, decision_intelligence: 14, operations_optimizer: 16, personal_coach: 18, innovation_advisor: 3, growth_strategist: 7, learning_adaptation: 24 },
+    },
+  ];
+};
+
 // Generate Pivot specific paths
 const generatePivotPaths = (
   profile: BusinessProfile,
@@ -1593,152 +2148,11 @@ export const generateDecisionPaths = (
     case 'pivot':
       return generatePivotPaths(profile, baseExpectedValue, query);
     case 'growth':
+      return generateGrowthPaths(profile, baseExpectedValue, query);
     case 'general':
     default:
-      // Fall back to general growth paths
-      break;
+      return generateGrowthPaths(profile, baseExpectedValue, query);
   }
-
-  // General/Growth paths (default)
-  const paths: DecisionPath[] = [
-    {
-      id: 'aggressive',
-      name: 'Aggressive Scaling',
-      description: 'Hire immediately, scale marketing, raise funding',
-      expectedValue: baseExpectedValue * 1.8,
-      probability: 0.65,
-      riskScore: 72,
-      timeline: 90,
-      costs: {
-        immediate: profile.mrr * 6,
-        monthly: profile.mrr * 0.4,
-      },
-      benefits: {
-        revenue: baseExpectedValue * 2.0,
-        efficiency: 35,
-        riskReduction: 15,
-      },
-      steps: [
-        'Raise seed/Series A funding within 60 days',
-        'Hire 10+ team members across functions',
-        'Launch aggressive paid marketing campaigns',
-        'Expand to 2-3 new cities simultaneously',
-      ],
-      risks: [
-        'High burn rate requires external funding',
-        'Rapid hiring may affect culture',
-        'Market conditions may change',
-      ],
-      shapleySHAP: calculateSHAPValues({
-        team_capacity: 45,
-        market_timing: 35,
-        cash_buffer: 20,
-      }),
-      agentContributions: {
-        orchestrator: 10,              // 10%
-        simulation_cluster: 15,        // 15%
-        decision_intelligence: 18,     // 18%
-        operations_optimizer: 22,      // 22%
-        personal_coach: 4,             // 4%
-        innovation_advisor: 7,         // 7%
-        growth_strategist: 19,         // 19%
-        learning_adaptation: 5,        // 5%
-      },
-      // Total: 100%
-    },
-    {
-      id: 'balanced',
-      name: 'Balanced Growth',
-      description: 'Optimize ops, selective hiring, organic growth',
-      expectedValue: baseExpectedValue,
-      probability: 0.85,
-      riskScore: 45,
-      timeline: 180,
-      costs: {
-        immediate: profile.mrr * 2,
-        monthly: profile.mrr * 0.15,
-      },
-      benefits: {
-        revenue: baseExpectedValue * 1.2,
-        efficiency: 25,
-        riskReduction: 40,
-      },
-      steps: [
-        'Optimize current operations for efficiency',
-        'Hire 3-5 key roles strategically',
-        'Focus on organic and referral growth',
-        'Build sustainable unit economics',
-      ],
-      risks: [
-        'Slower growth may miss market window',
-        'Competitors may scale faster',
-        'Limited resources for experimentation',
-      ],
-      shapleySHAP: calculateSHAPValues({
-        operational_efficiency: 40,
-        market_stability: 35,
-        cash_flow: 25,
-      }),
-      agentContributions: {
-        orchestrator: 13,              // 13%
-        simulation_cluster: 14,        // 14%
-        decision_intelligence: 16,     // 16%
-        operations_optimizer: 19,      // 19%
-        personal_coach: 11,            // 11%
-        innovation_advisor: 5,         // 5%
-        growth_strategist: 12,         // 12%
-        learning_adaptation: 10,       // 10%
-      },
-      // Total: 100%
-    },
-    {
-      id: 'conservative',
-      name: 'Conservative Path',
-      description: 'Build cash reserves, improve margins, low risk',
-      expectedValue: baseExpectedValue * 0.6,
-      probability: 0.95,
-      riskScore: 20,
-      timeline: 365,
-      costs: {
-        immediate: profile.mrr * 0.5,
-        monthly: profile.mrr * 0.05,
-      },
-      benefits: {
-        revenue: baseExpectedValue * 0.8,
-        efficiency: 15,
-        riskReduction: 75,
-      },
-      steps: [
-        'Focus on existing customer retention',
-        'Build 12+ months runway',
-        'Improve profit margins by 20%',
-        'Minimal new hires, upskill existing team',
-      ],
-      risks: [
-        'May miss growth opportunities',
-        'Team may get demotivated',
-        'Market share may decline',
-      ],
-      shapleySHAP: calculateSHAPValues({
-        cash_preservation: 50,
-        risk_mitigation: 35,
-        stability: 15,
-      }),
-      agentContributions: {
-        orchestrator: 9,               // 9%
-        simulation_cluster: 9,         // 9%
-        decision_intelligence: 14,     // 14%
-        operations_optimizer: 16,      // 16%
-        personal_coach: 18,            // 18%
-        innovation_advisor: 3,         // 3%
-        growth_strategist: 7,          // 7%
-        learning_adaptation: 24,       // 24%
-      },
-      // Total: 100%
-    },
-  ];
-
-  return paths;
 };
 
 // World Model Prediction (horizon-aware)
